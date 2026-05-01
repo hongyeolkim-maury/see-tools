@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HELIAS Lab — NIEL / TID Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b14;--bg1:#0d1424;--bg2:#111d30;--bg3:#172236;
+  --border:rgba(99,149,255,.13);--border2:rgba(99,149,255,.22);
+  --accent:#4c8bff;--accent2:#7aacff;--dim:#3a5070;--text:#dbe8ff;--muted:#6b89b0;
+  --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+  --ok:#2dd4a0;--warn:#f0b23a;--bad:#ff5a5a;
+  --ok-bg:rgba(45,212,160,.1);--warn-bg:rgba(240,178,58,.1);--bad-bg:rgba(255,90,90,.1);
+  --ok-bd:rgba(45,212,160,.3);--warn-bd:rgba(240,178,58,.3);--bad-bd:rgba(255,90,90,.3);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;opacity:.4}
+.wrap{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:0 20px 60px}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 18px;border-bottom:1px solid var(--border2);margin-bottom:28px}
+.logo{display:flex;flex-direction:column;gap:2px}
+.logo-main{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--text);letter-spacing:.12em}
+.logo-main span{color:var(--accent)}
+.logo-sub{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.htags{display:flex;gap:8px;align-items:center}
+.htag{font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border2);padding:3px 9px;border-radius:3px;letter-spacing:.06em}
+.live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* tabs */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px}
+.tab{font-family:var(--mono);font-size:11px;color:var(--muted);padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.06em;text-transform:uppercase;transition:color .2s,border-color .2s;user-select:none}
+.tab:hover{color:var(--text)}.tab.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* panels */
+.panel{background:var(--bg1);border:1px solid var(--border);border-radius:6px;overflow:hidden;animation:fadeIn .3s ease both}
+.ph{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.phdot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.phtxt{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.pb{padding:14px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* controls */
+.field{margin-bottom:14px}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;letter-spacing:.04em}
+select{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:4px;font-family:var(--sans);font-size:13px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234a6080'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+select:focus{border-color:var(--accent)}
+.srow{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.srow:last-child{margin-bottom:0}
+.shdr{display:flex;justify-content:space-between;align-items:baseline}
+.sname{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.sval{font-size:12px;font-weight:700;color:var(--text);font-family:var(--mono)}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:2px;background:var(--bg3);border-radius:1px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:pointer;transition:transform .15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
+input[type=number]{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:4px;font-family:var(--mono);font-size:13px;outline:none}
+input[type=number]:focus{border-color:var(--accent)}
+
+/* layouts */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* metric cards */
+.mc{background:var(--bg1);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+.mcl{font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;font-family:var(--mono)}
+.mcv{font-size:16px;font-weight:700;font-family:var(--mono);color:var(--text);line-height:1}
+.mcu{font-size:10px;color:var(--muted);margin-top:3px}
+
+/* verdict */
+.verdict-box{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 14px;text-align:center}
+.vring{width:66px;height:66px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;transition:all .4s;font-family:var(--mono);font-weight:700}
+.vtitle{font-size:18px;font-weight:500;margin-bottom:5px}
+.vsub{font-size:12px;color:var(--muted);line-height:1.6;max-width:260px}
+.vdiv{width:100%;border-top:1px solid var(--border);padding-top:12px;margin-top:12px;text-align:left}
+.act{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}.act:last-child{margin-bottom:0}
+.actn{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px;font-family:var(--mono)}
+.actt{font-size:12px;color:var(--text);line-height:1.5}
+
+/* chart */
+.chart-outer{padding:12px}
+.chart-wrap{position:relative;height:210px}
+
+/* gauge */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.gauge-svg{}
+.dose-bar-outer{height:12px;background:var(--bg3);border-radius:6px;overflow:hidden;margin-top:4px}
+.dose-bar-inner{height:100%;border-radius:6px;transition:width .5s,background .5s}
+
+/* info boxes */
+.eq-box{background:var(--bg2);border-left:2px solid var(--accent);border-radius:0 4px 4px 0;padding:8px 12px;font-family:var(--mono);font-size:12px;color:var(--accent2);margin:8px 0;line-height:1.9}
+.info-p{font-size:12px;color:var(--muted);line-height:1.7}
+.ref-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.ref-tbl th{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);letter-spacing:.06em}
+.ref-tbl td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px}
+.ref-tbl tr:hover td{background:var(--bg2)}
+
+/* note */
+.mnote{font-size:11px;color:var(--dim);border:1px solid var(--border);border-radius:4px;padding:8px 12px;margin-top:10px;line-height:1.6}
+.mnote strong{color:var(--muted)}
+
+/* nav link */
+.back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;border:1px solid var(--border2);padding:5px 12px;border-radius:4px;transition:color .2s,border-color .2s}
+.back-link:hover{color:var(--accent2);border-color:var(--accent)}
+
+footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;display:flex;justify-content:space-between;align-items:center}
+.ft{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.05em}
+
+@media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo">
+    <div class="logo-main">HELIAS<span>/</span>NIEL·TID</div>
+    <div class="logo-sub">Displacement Damage · Total Ionizing Dose Calculator</div>
+  </div>
+  <div class="htags">
+    <a class="back-link" href="index.html">← SEE Tool</a>
+    <span class="htag">NIEL SR모델</span>
+    <span class="htag">TID 누적선량</span>
+    <div class="live"></div>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('niel',this)">NIEL / TNID 변위 손상</div>
+  <div class="tab" onclick="switchTab('tid',this)">TID 전리 선량</div>
+  <div class="tab" onclick="switchTab('combined',this)">복합 판정</div>
+  <div class="tab" onclick="switchTab('info',this)">모델 / 기준</div>
+</div>
+
+<!-- ══ TAB 1: NIEL ══ -->
+<div id="tab-niel" class="tab-panel active">
+  <div class="g2" style="margin-bottom:14px">
+
+    <!-- Left: inputs -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="panel">
+        <div class="ph"><div class="phdot"></div><div class="phtxt">소재 및 입자 설정</div></div>
+        <div class="pb">
+          <div class="field">
+            <label>반도체 소재</label>
+            <select id="n-material" onchange="updateNIEL()">
+              <option value="si">Si — 실리콘 (CMOS/SRAM)</option>
+              <option value="gaas">GaAs — 갈륨비소 (RF/광소자)</option>
+              <option value="gan" selected>GaN — 질화갈륨 (전력/RF HEMT)</option>
+              <option value="sic">SiC — 탄화규소 (전력 스위치)</option>
+              <option value="ge">Ge — 게르마늄 (SiGe HBT)</option>
+              <option value="inp">InP — 인화인듐 (광통신)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>입사 입자</label>
+            <select id="n-particle" onchange="updateNIEL()">
+              <option value="proton">양성자 (Proton)</option>
+              <option value="neutron" selected>중성자 (Neutron)</option>
+              <option value="electron">전자 (Electron)</option>
+              <option value="alpha">알파 입자 (He-4)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>궤도 환경</label>
+            <select id="n-orbit" onchange="updateNIEL()">
+              <option value="leo">LEO 400km (ISS형)</option>
+              <option value="leo_pol">LEO 극궤도 800km</option>
+              <option value="meo">MEO GPS 20,200km</option>
+              <option value="geo" selected>GEO 정지궤도 36,000km</option>
+              <option value="deep">심우주 / 행성간</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>태양 활동</label>
+            <select id="n-solar" onchange="updateNIEL()">
+              <option value="min" selected>극소기 (보수적)</option>
+              <option value="max">극대기</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">임무 파라미터</div></div>
+        <div class="pb">
+          <div class="srow">
+            <div class="shdr"><span class="sname">차폐 두께 (Al, mm)</span><span class="sval" id="n-shv">5.0 mm</span></div>
+            <input type="range" id="n-shield" min="0" max="30" step="0.5" value="5" oninput="updateNIEL()">
+          </div>
+          <div class="srow">
+            <div class="shdr"><span class="sname">임무 기간 (년)</span><span class="sval" id="n-durv">3 yr</span></div>
+            <input type="range" id="n-duration" min="0.5" max="15" step="0.5" value="3" oninput="updateNIEL()">
+          </div>
+          <div class="srow">
+            <div class="shdr"><span class="sname">소자 부피 (μm³, log₁₀)</span><span class="sval" id="n-volv">10³</span></div>
+            <input type="range" id="n-vol" min="1" max="9" step="0.5" value="3" oninput="updateNIEL()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: verdict + chart -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="panel" style="flex:1">
+        <div class="ph"><div class="phdot" style="background:var(--ok)"></div><div class="phtxt">변위 손상 판정</div></div>
+        <div class="verdict-box" id="niel-verdict">
+          <div class="vring" id="nv-ring" style="border-color:var(--ok);color:var(--ok);background:var(--ok-bg)">✓</div>
+          <div class="vtitle" id="nv-title" style="color:var(--ok)">허용 범위</div>
+          <div class="vsub" id="nv-sub">계산 중...</div>
+          <div class="vdiv">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;margin-bottom:8px;text-transform:uppercase">권장 조치</div>
+            <div id="nv-actions"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">NIEL 에너지 의존성 곡선</div></div>
+        <div class="chart-outer">
+          <div class="chart-wrap"><canvas id="niel-chart" role="img" aria-label="NIEL vs 입자 에너지 곡선"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metric row -->
+  <div class="g4" style="margin-bottom:10px">
+    <div class="mc"><div class="mcl">NIEL (소재 기준)</div><div class="mcv" id="m-niel">—</div><div class="mcu">MeV·cm²/g</div></div>
+    <div class="mc"><div class="mcl">임무 기간 TNID</div><div class="mcv" id="m-tnid">—</div><div class="mcu">MeV/g</div></div>
+    <div class="mc"><div class="mcl">Si 등가 NIEL 비</div><div class="mcv" id="m-ratio">—</div><div class="mcu">소재/Si</div></div>
+    <div class="mc"><div class="mcl">허용 TNID 임계값</div><div class="mcv" id="m-limit">—</div><div class="mcu">MeV/g</div></div>
+  </div>
+
+  <div class="mnote">
+    <strong>모델:</strong> SR(Screened Relativistic) 처리 기반 NIEL 근사값 (Summers et al. 1993; Jun et al. 2003). 에너지 의존 핵 저지능에 차폐 감쇠 및 궤도 플럭스 모델을 적용. 정밀 계산은 SPENVIS NIEL 모듈 또는 MULASSIS(Geant4 기반) 권장.
+  </div>
+</div>
+
+<!-- ══ TAB 2: TID ══ -->
+<div id="tab-tid" class="tab-panel">
+  <div class="g2" style="margin-bottom:14px">
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="panel">
+        <div class="ph"><div class="phdot"></div><div class="phtxt">소자 및 환경 설정</div></div>
+        <div class="pb">
+          <div class="field">
+            <label>소자 유형 (TID 내성 기준)</label>
+            <select id="t-device" onchange="updateTID()">
+              <option value="cmos_com">상용 CMOS (65–130nm)</option>
+              <option value="cmos_rh">RHBD CMOS (방사선 강화)</option>
+              <option value="bipolar">Bipolar / BiCMOS</option>
+              <option value="gan_hemt" selected>GaN HEMT (전력용)</option>
+              <option value="sic_fet">SiC MOSFET (전력용)</option>
+              <option value="flash">NAND Flash</option>
+              <option value="solar">태양전지 (Si)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>궤도 환경</label>
+            <select id="t-orbit" onchange="updateTID()">
+              <option value="leo">LEO 400km</option>
+              <option value="leo_pol">LEO 극궤도 800km</option>
+              <option value="meo">MEO GPS</option>
+              <option value="geo" selected>GEO 정지궤도</option>
+              <option value="deep">심우주</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>태양 활동</label>
+            <select id="t-solar" onchange="updateTID()">
+              <option value="min" selected>극소기 (보수적)</option>
+              <option value="max">극대기</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">임무 파라미터</div></div>
+        <div class="pb">
+          <div class="srow">
+            <div class="shdr"><span class="sname">알루미늄 차폐 두께 (mm)</span><span class="sval" id="t-shv">5.0 mm</span></div>
+            <input type="range" id="t-shield" min="0" max="30" step="0.5" value="5" oninput="updateTID()">
+          </div>
+          <div class="srow">
+            <div class="shdr"><span class="sname">임무 기간 (년)</span><span class="sval" id="t-durv">3 yr</span></div>
+            <input type="range" id="t-duration" min="0.5" max="15" step="0.5" value="3" oninput="updateTID()">
+          </div>
+          <div class="srow">
+            <div class="shdr"><span class="sname">안전 마진 계수</span><span class="sval" id="t-margv">×2</span></div>
+            <input type="range" id="t-margin" min="1" max="5" step="0.5" value="2" oninput="updateTID()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="panel" style="flex:1">
+        <div class="ph"><div class="phdot" style="background:var(--ok)"></div><div class="phtxt">TID 누적 선량 판정</div></div>
+        <div class="verdict-box" id="tid-verdict">
+          <div class="vring" id="tv-ring" style="border-color:var(--ok);color:var(--ok);background:var(--ok-bg)">✓</div>
+          <div class="vtitle" id="tv-title" style="color:var(--ok)">허용 범위</div>
+          <!-- Dose gauge -->
+          <div style="width:100%;margin:10px 0">
+            <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px">
+              <span>0</span><span id="t-gauge-label">누적 / 한계</span><span id="t-limit-label">한계</span>
+            </div>
+            <div class="dose-bar-outer">
+              <div class="dose-bar-inner" id="t-gauge-bar" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="vsub" id="tv-sub">계산 중...</div>
+          <div class="vdiv">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;margin-bottom:8px;text-transform:uppercase">권장 조치</div>
+            <div id="tv-actions"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">차폐 두께별 누적 TID 곡선</div></div>
+        <div class="chart-outer">
+          <div class="chart-wrap"><canvas id="tid-chart" role="img" aria-label="알루미늄 차폐 두께에 따른 TID 누적 선량 곡선"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g4" style="margin-bottom:10px">
+    <div class="mc"><div class="mcl">임무 누적 TID</div><div class="mcv" id="m-tid">—</div><div class="mcu">krad(Si)</div></div>
+    <div class="mc"><div class="mcl">소자 TID 한계</div><div class="mcv" id="m-tlimit">—</div><div class="mcu">krad</div></div>
+    <div class="mc"><div class="mcl">마진 적용 후 한계</div><div class="mcv" id="m-tmargin">—</div><div class="mcu">krad</div></div>
+    <div class="mc"><div class="mcl">연간 선량률</div><div class="mcv" id="m-trate">—</div><div class="mcu">krad/yr</div></div>
+  </div>
+
+  <div class="mnote">
+    <strong>모델:</strong> 전리 선량은 Shieldose-2 기반 단순화 해석 모델 적용 (Seltzer 1994). 궤도별 전자·양성자 플럭스에 알루미늄 차폐 감쇠를 적용하여 Si 기준 등가 흡수 선량 계산. 정밀 계산: SPENVIS SHIELDOSE-2 모듈 사용 권장. TID 한계값은 문헌 대표값이며 소자별 시험 결과로 검증 필요.
+  </div>
+</div>
+
+<!-- ══ TAB 3: COMBINED ══ -->
+<div id="tab-combined" class="tab-panel">
+  <div style="font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px">복합 방사선 내성 판정 — NIEL + TID + SEE 통합</div>
+
+  <div class="g3" style="margin-bottom:16px">
+    <div class="panel" id="c-niel-card">
+      <div class="ph"><div class="phdot"></div><div class="phtxt">NIEL 변위 손상</div></div>
+      <div class="pb" style="text-align:center;padding:20px 14px">
+        <div class="vring" id="c-niel-ring" style="margin:0 auto 10px;border-color:var(--ok);color:var(--ok);background:var(--ok-bg)">✓</div>
+        <div style="font-size:15px;font-weight:500" id="c-niel-t">—</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px" id="c-niel-v">—</div>
+      </div>
+    </div>
+    <div class="panel" id="c-tid-card">
+      <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">TID 누적 선량</div></div>
+      <div class="pb" style="text-align:center;padding:20px 14px">
+        <div class="vring" id="c-tid-ring" style="margin:0 auto 10px;border-color:var(--ok);color:var(--ok);background:var(--ok-bg)">✓</div>
+        <div style="font-size:15px;font-weight:500" id="c-tid-t">—</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px" id="c-tid-v">—</div>
+      </div>
+    </div>
+    <div class="panel" style="border-color:var(--border2)">
+      <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">종합 판정</div></div>
+      <div class="pb" style="text-align:center;padding:20px 14px">
+        <div class="vring" id="c-overall-ring" style="margin:0 auto 10px;border-color:var(--ok);color:var(--ok);background:var(--ok-bg)">✓</div>
+        <div style="font-size:15px;font-weight:500" id="c-overall-t">—</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px" id="c-overall-v">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">소자 방사선 내성 종합 레포트</div></div>
+    <div class="pb" id="combined-report" style="font-size:13px;line-height:1.9;color:var(--text)">
+      NIEL 탭과 TID 탭에서 파라미터를 설정하면 여기에 종합 레포트가 자동 생성됩니다.
+    </div>
+  </div>
+
+  <div class="mnote" style="margin-top:14px">
+    SEE 판정은 <a href="index.html" style="color:var(--accent)">SEE Tool (index.html)</a>을 참조하십시오. 세 가지 판정을 모두 통과한 경우에만 해당 궤도 환경에서의 소자 사용을 권장합니다.
+  </div>
+</div>
+
+<!-- ══ TAB 4: INFO ══ -->
+<div id="tab-info" class="tab-panel">
+  <div class="g2">
+    <div class="panel">
+      <div class="ph"><div class="phdot"></div><div class="phtxt">NIEL 판정 기준</div></div>
+      <div class="pb">
+        <table class="ref-tbl">
+          <thead><tr><th>판정</th><th>TNID (MeV/g)</th><th>의미</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--ok)">허용</td><td>&lt; 한계치</td><td>변위 손상 허용 범위 내</td></tr>
+            <tr><td style="color:var(--warn)">주의</td><td>한계 50~100%</td><td>성능 저하 가능 — 마진 검토</td></tr>
+            <tr><td style="color:var(--bad)">위험</td><td>&gt; 한계치</td><td>암전류 급증, hFE 열화 예상</td></tr>
+          </tbody>
+        </table>
+        <div class="eq-box" style="margin-top:12px">
+          TNID = NIEL(E) × Φ(E,t,orbit) × t<br>
+          Φ: 궤도·차폐 보정 플럭스 (cm⁻²)<br>
+          t: 임무 기간 (s)
+        </div>
+        <div class="info-p">NIEL은 에너지와 입자 종류에 강하게 의존합니다. 양성자는 Coulomb 산란이 지배적이며 (1~100 MeV 범위), 중성자는 핵 탄성 산란이 지배적입니다. GaN은 Si 대비 NIEL이 ~3배 낮아 변위 손상 저항성이 우수합니다.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">TID 소자별 한계값 (문헌)</div></div>
+      <div class="pb">
+        <table class="ref-tbl">
+          <thead><tr><th>소자 유형</th><th>TID 한계 (krad)</th><th>주요 열화 메커니즘</th></tr></thead>
+          <tbody>
+            <tr><td>상용 CMOS</td><td>1–10</td><td>산화막 전하 트래핑</td></tr>
+            <tr><td>RHBD CMOS</td><td>300–1000</td><td>계면 준위 생성</td></tr>
+            <tr><td>Bipolar</td><td>10–100</td><td>ELDRS (저선량률 효과)</td></tr>
+            <tr><td>GaN HEMT</td><td>100–1000</td><td>AlGaN 장벽층 열화</td></tr>
+            <tr><td>SiC MOSFET</td><td>10–100</td><td>SiO₂/SiC 계면 손상</td></tr>
+            <tr><td>NAND Flash</td><td>1–5</td><td>플로팅 게이트 전하 손실</td></tr>
+            <tr><td>Si 태양전지</td><td>200–500</td><td>소수 캐리어 수명 감소</td></tr>
+          </tbody>
+        </table>
+        <div class="info-p" style="margin-top:8px">출처: Srour & Palko (2013) TNS; Fleetwood (2018); Luo et al. (2021)</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">소재별 NIEL 파라미터</div></div>
+      <div class="pb">
+        <table class="ref-tbl">
+          <thead><tr><th>소재</th><th>NIEL₀ (×10⁻³)</th><th>Si 대비 비</th><th>주요 응용</th></tr></thead>
+          <tbody>
+            <tr><td>Si</td><td>2.16</td><td>1.00</td><td>CMOS, SRAM</td></tr>
+            <tr><td>GaAs</td><td>4.30</td><td>1.99</td><td>RF, 광소자</td></tr>
+            <tr><td>GaN</td><td>0.72</td><td>0.33</td><td>전력, RF HEMT</td></tr>
+            <tr><td>SiC</td><td>1.10</td><td>0.51</td><td>전력 MOSFET</td></tr>
+            <tr><td>Ge</td><td>5.80</td><td>2.69</td><td>SiGe HBT</td></tr>
+            <tr><td>InP</td><td>7.20</td><td>3.33</td><td>광통신</td></tr>
+          </tbody>
+        </table>
+        <div class="info-p" style="margin-top:8px">단위: MeV·cm²/g @ 10 MeV 양성자. Jun et al. (2003) 기준값.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">관련 표준 및 참고 도구</div></div>
+      <div class="pb">
+        <table class="ref-tbl">
+          <thead><tr><th>표준/도구</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><td>MIL-STD-750</td><td>반도체 방사선 시험 방법</td></tr>
+            <tr><td>ESCC 22900</td><td>TID 시험 표준 (ESA)</td></tr>
+            <tr><td>JESD57</td><td>SEE 시험 표준 (JEDEC)</td></tr>
+            <tr><td>SPENVIS NIEL</td><td>궤도별 NIEL/TNID 정밀 계산</td></tr>
+            <tr><td>MULASSIS</td><td>Geant4 기반 차폐 분석</td></tr>
+            <tr><td>SHIELDOSE-2</td><td>TID 차폐 선량 계산</td></tr>
+          </tbody>
+        </table>
+        <div class="info-p" style="margin-top:8px">HELIAS Lab. 헤비이온·양성자 실험 서비스: <a href="https://heliaslab.com" style="color:var(--accent)">heliaslab.com</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · NIEL/TID Calculator v1.0</span>
+  <span class="ft">SR모델: Summers+1993 · Jun+2003 · Shieldose-2 · ECSS-E-HB-10-12A</span>
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── Tab ──
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+  if(id==='niel') updateNIEL();
+  if(id==='tid')  updateTID();
+  if(id==='combined') updateCombined();
+}
+
+// ── Data tables ──
+const NIEL0 = { si:2.16e-3, gaas:4.30e-3, gan:0.72e-3, sic:1.10e-3, ge:5.80e-3, inp:7.20e-3 };
+const NIEL_LIMITS = { si:1e10, gaas:5e9, gan:5e10, sic:2e10, ge:3e9, inp:2e9 }; // p/cm²
+const NIEL_LABELS = { si:'Si', gaas:'GaAs', gan:'GaN', sic:'SiC', ge:'Ge', inp:'InP' };
+const PART_FACTOR = { proton:1.0, neutron:0.95, electron:0.05, alpha:3.2 };
+
+const ORBIT_FLUX = { leo:5e8, leo_pol:3e9, meo:2e10, geo:5e9, deep:1e10 }; // p/cm²/yr
+const SOLAR_MOD  = { min:1.0, max:0.5 };
+const SHIELD_LAM = 8; // mm Al half-value for proton flux
+
+// TID orbit dose rate (rad/yr @ 0mm shield)
+const TID_RATE0 = { leo:0.1, leo_pol:0.8, meo:50, geo:15, deep:25 }; // krad/yr
+const TID_LIMITS = {
+  cmos_com:5, cmos_rh:500, bipolar:30, gan_hemt:300, sic_fet:30, flash:3, solar:300
+};
+const TID_NAMES = {
+  cmos_com:'상용 CMOS', cmos_rh:'RHBD CMOS', bipolar:'Bipolar',
+  gan_hemt:'GaN HEMT', sic_fet:'SiC MOSFET', flash:'NAND Flash', solar:'Si 태양전지'
+};
+
+function shieldAtten(t_mm) { return Math.exp(-t_mm / SHIELD_LAM); }
+function fmtSci(v,d=2) {
+  if(!v||v===0) return '0';
+  const e=Math.floor(Math.log10(Math.abs(v))); const m=(v/Math.pow(10,e)).toFixed(d);
+  const sup={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+  return m+'×10'+String(e).split('').map(c=>sup[c]||c).join('');
+}
+
+// ── NIEL ──
+let nielChart;
+function updateNIEL() {
+  const mat   = document.getElementById('n-material').value;
+  const part  = document.getElementById('n-particle').value;
+  const orbit = document.getElementById('n-orbit').value;
+  const solar = document.getElementById('n-solar').value;
+  const t_mm  = parseFloat(document.getElementById('n-shield').value);
+  const dur   = parseFloat(document.getElementById('n-duration').value);
+  const logVol= parseFloat(document.getElementById('n-vol').value);
+
+  document.getElementById('n-shv').textContent  = t_mm.toFixed(1)+' mm';
+  document.getElementById('n-durv').textContent = dur.toFixed(1)+' yr';
+  document.getElementById('n-volv').textContent = '10'+fmtSup(Math.round(logVol));
+
+  const niel0   = NIEL0[mat] * PART_FACTOR[part];
+  const flux0   = ORBIT_FLUX[orbit] * SOLAR_MOD[solar];
+  const flux    = flux0 * Math.exp(-t_mm / SHIELD_LAM);
+  const tnid    = niel0 * flux * dur;    // MeV/g per mission
+  const limit   = NIEL_LIMITS[mat] * niel0;
+  const ratio   = niel0 / NIEL0['si'];
+
+  document.getElementById('m-niel').textContent  = fmtSci(niel0);
+  document.getElementById('m-tnid').textContent  = fmtSci(tnid);
+  document.getElementById('m-ratio').textContent = ratio.toFixed(2)+'×';
+  document.getElementById('m-limit').textContent = fmtSci(limit);
+
+  // Verdict
+  const pct = tnid / limit;
+  let icon,title,titleColor,ringStyle,acts;
+  if(pct < 0.5) {
+    icon='✓'; title='허용 범위'; titleColor='var(--ok)';
+    ringStyle='border-color:var(--ok);color:var(--ok);background:var(--ok-bg)';
+    acts=['SPENVIS NIEL 모듈로 정밀 플럭스 대입 후 최종 검증','임무 기간 연장 시나리오(+30%) 재계산 권장',
+          '소자 특성 변화(hFE, 암전류) 모니터링 계획 수립'];
+  } else if(pct < 1.0) {
+    icon='!'; title='주의 — 마진 검토'; titleColor='var(--warn)';
+    ringStyle='border-color:var(--warn);color:var(--warn);background:var(--warn-bg)';
+    acts=[`차폐 두께 ${t_mm}mm → ${(t_mm+5).toFixed(0)}mm로 증가 후 재계산`,
+          '저선량률 효과(ELDRS) 가능성 — 양성자 빔 실험으로 검증 권장',
+          '방사선 강화 소자(RHBD) 또는 파티클 클라우드 차폐 검토'];
+  } else {
+    icon='✕'; title='한계 초과 — 대체 필요'; titleColor='var(--bad)';
+    ringStyle='border-color:var(--bad);color:var(--bad);background:var(--bad-bg)';
+    acts=['NIEL 내성이 높은 소재로 교체: GaN(×0.33), SiC(×0.51) vs Si 기준',
+          'NASA NSRDB/ESA ESDB에서 고내성 동급 소자 검색',
+          'HELIAS Lab. 양성자·중성자 NIEL 시험으로 정확한 한계치 측정 문의'];
+  }
+
+  document.getElementById('nv-ring').className='vring';
+  document.getElementById('nv-ring').style.cssText=ringStyle+';width:66px;height:66px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;font-family:var(--mono);font-weight:700';
+  document.getElementById('nv-ring').textContent=icon;
+  document.getElementById('nv-title').textContent=title;
+  document.getElementById('nv-title').style.color=titleColor;
+  document.getElementById('nv-sub').textContent=
+    `임무 TNID ${fmtSci(tnid)} MeV/g — 한계 대비 ${(pct*100).toFixed(0)}%. ${NIEL_LABELS[mat]} 소재 기준.`;
+  const acColors=['var(--ok-bg)','var(--warn-bg)','var(--bad-bg)'];
+  const acTexts=['var(--ok)','var(--warn)','var(--bad)'];
+  const ac=pct<0.5?[0,0,0]:pct<1?[1,1,0]:[2,2,1];
+  document.getElementById('nv-actions').innerHTML=acts.map((a,i)=>
+    `<div class="act"><div class="actn" style="background:${acColors[ac[i]]};color:${acTexts[ac[i]]}">${i+1}</div><span class="actt">${a}</span></div>`
+  ).join('');
+
+  // Chart: NIEL vs energy (simplified)
+  const energies=[],niels=[];
+  for(let e=0.1;e<=1000;e*=1.2){
+    energies.push(e);
+    // SR model approximation: bell-shaped peak around 1-10 MeV
+    const nVal=niel0*(1+5*Math.exp(-Math.pow(Math.log10(e)-0.5,2)/0.8));
+    niels.push({x:e,y:nVal});
+  }
+  if(nielChart){ nielChart.data.datasets[0].data=niels; nielChart.update('none'); }
+  else {
+    nielChart=new Chart(document.getElementById('niel-chart'),{
+      type:'line',
+      data:{datasets:[{label:'NIEL(E)',data:niels,parsing:false,
+        borderColor:'#4c8bff',borderWidth:2,pointRadius:0,tension:.3,
+        fill:true,backgroundColor:'rgba(76,139,255,.07)'}]},
+      options:{responsive:true,maintainAspectRatio:false,animation:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`NIEL = ${c.parsed.y.toExponential(2)} MeV·cm²/g`}}},
+        scales:{
+          x:{type:'logarithmic',title:{display:true,text:'입자 에너지 (MeV)',color:'#4a6080',font:{size:11}},
+             grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#4a6080',font:{size:10}}},
+          y:{type:'logarithmic',title:{display:true,text:'NIEL (MeV·cm²/g)',color:'#4a6080',font:{size:11}},
+             grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#4a6080',font:{size:10},callback:v=>v.toExponential(0)}}
+        }}
+    });
+  }
+  updateCombined();
+}
+
+// ── TID ──
+let tidChart;
+function updateTID() {
+  const dev   = document.getElementById('t-device').value;
+  const orbit = document.getElementById('t-orbit').value;
+  const solar = document.getElementById('t-solar').value;
+  const t_mm  = parseFloat(document.getElementById('t-shield').value);
+  const dur   = parseFloat(document.getElementById('t-duration').value);
+  const margin= parseFloat(document.getElementById('t-margin').value);
+
+  document.getElementById('t-shv').textContent  = t_mm.toFixed(1)+' mm';
+  document.getElementById('t-durv').textContent = dur.toFixed(1)+' yr';
+  document.getElementById('t-margv').textContent= '×'+margin.toFixed(1);
+
+  const rate0   = TID_RATE0[orbit] * SOLAR_MOD[solar];
+  const atten   = Math.exp(-t_mm / 5); // TID: ~5mm half-value
+  const rate    = rate0 * atten;
+  const tid     = rate * dur;
+  const limit   = TID_LIMITS[dev];
+  const mLimit  = limit / margin;
+  const pct     = tid / mLimit;
+
+  document.getElementById('m-tid').textContent    = tid.toFixed(2);
+  document.getElementById('m-tlimit').textContent = limit.toFixed(0);
+  document.getElementById('m-tmargin').textContent= mLimit.toFixed(1);
+  document.getElementById('m-trate').textContent  = rate.toFixed(3);
+
+  // Gauge
+  const gaugePct=Math.min(pct*100,100);
+  const gaugeColor=pct<0.5?'var(--ok)':pct<1?'var(--warn)':'var(--bad)';
+  document.getElementById('t-gauge-bar').style.width=gaugePct.toFixed(0)+'%';
+  document.getElementById('t-gauge-bar').style.background=gaugeColor;
+  document.getElementById('t-gauge-label').textContent=`${tid.toFixed(1)} / ${mLimit.toFixed(1)} krad`;
+  document.getElementById('t-limit-label').textContent=`한계 ${limit} krad`;
+
+  let icon,title,titleColor,ringStyle,sub,acts;
+  if(pct < 0.5) {
+    icon='✓'; title='허용 범위'; titleColor='var(--ok)';
+    ringStyle='border-color:var(--ok);color:var(--ok);background:var(--ok-bg)';
+    sub=`누적 TID ${tid.toFixed(2)} krad — 마진 적용 한계 ${mLimit.toFixed(1)} krad의 ${(pct*100).toFixed(0)}%.`;
+    acts=['SPENVIS SHIELDOSE-2로 전자·양성자 스펙트럼 정밀 분리 계산 권장',
+          `Bipolar 계열 시: ELDRS(저선량률 효과) 추가 검토 — 실험실 선량률(${(rate*365/8760).toFixed(3)} rad/h) 확인`,
+          'MIL-STD-750 또는 ESCC 22900 표준에 따른 TID 시험으로 최종 검증'];
+  } else if(pct < 1.0) {
+    icon='!'; title='마진 부족 — 검토 필요'; titleColor='var(--warn)';
+    ringStyle='border-color:var(--warn);color:var(--warn);background:var(--warn-bg)';
+    sub=`누적 TID ${tid.toFixed(2)} krad — 마진(×${margin.toFixed(1)}) 적용 시 한계 초과 임박.`;
+    acts=[`차폐 두께 ${t_mm}mm → ${(t_mm+5).toFixed(0)}mm 증가 또는 임무 기간 ${(mLimit/rate).toFixed(1)}년으로 단축 검토`,
+          `RHBD 옵션: ${TID_NAMES[dev]} → RHBD CMOS(500 krad) 또는 GaN HEMT(300 krad) 대체 검토`,
+          '선량률 의존 효과(ELDRS) 고려 — 저선량률 시험 조건 확인'];
+  } else {
+    icon='✕'; title='한계 초과 — 대체 필요'; titleColor='var(--bad)';
+    ringStyle='border-color:var(--bad);color:var(--bad);background:var(--bad-bg)';
+    sub=`누적 TID ${tid.toFixed(2)} krad — 소자 한계 ${limit} krad 초과. 소자 교체 또는 임무 재설계 필요.`;
+    acts=['ESA ESDB / NASA NSRDB에서 TID ≥ '+(tid*margin).toFixed(0)+' krad 인증 소자 검색',
+          `차폐 ${(Math.log(rate*dur/limit)*5).toFixed(0)}mm Al 이상 필요 — 무게 예산 확인`,
+          'HELIAS Lab. 양성자 TID 시험으로 실제 한계치 측정 후 재평가 문의'];
+  }
+
+  document.getElementById('tv-ring').style.cssText=ringStyle+';width:66px;height:66px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:8px;font-family:var(--mono);font-weight:700';
+  document.getElementById('tv-ring').textContent=icon;
+  document.getElementById('tv-title').textContent=title;
+  document.getElementById('tv-title').style.color=titleColor;
+  document.getElementById('tv-sub').textContent=sub;
+  const acColors=['var(--ok-bg)','var(--warn-bg)','var(--bad-bg)'];
+  const acTexts=['var(--ok)','var(--warn)','var(--bad)'];
+  const ac=pct<0.5?[0,0,0]:pct<1?[1,1,0]:[2,2,1];
+  document.getElementById('tv-actions').innerHTML=acts.map((a,i)=>
+    `<div class="act"><div class="actn" style="background:${acColors[ac[i]]};color:${acTexts[ac[i]]}">${i+1}</div><span class="actt">${a}</span></div>`
+  ).join('');
+
+  // Chart: TID vs shield thickness
+  const thicknesses=[],doses=[];
+  for(let t=0;t<=30;t+=0.5){
+    thicknesses.push(t);
+    doses.push({x:t, y:rate0*Math.exp(-t/5)*dur});
+  }
+  const limitLine=[{x:0,y:mLimit},{x:30,y:mLimit}];
+  if(tidChart){
+    tidChart.data.datasets[0].data=doses;
+    tidChart.data.datasets[1].data=limitLine;
+    tidChart.update('none');
+  } else {
+    tidChart=new Chart(document.getElementById('tid-chart'),{
+      type:'line',
+      data:{datasets:[
+        {label:'누적 TID',data:doses,parsing:false,borderColor:'#f0b23a',borderWidth:2,
+         pointRadius:0,tension:.3,fill:true,backgroundColor:'rgba(240,178,58,.07)'},
+        {label:'마진 한계',data:limitLine,parsing:false,borderColor:'rgba(255,90,90,.6)',
+         borderWidth:1.5,borderDash:[5,5],pointRadius:0}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,animation:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y.toFixed(2)} krad`}}},
+        scales:{
+          x:{type:'linear',min:0,max:30,title:{display:true,text:'Al 차폐 두께 (mm)',color:'#4a6080',font:{size:11}},
+             grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#4a6080',font:{size:10}}},
+          y:{type:'linear',title:{display:true,text:'누적 TID (krad)',color:'#4a6080',font:{size:11}},
+             grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#4a6080',font:{size:10}}}
+        }}
+    });
+  }
+  updateCombined();
+}
+
+// ── Combined ──
+function updateCombined() {
+  // Read NIEL result
+  const nTitle=document.getElementById('nv-title')?.textContent||'—';
+  const nSub=document.getElementById('nv-sub')?.textContent||'—';
+  const nRingStyle=document.getElementById('nv-ring')?.style.cssText||'';
+
+  // Read TID result
+  const tTitle=document.getElementById('tv-title')?.textContent||'—';
+  const tSub=document.getElementById('tv-sub')?.textContent||'—';
+  const tRingStyle=document.getElementById('tv-ring')?.style.cssText||'';
+
+  const rOk=nTitle==='허용 범위'&&tTitle==='허용 범위';
+  const rWarn=nTitle.includes('주의')||nTitle.includes('마진')||tTitle.includes('주의')||tTitle.includes('마진');
+
+  let overallIcon,overallTitle,overallStyle,overallSub;
+  if(rOk){
+    overallIcon='✓'; overallTitle='적합';
+    overallStyle='border-color:var(--ok);color:var(--ok);background:var(--ok-bg)';
+    overallSub='NIEL 변위 손상 및 TID 누적 선량 모두 허용 범위. SEE 판정도 통과 시 비행 승인 권장.';
+  } else if(rWarn||(!nTitle.includes('초과')&&!tTitle.includes('초과'))){
+    overallIcon='!'; overallTitle='부분 주의';
+    overallStyle='border-color:var(--warn);color:var(--warn);background:var(--warn-bg)';
+    overallSub='일부 항목이 주의 구간. 차폐 보강 또는 소자 재선정 후 재평가 권장.';
+  } else {
+    overallIcon='✕'; overallTitle='부적합';
+    overallStyle='border-color:var(--bad);color:var(--bad);background:var(--bad-bg)';
+    overallSub='NIEL 또는 TID가 한계를 초과합니다. 소자 교체 또는 임무 궤도 재설계가 필요합니다.';
+  }
+
+  const applyRing=(id,style,icon)=>{
+    const el=document.getElementById(id);
+    if(el){el.style.cssText=style+';width:66px;height:66px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:var(--mono);font-weight:700;margin:0 auto 10px';el.textContent=icon;}
+  };
+  applyRing('c-niel-ring',nRingStyle,document.getElementById('nv-ring')?.textContent||'—');
+  applyRing('c-tid-ring',tRingStyle,document.getElementById('tv-ring')?.textContent||'—');
+  applyRing('c-overall-ring',overallStyle,overallIcon);
+
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('c-niel-t',nTitle); set('c-niel-v',nSub.slice(0,60)+'…');
+  set('c-tid-t',tTitle);  set('c-tid-v',tSub.slice(0,60)+'…');
+  set('c-overall-t',overallTitle);
+  document.getElementById('c-overall-v').textContent=overallSub;
+
+  const report=document.getElementById('combined-report');
+  if(report){
+    report.innerHTML=`
+      <div style="font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.08em;margin-bottom:12px">
+        HELIAS LABORATORY — 방사선 내성 종합 평가 레포트
+      </div>
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:6px 16px;font-size:13px">
+        <span style="color:var(--muted)">NIEL 판정</span><span>${nTitle} — ${nSub}</span>
+        <span style="color:var(--muted)">TID 판정</span><span>${tTitle} — ${tSub}</span>
+        <span style="color:var(--muted)">종합 판정</span><span style="color:${rOk?'var(--ok)':rWarn?'var(--warn)':'var(--bad)'};font-weight:500">${overallTitle} — ${overallSub}</span>
+        <span style="color:var(--muted)">SEE 판정</span><span>→ <a href="index.html" style="color:var(--accent)">SEE Tool</a>에서 Weibull 파라미터 입력 필요</span>
+        <span style="color:var(--muted)">비고</span><span>세 가지(NIEL·TID·SEE) 모두 통과 시에만 해당 궤도 환경 사용 권장</span>
+      </div>
+    `;
+  }
+}
+
+function fmtSup(e){const s={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};return String(e).split('').map(c=>s[c]||c).join('');}
+
+// Init
+updateNIEL();
+updateTID();
+</script>
+</body>
+</html>

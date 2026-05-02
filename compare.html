@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HELIAS Lab — Device Comparison Matrix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f9;--bg1:#ffffff;--bg2:#eef1f6;--bg3:#dde3ee;
+  --border:rgba(30,64,120,.12);--border2:rgba(30,64,120,.22);
+  --accent:#1a52c8;--accent2:#1a3e8f;--text:#0f1f3d;--muted:#3a5070;--dim:#8fa0b8;
+  --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+  --ok:#0d8a5e;--warn:#b86e00;--bad:#b52020;
+  --ok-bg:rgba(13,138,94,.09);--warn-bg:rgba(184,110,0,.09);--bad-bg:rgba(181,32,32,.09);
+  --ok-bd:rgba(13,138,94,.35);--warn-bd:rgba(184,110,0,.35);--bad-bd:rgba(181,32,32,.35);
+  --d1:#1a52c8;--d2:#0d8a5e;--d3:#b86e00;--d4:#8b2fc9;
+  --d1a:rgba(26,82,200,.12);--d2a:rgba(13,138,94,.12);--d3a:rgba(184,110,0,.12);--d4a:rgba(139,47,201,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;min-height:100vh}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px 60px}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 18px;border-bottom:1px solid var(--border2);margin-bottom:28px}
+.logo-main{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:.12em}
+.logo-main span{color:var(--accent)}
+.logo-sub{font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.htags{display:flex;align-items:center;gap:8px}
+.htag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--border2);padding:4px 10px;border-radius:3px;letter-spacing:.05em}
+.nav-btn{font-family:var(--mono);font-size:13px;padding:5px 14px;border-radius:4px;text-decoration:none;letter-spacing:.04em;transition:all .2s;border:1px solid var(--border2);color:var(--accent);background:transparent}
+.nav-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+.live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* device selector bar */
+.sel-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.dev-slot{background:var(--bg1);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .2s}
+.dev-slot.active{border-color:var(--d1)}
+.dev-slot:nth-child(2).active{border-color:var(--d2)}
+.dev-slot:nth-child(3).active{border-color:var(--d3)}
+.dev-slot:nth-child(4).active{border-color:var(--d4)}
+.slot-hd{padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.slot-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.slot-label{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.slot-body{padding:10px 12px}
+.slot-body select{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:6px 8px;border-radius:4px;font-family:var(--sans);font-size:13px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231a3e8f'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+
+/* orbit / solar */
+.env-bar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.env-card{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.env-label{font-size:13px;color:var(--muted);margin-bottom:6px}
+.env-card select{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:4px;font-family:var(--sans);font-size:14px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231a3e8f'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+
+/* main grid */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+
+/* panel */
+.panel{background:var(--bg1);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.ph{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.phdot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.phtxt{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.pb{padding:14px}
+
+/* radar */
+.radar-wrap{position:relative;height:300px;display:flex;align-items:center;justify-content:center}
+
+/* score table */
+.score-table{width:100%;border-collapse:collapse}
+.score-table th{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);letter-spacing:.06em;text-transform:uppercase}
+.score-table td{padding:9px 10px;border-bottom:1px solid var(--border);font-size:14px;color:var(--text);vertical-align:middle}
+.score-table tr:last-child td{border-bottom:none}
+.score-table tr:hover td{background:var(--bg2)}
+.metric-name{font-weight:500}
+.metric-sub{font-size:11px;color:var(--muted);margin-top:1px;font-family:var(--mono)}
+.bar-cell{min-width:120px}
+.mini-bar-outer{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:4px}
+.mini-bar-inner{height:100%;border-radius:3px;transition:width .5s}
+.val-cell{font-family:var(--mono);font-size:13px;text-align:right;white-space:nowrap}
+
+/* verdict row */
+.verdict-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.vcard{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;transition:border-color .3s}
+.vcard-name{font-size:12px;color:var(--muted);margin-bottom:8px;font-family:var(--mono);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vring{width:54px;height:54px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 8px;font-family:var(--mono);font-weight:700;transition:all .4s}
+.vtitle{font-size:14px;font-weight:500;margin-bottom:4px}
+.vscore{font-family:var(--mono);font-size:22px;font-weight:700;margin-bottom:2px}
+.vscore-lbl{font-size:11px;color:var(--muted)}
+
+/* winner badge */
+.winner-badge{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(13,138,94,.12);color:var(--ok);border:1px solid var(--ok-bd);letter-spacing:.06em;margin-top:4px}
+
+/* best pick */
+.best-panel{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px}
+.best-title{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.best-content{font-size:15px;color:var(--text);line-height:1.7}
+.best-content strong{color:var(--accent2)}
+
+/* metric cards row */
+.mc-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.mc{background:var(--bg1);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+.mcl{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;font-family:var(--mono)}
+.mcv{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--text)}
+.mcu{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* note */
+.mnote{font-size:13px;color:var(--dim);border:1px solid var(--border);border-radius:4px;padding:9px 13px;line-height:1.6}
+.mnote strong{color:var(--muted)}
+
+footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;display:flex;justify-content:space-between}
+.ft{font-family:var(--mono);font-size:12px;color:var(--dim)}
+
+/* disabled slot */
+.slot-body .disabled-msg{font-size:13px;color:var(--dim);font-style:italic;padding:4px 0}
+
+@media(max-width:900px){.main-grid{grid-template-columns:1fr}.sel-bar{grid-template-columns:1fr 1fr}.verdict-grid{grid-template-columns:1fr 1fr}.mc-row{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.sel-bar{grid-template-columns:1fr}.verdict-grid{grid-template-columns:1fr}.mc-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <div class="logo-main">HELIAS<span>/</span>COMPARE</div>
+    <div class="logo-sub">Device Comparison Matrix — Module 5</div>
+  </div>
+  <div class="htags">
+    <nav style="display:flex;gap:4px;margin-right:10px">
+      <a href="index.html" class="nav-btn">SEE Tool</a>
+      <a href="niel-tid.html" class="nav-btn">NIEL · TID</a>
+      <a href="compare.html" class="nav-btn active">Compare</a>
+    </nav>
+    <span class="htag">최대 4소자 비교</span>
+    <span class="htag">레이더 차트</span>
+    <div class="live"></div>
+  </div>
+</header>
+
+<!-- 소자 선택 -->
+<div class="sel-bar">
+  <div class="dev-slot active" id="slot0">
+    <div class="slot-hd"><div class="slot-dot" style="background:var(--d1)"></div><div class="slot-label">소자 A</div></div>
+    <div class="slot-body"><select id="dev0" onchange="update()"></select></div>
+  </div>
+  <div class="dev-slot active" id="slot1">
+    <div class="slot-hd"><div class="slot-dot" style="background:var(--d2)"></div><div class="slot-label">소자 B</div></div>
+    <div class="slot-body"><select id="dev1" onchange="update()"></select></div>
+  </div>
+  <div class="dev-slot" id="slot2">
+    <div class="slot-hd"><div class="slot-dot" style="background:var(--d3)"></div><div class="slot-label">소자 C (선택)</div></div>
+    <div class="slot-body"><select id="dev2" onchange="update()"><option value="none">— 비교 안 함 —</option></select></div>
+  </div>
+  <div class="dev-slot" id="slot3">
+    <div class="slot-hd"><div class="slot-dot" style="background:var(--d4)"></div><div class="slot-label">소자 D (선택)</div></div>
+    <div class="slot-body"><select id="dev3" onchange="update()"><option value="none">— 비교 안 함 —</option></select></div>
+  </div>
+</div>
+
+<!-- 궤도/태양 환경 -->
+<div class="env-bar">
+  <div class="env-card">
+    <div class="env-label">목표 궤도</div>
+    <select id="orbit" onchange="update()">
+      <option value="leo">LEO 400km 저경사 (ISS형)</option>
+      <option value="leo_pol">LEO 극궤도 800km</option>
+      <option value="meo">MEO GPS 20,200km</option>
+      <option value="geo" selected>GEO 정지궤도 36,000km</option>
+      <option value="deep">심우주 / 행성간</option>
+    </select>
+  </div>
+  <div class="env-card">
+    <div class="env-label">태양 활동 조건</div>
+    <select id="solar" onchange="update()">
+      <option value="min" selected>태양 극소기 (GCR 최대 — 보수적)</option>
+      <option value="max">태양 극대기 (GCR 감소)</option>
+    </select>
+  </div>
+</div>
+
+<!-- 종합 판정 카드 -->
+<div class="verdict-grid" id="verdict-grid"></div>
+
+<!-- 최적 소자 추천 -->
+<div class="best-panel">
+  <div class="best-title">종합 추천 분석</div>
+  <div class="best-content" id="best-content">분석 중...</div>
+</div>
+
+<!-- 메트릭 요약 -->
+<div class="mc-row" id="mc-row"></div>
+
+<!-- 레이더 + 점수표 -->
+<div class="main-grid">
+  <div class="panel">
+    <div class="ph"><div class="phdot"></div><div class="phtxt">방사선 내성 레이더 차트</div></div>
+    <div class="pb">
+      <div class="radar-wrap"><canvas id="radar" width="300" height="300" role="img" aria-label="소자별 방사선 내성 레이더 차트"></canvas></div>
+      <div id="radar-legend" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;justify-content:center"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">지표별 상세 비교</div></div>
+    <div class="pb" style="padding:0">
+      <table class="score-table" id="score-table">
+        <thead><tr>
+          <th style="min-width:140px">지표</th>
+          <th id="th0">소자 A</th>
+          <th id="th1">소자 B</th>
+          <th id="th2" style="display:none">소자 C</th>
+          <th id="th3" style="display:none">소자 D</th>
+        </tr></thead>
+        <tbody id="score-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="mnote" style="margin-bottom:16px">
+  <strong>모델 기준:</strong> SEE 발생률 — CREME96 GCR 파워법칙 모델 (Adams 1986). NIEL — SR처리 근사 (Jun+2003). TID — Shieldose-2 해석 모델 (Seltzer 1994). 차폐 Al 2mm 고정. 종합 점수(0~100)는 세 지표의 가중 합산: SEE 40% + NIEL 30% + TID 30%. 정밀 설계에는 CREME-MC·SPENVIS 사용 권장.
+</div>
+
+<footer>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · Device Comparison Matrix v1.0</span>
+  <span class="ft">Module 5 / SEE·NIEL·TID 통합 비교</span>
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── 소자 데이터베이스 ──
+const DEVICES = {
+  sram65:   { name:'65nm SRAM',         type:'SEU',  L0:0.5,  sig:-8,  W:10,  s:1.2, tid_lim:5,    niel_r:1.00 },
+  sram130:  { name:'130nm SRAM',        type:'SEU',  L0:2.0,  sig:-7,  W:14,  s:1.4, tid_lim:8,    niel_r:1.00 },
+  flash64:  { name:'64nm NAND Flash',   type:'SEFI', L0:1.5,  sig:-7,  W:12,  s:1.6, tid_lim:3,    niel_r:0.95 },
+  bipolar:  { name:'SiGe BiCMOS HBT',   type:'SET',  L0:3.0,  sig:-7,  W:18,  s:1.8, tid_lim:25,   niel_r:2.69 },
+  rhbd_soi: { name:'RHBD SOI SRAM',     type:'SEU',  L0:20.0, sig:-7,  W:25,  s:2.0, tid_lim:500,  niel_r:0.90 },
+  gan_hemt: { name:'GaN HEMT (전력)',    type:'SET',  L0:8.0,  sig:-7,  W:20,  s:2.5, tid_lim:300,  niel_r:0.33 },
+  gan_rf:   { name:'GaN HEMT (RF)',     type:'SET',  L0:6.0,  sig:-7,  W:18,  s:2.2, tid_lim:200,  niel_r:0.33 },
+  sic_fet:  { name:'SiC MOSFET',        type:'SEB',  L0:14.0, sig:-6,  W:30,  s:3.1, tid_lim:30,   niel_r:0.51 },
+  gaas_hbt: { name:'GaAs HBT (RF)',     type:'SET',  L0:1.0,  sig:-7,  W:15,  s:1.5, tid_lim:15,   niel_r:1.99 },
+  inp_hbt:  { name:'InP HBT (광통신)',   type:'SET',  L0:0.8,  sig:-8,  W:12,  s:1.3, tid_lim:10,   niel_r:3.33 },
+  solar_si: { name:'Si 태양전지',        type:'DD',   L0:99.0, sig:-9,  W:1,   s:1.0, tid_lim:300,  niel_r:1.00 },
+  cmos_rh:  { name:'RHBD CMOS 0.35μm',  type:'SEU',  L0:18.0, sig:-7,  W:22,  s:2.0, tid_lim:1000, niel_r:0.92 },
+};
+
+const ORBIT_FLUX  = { leo:5e8, leo_pol:3e9, meo:2e10, geo:5e9, deep:1e10 };
+const ORBIT_TID0  = { leo:0.1, leo_pol:0.8, meo:50,   geo:15,  deep:25   };
+const SOLAR_MOD   = { min:1.0, max:0.5 };
+const DEV_COLORS  = ['#1a52c8','#0d8a5e','#b86e00','#8b2fc9'];
+const DEV_COLORS_A= ['rgba(26,82,200,.15)','rgba(13,138,94,.15)','rgba(184,110,0,.15)','rgba(139,47,201,.15)'];
+const SHIELD_MM   = 2;
+
+function weibull(L, L0, sigSat, W, s) {
+  if (L <= L0) return 0;
+  return sigSat * (1 - Math.exp(-Math.pow((L - L0) / W, s)));
+}
+function computeSEE(d, orbKey, solar) {
+  const sigSat = Math.pow(10, d.sig);
+  const orb = ORBIT_FLUX[orbKey] * SOLAR_MOD[solar];
+  const atten = Math.exp(-SHIELD_MM / 5);
+  let rate = 0, dL = 0.25;
+  for (let L = 1; L <= 100; L += dL) {
+    const phi = orb * Math.pow(L, -1.5) * Math.exp(-L / 120);
+    rate += weibull(L, d.L0, sigSat, d.W, d.s) * phi * atten * dL;
+  }
+  return rate;
+}
+function computeTNID(d, orbKey, solar) {
+  const niel0 = 2.16e-3 * d.niel_r;
+  const flux = ORBIT_FLUX[orbKey] * SOLAR_MOD[solar] * Math.exp(-SHIELD_MM / 8);
+  return niel0 * flux * 3; // 3-year mission
+}
+function computeTID(orbKey, solar) {
+  return ORBIT_TID0[orbKey] * SOLAR_MOD[solar] * Math.exp(-SHIELD_MM / 5) * 3;
+}
+
+// 점수화 (높을수록 좋음, 0~100)
+function scoreSEE(rate) {
+  if (rate < 1e-8)  return 100;
+  if (rate < 1e-6)  return 85;
+  if (rate < 1e-5)  return 65;
+  if (rate < 1e-4)  return 40;
+  if (rate < 1e-3)  return 20;
+  return 5;
+}
+function scoreNIEL(tnid, limit) {
+  const r = tnid / limit;
+  return Math.max(0, Math.min(100, Math.round((1 - r) * 100)));
+}
+function scoreTID(tid, limit) {
+  const r = tid / limit;
+  return Math.max(0, Math.min(100, Math.round((1 - r) * 100)));
+}
+function scoreSensitivity(L0) { // LET 임계 자체 점수
+  return Math.min(100, Math.round(L0 * 4.5));
+}
+
+function fmtExp(v) {
+  if (!v || v < 1e-15) return '~0';
+  const e = Math.floor(Math.log10(v));
+  const m = (v / Math.pow(10, e)).toFixed(1);
+  const sup = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+  return m+'×10'+String(e).split('').map(c=>sup[c]||c).join('');
+}
+
+// populate selects
+function populateSelects() {
+  const opts = Object.entries(DEVICES).map(([k,v]) => `<option value="${k}">${v.name} (${v.type})</option>`).join('');
+  ['dev0','dev1'].forEach(id => document.getElementById(id).innerHTML = opts);
+  const noneOpt = '<option value="none">— 비교 안 함 —</option>';
+  ['dev2','dev3'].forEach(id => document.getElementById(id).innerHTML = noneOpt + opts);
+  document.getElementById('dev0').value = 'sram65';
+  document.getElementById('dev1').value = 'gan_hemt';
+  document.getElementById('dev2').value = 'rhbd_soi';
+  document.getElementById('dev3').value = 'sic_fet';
+}
+
+let radarChart = null;
+
+function update() {
+  const orbKey = document.getElementById('orbit').value;
+  const solar  = document.getElementById('solar').value;
+  const tid3yr = computeTID(orbKey, solar);
+
+  // 활성 소자 수집
+  const devKeys = ['dev0','dev1','dev2','dev3'].map(id => document.getElementById(id).value);
+  const active  = devKeys.map((k,i) => k !== 'none' ? { key:k, dev:DEVICES[k], idx:i } : null).filter(Boolean);
+
+  // slot 테두리 업데이트
+  for (let i = 0; i < 4; i++) {
+    const slot = document.getElementById('slot'+i);
+    slot.classList.toggle('active', devKeys[i] !== 'none');
+  }
+  // th 표시/숨김
+  for (let i = 2; i < 4; i++) {
+    const th = document.getElementById('th'+i);
+    th.style.display = devKeys[i] !== 'none' ? '' : 'none';
+  }
+
+  // 계산
+  const results = active.map(({key, dev, idx}) => {
+    const see  = computeSEE(dev, orbKey, solar);
+    const tnid = computeTNID(dev, orbKey, solar);
+    const niel_limit = 1e10 * 2.16e-3 * dev.niel_r;
+    const sSEE  = scoreSEE(see);
+    const sNIEL = scoreNIEL(tnid, niel_limit);
+    const sTID  = scoreTID(tid3yr, dev.tid_lim);
+    const sLET  = scoreSensitivity(dev.L0);
+    const total = Math.round(sSEE * 0.40 + sNIEL * 0.30 + sTID * 0.30);
+    return { key, dev, idx, see, tnid, tid:tid3yr, sSEE, sNIEL, sTID, sLET, total };
+  });
+
+  // 최고 점수 찾기
+  const best = results.reduce((a,b) => b.total > a.total ? b : a, results[0]);
+
+  // ── 판정 카드 ──
+  const vgrid = document.getElementById('verdict-grid');
+  vgrid.style.gridTemplateColumns = `repeat(${active.length},1fr)`;
+  vgrid.innerHTML = results.map(r => {
+    const score = r.total;
+    const col  = score >= 70 ? 'var(--ok)' : score >= 40 ? 'var(--warn)' : 'var(--bad)';
+    const bg   = score >= 70 ? 'var(--ok-bg)' : score >= 40 ? 'var(--warn-bg)' : 'var(--bad-bg)';
+    const bd   = score >= 70 ? 'var(--ok-bd)' : score >= 40 ? 'var(--warn-bd)' : 'var(--bad-bd)';
+    const icon = score >= 70 ? '✓' : score >= 40 ? '!' : '✕';
+    const verdict = score >= 70 ? '사용 권장' : score >= 40 ? '검토 필요' : '부적합';
+    const isBest  = r.key === best.key;
+    return `<div class="vcard" style="border-color:${bd};background:${bg}">
+      <div class="vcard-name" style="color:${DEV_COLORS[r.idx]}">${r.dev.name}</div>
+      <div class="vring" style="border-color:${col};color:${col};background:${bg}">${icon}</div>
+      <div class="vtitle" style="color:${col}">${verdict}</div>
+      <div class="vscore" style="color:${col}">${score}</div>
+      <div class="vscore-lbl">/ 100점</div>
+      ${isBest ? '<div class="winner-badge">★ 최적 소자</div>' : ''}
+    </div>`;
+  }).join('');
+
+  // ── 메트릭 요약 ──
+  const mcRow = document.getElementById('mc-row');
+  mcRow.style.gridTemplateColumns = `repeat(${Math.min(active.length,4)},1fr)`;
+  mcRow.innerHTML = results.map(r => `
+    <div class="mc" style="border-top:3px solid ${DEV_COLORS[r.idx]}">
+      <div class="mcl">${r.dev.name}</div>
+      <div class="mcv">${r.total}<span style="font-size:13px;color:var(--muted)">/100</span></div>
+      <div class="mcu">SEE ${r.sSEE} · NIEL ${r.sNIEL} · TID ${r.sTID}</div>
+    </div>`).join('');
+
+  // ── 추천 분석 ──
+  const worst  = results.reduce((a,b) => b.total < a.total ? b : a, results[0]);
+  const tidPass = results.filter(r => r.tid <= r.dev.tid_lim);
+  document.getElementById('best-content').innerHTML =
+    `이 궤도 환경에서 <strong>${best.dev.name}</strong>이 종합 점수 <strong>${best.total}점</strong>으로 가장 우수합니다. ` +
+    (best.sSEE >= 65 ? `SEE 발생률(${fmtExp(best.see)}회/소자/일)이 허용 기준 이하이며, ` : `SEE 발생률이 주의 구간이지만, `) +
+    (best.sTID >= 65 ? `3년 TID 누적(${best.tid.toFixed(1)} krad)도 소자 한계(${best.dev.tid_lim} krad) 이하입니다. ` : `TID 검토가 추가로 필요합니다. `) +
+    `반면 <strong>${worst.dev.name}</strong>은 ${worst.total}점으로 가장 낮은 평가를 받았습니다. ` +
+    (results.length > 2 ? `비교 소자 ${results.length}개 중 ` : '') +
+    `TID 기준을 통과한 소자는 ${tidPass.length}개입니다.`;
+
+  // ── 레이더 차트 ──
+  const labels = ['SEE 내성', 'NIEL 내성', 'TID 내성', 'LET 임계', '종합 점수'];
+  const datasets = results.map(r => ({
+    label: r.dev.name,
+    data: [r.sSEE, r.sNIEL, r.sTID, r.sLET, r.total],
+    borderColor: DEV_COLORS[r.idx],
+    backgroundColor: DEV_COLORS_A[r.idx],
+    borderWidth: 2,
+    pointRadius: 4,
+    pointBackgroundColor: DEV_COLORS[r.idx],
+  }));
+
+  if (radarChart) {
+    radarChart.data.datasets = datasets;
+    radarChart.update('none');
+  } else {
+    radarChart = new Chart(document.getElementById('radar'), {
+      type: 'radar',
+      data: { labels, datasets },
+      options: {
+        responsive: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          r: {
+            min: 0, max: 100,
+            ticks: { stepSize: 25, display: false },
+            pointLabels: { font: { family: "'DM Sans'", size: 13 }, color: '#3a5070' },
+            grid: { color: 'rgba(0,0,0,.08)' },
+            angleLines: { color: 'rgba(0,0,0,.1)' },
+          }
+        }
+      }
+    });
+  }
+
+  // radar legend
+  document.getElementById('radar-legend').innerHTML = results.map(r =>
+    `<span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)">
+      <span style="width:10px;height:10px;border-radius:2px;background:${DEV_COLORS[r.idx]};display:inline-block"></span>
+      ${r.dev.name}
+    </span>`
+  ).join('');
+
+  // ── 점수 테이블 ──
+  // th 이름
+  results.forEach(r => { document.getElementById('th'+r.idx).textContent = r.dev.name; });
+
+  const METRICS = [
+    { name:'소자 유형',    sub:'SEE 유형',         fmt: r => r.dev.type, bar:false },
+    { name:'LET 임계값',   sub:'L₀ (MeV·cm²/mg)', fmt: r => r.dev.L0.toFixed(1), score: r=>r.sLET, bar:true },
+    { name:'SEE 발생률',   sub:'회/소자/일 (3yr)', fmt: r => fmtExp(r.see), score: r=>r.sSEE, bar:true },
+    { name:'NIEL 내성',    sub:'TNID 점수',        fmt: r => r.sNIEL+'/100', score: r=>r.sNIEL, bar:true },
+    { name:'TID 누적',     sub:'krad (3yr)',       fmt: r => r.tid.toFixed(1)+'k/'+r.dev.tid_lim+'k', score: r=>r.sTID, bar:true },
+    { name:'종합 점수',    sub:'SEE×0.4 + 기타',   fmt: r => r.total+'/100', score: r=>r.total, bar:true, bold:true },
+  ];
+
+  const activeIdx = active.map(a => a.idx);
+  const allIdx    = [0,1,2,3];
+
+  document.getElementById('score-tbody').innerHTML = METRICS.map(m => {
+    const cells = allIdx.map(i => {
+      const r = results.find(x => x.idx === i);
+      if (!r) return `<td style="display:${devKeys[i]==='none'?'none':''}"></td>`;
+      const val   = m.fmt(r);
+      const score = m.score ? m.score(r) : null;
+      const isBestInMetric = m.score ? results.every(x => m.score(x) <= score) : false;
+      const barW  = score !== null ? Math.min(score, 100) : 0;
+      const barCol = score >= 70 ? 'var(--ok)' : score >= 40 ? 'var(--warn)' : 'var(--bad)';
+      return `<td class="val-cell" style="display:${devKeys[i]==='none'?'none':''}">
+        <span style="font-weight:${m.bold?'700':'400'};color:${m.bold&&isBestInMetric?'var(--ok)':'inherit'}">${val}</span>
+        ${m.bar && score!==null ? `<div class="mini-bar-outer"><div class="mini-bar-inner" style="width:${barW}%;background:${DEV_COLORS[i]}"></div></div>` : ''}
+      </td>`;
+    }).join('');
+    return `<tr>
+      <td><div class="metric-name">${m.name}</div><div class="metric-sub">${m.sub}</div></td>
+      ${cells}
+    </tr>`;
+  }).join('');
+}
+
+populateSelects();
+update();
+</script>
+</body>
+</html>

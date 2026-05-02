@@ -8,18 +8,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#070b14;--bg1:#0d1424;--bg2:#111d30;--bg3:#172236;
-  --border:rgba(99,149,255,.13);--border2:rgba(99,149,255,.22);
-  --accent:#4c8bff;--accent2:#7aacff;--dim:#3a5070;--text:#dbe8ff;--muted:#6b89b0;
+  --bg:#f4f6f9;--bg1:#ffffff;--bg2:#eef1f6;--bg3:#dde3ee;
+  --border:rgba(30,64,120,.12);--border2:rgba(30,64,120,.22);
+  --accent:#1a52c8;--accent2:#1a3e8f;--dim:#8fa0b8;--text:#0f1f3d;--muted:#3a5070;
   --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
-  --ok:#2dd4a0;--warn:#f0b23a;--bad:#ff5a5a;
-  --ok-bg:rgba(45,212,160,.1);--warn-bg:rgba(240,178,58,.1);--bad-bg:rgba(255,90,90,.1);
-  --ok-bd:rgba(45,212,160,.3);--warn-bd:rgba(240,178,58,.3);--bad-bd:rgba(255,90,90,.3);
+  --ok:#0d8a5e;--warn:#b86e00;--bad:#b52020;
+  --ok-bg:rgba(13,138,94,.09);--warn-bg:rgba(184,110,0,.09);--bad-bg:rgba(181,32,32,.09);
+  --ok-bd:rgba(13,138,94,.35);--warn-bd:rgba(184,110,0,.35);--bad-bd:rgba(181,32,32,.35);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
-
-
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;min-height:100vh;overflow-x:hidden}
 .wrap{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:0 20px 60px}
 
 /* header */
@@ -27,15 +25,15 @@ header{display:flex;align-items:center;justify-content:space-between;padding:20p
 .logo{display:flex;flex-direction:column;gap:2px}
 .logo-main{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--text);letter-spacing:.12em}
 .logo-main span{color:var(--accent)}
-.logo-sub{font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.logo-sub{font-size:14px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
 .htags{display:flex;gap:8px;align-items:center}
-.htag{font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border2);padding:3px 9px;border-radius:3px;letter-spacing:.06em}
+.htag{font-family:var(--mono);font-size:13px;color:var(--muted);border:1px solid var(--border2);padding:3px 9px;border-radius:3px;letter-spacing:.06em}
 .live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 /* tabs */
 .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px}
-.tab{font-family:var(--mono);font-size:13px;color:var(--muted);padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.06em;text-transform:uppercase;transition:color .2s,border-color .2s;user-select:none}
+.tab{font-family:var(--mono);font-size:14px;color:var(--muted);padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.06em;text-transform:uppercase;transition:color .2s,border-color .2s;user-select:none}
 .tab:hover{color:var(--text)}.tab.active{color:var(--accent2);border-bottom-color:var(--accent)}
 .tab-panel{display:none}.tab-panel.active{display:block}
 
@@ -43,22 +41,22 @@ header{display:flex;align-items:center;justify-content:space-between;padding:20p
 .panel{background:var(--bg1);border:1px solid var(--border);border-radius:6px;overflow:hidden;animation:fadeIn .3s ease both}
 .ph{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .phdot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
-.phtxt{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.phtxt{font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
 .pb{padding:14px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
 /* controls */
 .field{margin-bottom:14px}.field:last-child{margin-bottom:0}
-.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;letter-spacing:.04em}
-select{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:4px;font-family:var(--sans);font-size:13px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234a6080'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.field label{display:block;font-size:14px;color:var(--muted);margin-bottom:5px;letter-spacing:.04em}
+select{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:4px;font-family:var(--sans);font-size:13px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231a3e8f'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
 select:focus{border-color:var(--accent)}
 .srow{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
 .srow:last-child{margin-bottom:0}
 .shdr{display:flex;justify-content:space-between;align-items:baseline}
-.sname{font-size:13px;color:var(--muted);font-family:var(--mono)}
-.sval{font-size:12px;font-weight:700;color:var(--text);font-family:var(--mono)}
-input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:2px;background:var(--bg3);border-radius:1px;outline:none;cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:pointer;transition:transform .15s}
+.sname{font-size:14px;color:var(--muted);font-family:var(--mono)}
+.sval{font-size:15px;font-weight:700;color:var(--text);font-family:var(--mono)}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:2px;background:#cdd5e0;border-radius:1px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);border:2px solid #ffffff;cursor:pointer;transition:transform .15s}
 input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
 input[type=number]{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:4px;font-family:var(--mono);font-size:13px;outline:none}
 input[type=number]:focus{border-color:var(--accent)}
@@ -70,19 +68,19 @@ input[type=number]:focus{border-color:var(--accent)}
 
 /* metric cards */
 .mc{background:var(--bg1);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
-.mcl{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;font-family:var(--mono)}
-.mcv{font-size:16px;font-weight:700;font-family:var(--mono);color:var(--text);line-height:1}
-.mcu{font-size:10px;color:var(--muted);margin-top:3px}
+.mcl{font-size:13px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;font-family:var(--mono)}
+.mcv{font-size:21px;font-weight:700;font-family:var(--mono);color:var(--text);line-height:1}
+.mcu{font-size:12px;color:var(--muted);margin-top:3px}
 
 /* verdict */
 .verdict-box{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 14px;text-align:center}
 .vring{width:66px;height:66px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;transition:all .4s;font-family:var(--mono);font-weight:700}
-.vtitle{font-size:18px;font-weight:500;margin-bottom:5px}
-.vsub{font-size:12px;color:var(--muted);line-height:1.6;max-width:260px}
+.vtitle{font-size:22px;font-weight:500;margin-bottom:5px}
+.vsub{font-size:15px;color:var(--muted);line-height:1.6;max-width:260px}
 .vdiv{width:100%;border-top:1px solid var(--border);padding-top:12px;margin-top:12px;text-align:left}
 .act{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}.act:last-child{margin-bottom:0}
-.actn{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px;font-family:var(--mono)}
-.actt{font-size:12px;color:var(--text);line-height:1.5}
+.actn{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px;font-family:var(--mono)}
+.actt{font-size:15px;color:var(--text);line-height:1.5}
 
 /* chart */
 .chart-outer{padding:12px}
@@ -91,27 +89,27 @@ input[type=number]:focus{border-color:var(--accent)}
 /* gauge */
 .gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
 .gauge-svg{}
-.dose-bar-outer{height:12px;background:var(--bg3);border-radius:6px;overflow:hidden;margin-top:4px}
+.dose-bar-outer{height:14px;background:var(--bg3);border-radius:6px;overflow:hidden;margin-top:4px}
 .dose-bar-inner{height:100%;border-radius:6px;transition:width .5s,background .5s}
 
 /* info boxes */
-.eq-box{background:var(--bg2);border-left:2px solid var(--accent);border-radius:0 4px 4px 0;padding:8px 12px;font-family:var(--mono);font-size:12px;color:var(--accent2);margin:8px 0;line-height:1.9}
-.info-p{font-size:12px;color:var(--muted);line-height:1.7}
-.ref-tbl{width:100%;border-collapse:collapse;font-size:12px}
-.ref-tbl th{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);letter-spacing:.06em}
-.ref-tbl td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px}
+.eq-box{background:var(--bg2);border-left:3px solid var(--accent);border-radius:0 4px 4px 0;padding:12px 16px;font-family:var(--mono);font-size:14px;color:var(--accent2);margin:8px 0;line-height:1.9}
+.info-p{font-size:15px;color:var(--muted);line-height:1.7}
+.ref-tbl{width:100%;border-collapse:collapse;font-size:14px}
+.ref-tbl th{font-family:var(--mono);font-size:13px;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);letter-spacing:.06em}
+.ref-tbl td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:14px}
 .ref-tbl tr:hover td{background:var(--bg2)}
 
 /* note */
-.mnote{font-size:11px;color:var(--dim);border:1px solid var(--border);border-radius:4px;padding:8px 12px;margin-top:10px;line-height:1.6}
+.mnote{font-size:14px;color:var(--dim);border:1px solid var(--border);border-radius:4px;padding:8px 12px;margin-top:10px;line-height:1.6}
 .mnote strong{color:var(--muted)}
 
 /* nav link */
-.back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;border:1px solid var(--border2);padding:5px 12px;border-radius:4px;transition:color .2s,border-color .2s}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:14px;color:var(--muted);text-decoration:none;border:1px solid var(--border2);padding:5px 12px;border-radius:4px;transition:color .2s,border-color .2s}
 .back-link:hover{color:var(--accent2);border-color:var(--accent)}
 
 footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;display:flex;justify-content:space-between;align-items:center}
-.ft{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.05em}
+.ft{font-family:var(--mono);font-size:13px;color:var(--dim);letter-spacing:.05em}
 
 @media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}}
@@ -126,7 +124,7 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
     <div class="logo-sub">Displacement Damage · Total Ionizing Dose Calculator</div>
   </div>
   <div class="htags">
-    <nav style="display:flex;gap:4px;margin-right:8px">
+    <nav style="display:flex;gap:4px;margin-right:10px">
       <a href="index.html"
          style="font-family:var(--mono);font-size:13px;color:var(--accent);
                 border:1px solid var(--border2);background:transparent;
@@ -610,14 +608,14 @@ function updateNIEL() {
       type:'line',
       data:{datasets:[{label:'NIEL(E)',data:niels,parsing:false,
         borderColor:'#1a52c8',borderWidth:2,pointRadius:0,tension:.3,
-        fill:true,backgroundColor:'rgba(26,82,200,.07)'}]},
+        fill:true,backgroundColor:'rgba(26,82,200,.08)'}]},
       options:{responsive:true,maintainAspectRatio:false,animation:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`NIEL = ${c.parsed.y.toExponential(2)} MeV·cm²/g`}}},
         scales:{
-          x:{type:'logarithmic',title:{display:true,text:'입자 에너지 (MeV)',color:'#3a5070',font:{size:12}},
-             grid:{color:'rgba(0,0,0,.06)'},ticks:{color:'#3a5070',font:{size:11}}},
-          y:{type:'logarithmic',title:{display:true,text:'NIEL (MeV·cm²/g)',color:'#3a5070',font:{size:12}},
-             grid:{color:'rgba(0,0,0,.06)'},ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toExponential(0)}}
+          x:{type:'logarithmic',title:{display:true,text:'입자 에너지 (MeV)',color:'#3a5070',font:{size:13}},
+             grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:12}}},
+          y:{type:'logarithmic',title:{display:true,text:'NIEL (MeV·cm²/g)',color:'#3a5070',font:{size:13}},
+             grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:12},callback:v=>v.toExponential(0)}}
         }}
     });
   }
@@ -710,18 +708,18 @@ function updateTID() {
     tidChart=new Chart(document.getElementById('tid-chart'),{
       type:'line',
       data:{datasets:[
-        {label:'누적 TID',data:doses,parsing:false,borderColor:'#c47d0a',borderWidth:2,
-         pointRadius:0,tension:.3,fill:true,backgroundColor:'rgba(196,125,10,.07)'},
-        {label:'마진 한계',data:limitLine,parsing:false,borderColor:'rgba(255,90,90,.6)',
+        {label:'누적 TID',data:doses,parsing:false,borderColor:'#b86e00',borderWidth:2,
+         pointRadius:0,tension:.3,fill:true,backgroundColor:'rgba(184,110,0,.08)'},
+        {label:'마진 한계',data:limitLine,parsing:false,borderColor:'rgba(181,32,32,.7)',
          borderWidth:1.5,borderDash:[5,5],pointRadius:0}
       ]},
       options:{responsive:true,maintainAspectRatio:false,animation:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y.toFixed(2)} krad`}}},
         scales:{
-          x:{type:'linear',min:0,max:30,title:{display:true,text:'Al 차폐 두께 (mm)',color:'#3a5070',font:{size:12}},
-             grid:{color:'rgba(0,0,0,.06)'},ticks:{color:'#3a5070',font:{size:11}}},
-          y:{type:'linear',title:{display:true,text:'누적 TID (krad)',color:'#3a5070',font:{size:12}},
-             grid:{color:'rgba(0,0,0,.06)'},ticks:{color:'#3a5070',font:{size:11}}}
+          x:{type:'linear',min:0,max:30,title:{display:true,text:'Al 차폐 두께 (mm)',color:'#3a5070',font:{size:13}},
+             grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:12}}},
+          y:{type:'linear',title:{display:true,text:'누적 TID (krad)',color:'#3a5070',font:{size:13}},
+             grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:12}}}
         }}
     });
   }

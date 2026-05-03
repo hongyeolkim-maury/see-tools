@@ -348,38 +348,314 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
 
 <!-- ══════════════════ TAB 2: CURVE ══════════════════ -->
 <div id="tab-curve" class="tab-panel">
-  <div style="display:grid;grid-template-columns:300px 1fr;gap:16px">
-    <div class="panel">
-      <div class="panel-hd"><div class="panel-hd-dot"></div><div class="panel-hd-txt">파라미터 (판정 탭과 공유)</div></div>
-      <div class="panel-body" style="display:flex;flex-direction:column;gap:14px">
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">현재 파라미터 요약</div>
-          <div style="background:var(--bg2);border-radius:4px;padding:10px;font-family:var(--mono);font-size:12px;line-height:2;color:var(--accent2)" id="param-summary">—</div>
+<style>
+/* ── Tab2 전용 추가 스타일 ── */
+.param-card{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+.param-card-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.param-chip{font-family:var(--mono);font-size:13px;font-weight:700;padding:4px 12px;border-radius:4px;letter-spacing:.05em}
+.param-meaning{font-size:14px;color:var(--text);font-weight:500;margin-bottom:4px}
+.param-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.param-formula{font-family:var(--mono);font-size:12px;background:var(--bg2);border-left:3px solid;padding:7px 12px;border-radius:0 4px 4px 0;margin-top:8px;color:var(--accent2);line-height:1.8}
+.param-row-vis{display:flex;align-items:center;gap:10px;margin-top:8px}
+.param-current{font-family:var(--mono);font-size:15px;font-weight:700;min-width:80px;text-align:right}
+.uncertainty-bar-outer{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-top:4px;position:relative}
+.uncertainty-bar-main{height:100%;border-radius:4px;position:absolute;transition:all .4s}
+.uncertainty-bar-range{height:100%;position:absolute;opacity:.3;border-radius:4px}
+
+/* physical estimator */
+.est-section{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+.est-hd{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.est-hd::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block}
+.est-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.est-field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;letter-spacing:.03em}
+.est-field select,.est-field input[type=range]{width:100%}
+.est-field select{background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 9px;border-radius:4px;font-size:13px;font-family:var(--sans);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231a3e8f'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;cursor:pointer}
+.est-slider-hdr{display:flex;justify-content:space-between;margin-bottom:4px}
+.est-slider-name{font-size:12px;color:var(--muted)}
+.est-slider-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text)}
+.est-result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.est-result-card{background:var(--bg2);border-radius:6px;padding:10px 12px;text-align:center}
+.est-result-label{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px}
+.est-result-val{font-size:15px;font-weight:700;font-family:var(--mono);color:var(--accent2)}
+.est-result-range{font-size:11px;color:var(--dim);margin-top:2px;font-family:var(--mono)}
+.arrow-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--ok);background:var(--ok-bg);border:1px solid var(--ok-bd);border-radius:4px;padding:2px 8px;font-family:var(--mono)}
+.apply-btn{width:100%;padding:9px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:var(--mono);font-size:13px;cursor:pointer;letter-spacing:.05em;margin-top:10px;transition:background .2s;font-weight:700}
+.apply-btn:hover{background:var(--accent2)}
+.confidence-badge{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:3px;letter-spacing:.05em;margin-left:8px}
+.conf-high{background:rgba(13,138,94,.1);color:var(--ok);border:1px solid var(--ok-bd)}
+.conf-mid{background:rgba(196,125,10,.1);color:var(--warn);border:1px solid var(--warn-bd)}
+.conf-low{background:rgba(192,37,29,.1);color:var(--bad);border:1px solid var(--bad-bd)}
+</style>
+
+<div style="display:grid;grid-template-columns:400px 1fr;gap:14px">
+
+<!-- ── 왼쪽: 파라미터 의미 + 물리 추정기 ── -->
+<div style="display:flex;flex-direction:column;gap:12px">
+
+  <!-- Weibull 함수 박스 -->
+  <div class="param-card" style="background:var(--bg2);border-color:var(--accent)">
+    <div style="font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Petersen-Weibull 함수</div>
+    <div style="font-family:var(--mono);font-size:14px;color:var(--accent2);line-height:2.2;background:var(--bg1);padding:12px 14px;border-radius:6px">
+      σ(L) = <span style="color:var(--ok)">σ_sat</span> · { 1 − exp[ −((<span style="color:var(--bad)">L</span> − <span style="color:var(--warn)">L₀</span>) / <span style="color:var(--perv,#7c3aed)">W</span>)<sup><span style="color:var(--accent)">s</span></sup> ] }<br>
+      <span style="font-size:12px;color:var(--muted)">단, L ≤ L₀ 이면 σ = 0</span>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-top:10px;line-height:1.7">
+      이 함수는 헤비이온 <strong style="color:var(--text)">빔 시험 데이터를 피팅</strong>하는 경험적 모델입니다. 4개 파라미터는 소자의 물리적 구조를 <em>압축</em>하여 표현하며, 각각 독립적인 물리적 의미를 가집니다.
+    </div>
+  </div>
+
+  <!-- L0 -->
+  <div class="param-card">
+    <div class="param-card-hd">
+      <span class="param-chip" style="background:rgba(196,125,10,.12);color:var(--warn);border:1px solid var(--warn-bd)">L₀</span>
+      <span class="param-meaning">LET 임계값 (Threshold LET)</span>
+      <span class="confidence-badge" id="conf-L0">—</span>
+    </div>
+    <div class="param-desc">
+      이온이 소자에 <strong>SEE를 유발하기 시작하는 최소 LET</strong>입니다. 물리적으로는 소자 내 민감 노드의 <strong>임계 전하(Q<sub>crit</sub>)</strong>와 민감 부피 두께로 결정됩니다.<br><br>
+      작을수록 → 더 많은 이온이 SEE 유발 → 고감도 소자<br>
+      클수록 → 헤비이온만 SEE 유발 → 내방사선 소자
+    </div>
+    <div class="param-formula" style="border-left-color:var(--warn)">
+      L₀ ≈ Q<sub>crit</sub> / (ρ · d · 0.0226)<br>
+      Q<sub>crit</sub>: 임계 전하 (fC), ρ: 소재 밀도, d: 민감 부피 두께
+    </div>
+    <div class="param-row-vis">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px">현재값 vs 일반 범위</div>
+        <div class="uncertainty-bar-outer" style="height:10px">
+          <div class="uncertainty-bar-range" style="background:var(--warn);width:100%;left:0"></div>
+          <div class="uncertainty-bar-main" id="bar-L0" style="background:var(--warn)"></div>
         </div>
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">주요 도출값</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="derived-metrics"></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px"><span>0.1</span><span>30 MeV·cm²/mg</span></div>
+      </div>
+      <div class="param-current" id="cur-L0" style="color:var(--warn)">—</div>
+    </div>
+  </div>
+
+  <!-- sigma_sat -->
+  <div class="param-card">
+    <div class="param-card-hd">
+      <span class="param-chip" style="background:rgba(13,138,94,.1);color:var(--ok);border:1px solid var(--ok-bd)">σ_sat</span>
+      <span class="param-meaning">포화 단면적 (Saturation Cross-Section)</span>
+      <span class="confidence-badge" id="conf-sig">—</span>
+    </div>
+    <div class="param-desc">
+      LET가 충분히 높을 때 SEE가 발생하는 <strong>최대 유효 단면적</strong>입니다. 기하학적으로는 소자 내 <strong>민감 부피(Sensitive Volume)의 수평 투영 면적</strong>과 직접 대응됩니다.<br><br>
+      클수록 → 넓은 민감 영역 → 비트 밀도↑, 셀 크기↑<br>
+      작을수록 → 좁은 민감 영역 → 고집적 소자 또는 RHBD
+    </div>
+    <div class="param-formula" style="border-left-color:var(--ok)">
+      σ_sat ≈ A<sub>SV</sub> × N<sub>cells</sub><br>
+      A<sub>SV</sub>: 민감 부피 수평 면적, N<sub>cells</sub>: 민감 노드 수<br>
+      통상 10⁻⁸ ~ 10⁻⁴ cm²/device
+    </div>
+    <div class="param-row-vis">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px">현재값 vs 일반 범위 (log₁₀ 스케일)</div>
+        <div class="uncertainty-bar-outer" style="height:10px">
+          <div class="uncertainty-bar-range" style="background:var(--ok);width:100%;left:0"></div>
+          <div class="uncertainty-bar-main" id="bar-sig" style="background:var(--ok)"></div>
         </div>
-        <div style="background:var(--bg2);border-radius:4px;padding:10px">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:.06em">WEIBULL 함수</div>
-          <div style="font-family:var(--mono);font-size:11px;color:var(--accent2);line-height:1.9">
-            σ(L) = σ_sat · {<br>
-            &nbsp;&nbsp;1 − exp[<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;−((L−L₀)/W)ˢ<br>
-            &nbsp;&nbsp;]<br>
-            }
-          </div>
-          <div style="font-size:10px;color:var(--dim);margin-top:6px">L ≤ L₀ 에서 σ = 0</div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px"><span>10⁻¹⁰</span><span>10⁻⁴ cm²</span></div>
+      </div>
+      <div class="param-current" id="cur-sig" style="color:var(--ok)">—</div>
+    </div>
+  </div>
+
+  <!-- W -->
+  <div class="param-card">
+    <div class="param-card-hd">
+      <span class="param-chip" style="background:rgba(124,58,237,.1);color:#7c3aed;border:1px solid rgba(124,58,237,.3)">W</span>
+      <span class="param-meaning">폭 파라미터 (Width Parameter)</span>
+      <span class="confidence-badge" id="conf-W">—</span>
+    </div>
+    <div class="param-desc">
+      σ(L)가 L₀에서 σ_sat까지 <strong>증가하는 전이 구간의 폭</strong>입니다. 물리적으로는 소자 내 <strong>민감 부피의 불균일성</strong>(공정 편차, 도핑 구배)을 반영합니다.<br><br>
+      작을수록 → L₀ 부근에서 급격히 포화 → 균일한 공정<br>
+      클수록 → 넓은 LET 범위에서 점진적 증가 → 불균일한 구조
+    </div>
+    <div class="param-formula" style="border-left-color:#7c3aed">
+      W ∝ σ(Q<sub>crit</sub>) / 소자 내 전하 수집 경로 분포<br>
+      통상 1 ~ 50 MeV·cm²/mg
+    </div>
+    <div class="param-row-vis">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px">현재값 vs 일반 범위</div>
+        <div class="uncertainty-bar-outer" style="height:10px">
+          <div class="uncertainty-bar-range" style="background:#7c3aed;width:100%;left:0"></div>
+          <div class="uncertainty-bar-main" id="bar-W" style="background:#7c3aed"></div>
         </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px"><span>1</span><span>50 MeV·cm²/mg</span></div>
+      </div>
+      <div class="param-current" id="cur-W" style="color:#7c3aed">—</div>
+    </div>
+  </div>
+
+  <!-- s -->
+  <div class="param-card">
+    <div class="param-card-hd">
+      <span class="param-chip" style="background:rgba(26,82,200,.1);color:var(--accent);border:1px solid var(--border2)">s</span>
+      <span class="param-meaning">형상 파라미터 (Shape Exponent)</span>
+      <span class="confidence-badge" id="conf-s">—</span>
+    </div>
+    <div class="param-desc">
+      전이 구간의 <strong>곡률(기울기 형태)</strong>을 결정합니다. s=1이면 지수형, s&gt;1이면 S자형 곡선입니다. 물리적으로는 이온 입사 각도 분포와 <strong>전하 수집 메커니즘의 비선형성</strong>을 반영합니다.<br><br>
+      s &lt; 1 → 초기에 급격히 증가, 이후 완만<br>
+      s ≈ 2 → 전형적 CMOS (S자형 곡선)<br>
+      s &gt; 3 → 매우 급격한 임계 거동 (강한 임계 특성)
+    </div>
+    <div class="param-formula" style="border-left-color:var(--accent)">
+      s ↔ Weibull 형상 계수 (shape factor)<br>
+      s = 1: 지수 분포 / s = 2: 레일리 분포<br>
+      통상 0.5 ~ 5
+    </div>
+    <div class="param-row-vis">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px">현재값 vs 일반 범위</div>
+        <div class="uncertainty-bar-outer" style="height:10px">
+          <div class="uncertainty-bar-range" style="background:var(--accent);width:100%;left:0"></div>
+          <div class="uncertainty-bar-main" id="bar-s" style="background:var(--accent)"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px"><span>0.5</span><span>5.0</span></div>
+      </div>
+      <div class="param-current" id="cur-s" style="color:var(--accent)">—</div>
+    </div>
+  </div>
+
+  <!-- 물리 기반 파라미터 추정기 -->
+  <div class="est-section">
+    <div class="est-hd">물리 기반 파라미터 자동 추정기
+      <span style="font-size:11px;color:var(--muted);font-family:var(--sans);font-weight:400;text-transform:none;letter-spacing:0">소자 구조 입력 → Weibull 파라미터 추정</span>
+    </div>
+
+    <div class="est-row">
+      <div class="est-field">
+        <label>반도체 소재</label>
+        <select id="e-material" onchange="estimateParams()">
+          <option value="si">Si — 실리콘</option>
+          <option value="gaas">GaAs — 갈륨비소</option>
+          <option value="gan">GaN — 질화갈륨</option>
+          <option value="sic">SiC — 탄화규소</option>
+          <option value="ge">Ge — 게르마늄</option>
+          <option value="inp">InP — 인화인듐</option>
+        </select>
+      </div>
+      <div class="est-field">
+        <label>소자 유형 / 구조</label>
+        <select id="e-type" onchange="estimateParams()">
+          <option value="sram">SRAM (6T)</option>
+          <option value="ff">플립플롭 / 레지스터</option>
+          <option value="mosfet">MOSFET (파워)</option>
+          <option value="hemt">HEMT (RF/전력)</option>
+          <option value="hbt">HBT (바이폴라)</option>
+          <option value="flash">Flash 메모리</option>
+          <option value="ccd">CCD / 이미지센서</option>
+        </select>
       </div>
     </div>
-    <div class="panel">
-      <div class="panel-hd"><div class="panel-hd-dot"></div><div class="panel-hd-txt">SEE 단면적 곡선 σ(L)</div></div>
-      <div style="padding:14px">
-        <div style="position:relative;height:340px"><canvas id="chart1" role="img" aria-label="Weibull SEE 단면적 대 LET 곡선"></canvas></div>
+
+    <div class="est-row">
+      <div class="est-field">
+        <label>공정 노드 (nm)</label>
+        <select id="e-node" onchange="estimateParams()">
+          <option value="1000">1000nm (1μm)</option>
+          <option value="350">350nm</option>
+          <option value="180">180nm</option>
+          <option value="130">130nm</option>
+          <option value="90">90nm</option>
+          <option value="65">65nm</option>
+          <option value="28">28nm</option>
+          <option value="14">14nm / FinFET</option>
+          <option value="7">7nm / GAA</option>
+        </select>
+      </div>
+      <div class="est-field">
+        <label>기판 방향 / 경사각</label>
+        <select id="e-angle" onchange="estimateParams()">
+          <option value="normal">정면 입사 (0°)</option>
+          <option value="tilt30">경사 30°</option>
+          <option value="tilt60">경사 60° (LET 증폭)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <div class="est-slider-hdr">
+        <span class="est-slider-name">민감 부피 두께 d<sub>SV</sub> (μm)</span>
+        <span class="est-slider-val" id="e-dv">2.0 μm</span>
+      </div>
+      <input type="range" id="e-depth" min="0.1" max="10" step="0.1" value="2" oninput="estimateParams()">
+    </div>
+    <div style="margin-bottom:10px">
+      <div class="est-slider-hdr">
+        <span class="est-slider-name">임계 전하 Q<sub>crit</sub> (fC)</span>
+        <span class="est-slider-val" id="e-qv">50 fC</span>
+      </div>
+      <input type="range" id="e-qcrit" min="1" max="500" step="1" value="50" oninput="estimateParams()">
+    </div>
+    <div style="margin-bottom:4px">
+      <div class="est-slider-hdr">
+        <span class="est-slider-name">민감 노드 수 N<sub>cells</sub> (log₁₀)</span>
+        <span class="est-slider-val" id="e-nv">10⁶</span>
+      </div>
+      <input type="range" id="e-ncells" min="2" max="10" step="0.5" value="6" oninput="estimateParams()">
+    </div>
+
+    <!-- 추정 결과 -->
+    <div class="est-result-grid" id="est-results"></div>
+
+    <!-- 불확실도 경고 -->
+    <div id="est-warning" style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 10px;background:var(--bg2);border-radius:4px;line-height:1.6"></div>
+
+    <button class="apply-btn" onclick="applyEstimated()">→ 추정값을 판정 탭에 적용</button>
+  </div>
+
+</div>
+
+<!-- ── 오른쪽: Weibull 곡선 + 불확실도 ── -->
+<div style="display:flex;flex-direction:column;gap:12px">
+
+  <div class="panel">
+    <div class="panel-hd">
+      <div class="panel-hd-dot"></div>
+      <div class="panel-hd-txt">SEE 단면적 곡선 σ(L) — 현재값 + 불확실도 구간</div>
+    </div>
+    <div style="padding:14px">
+      <div style="position:relative;height:280px"><canvas id="chart1" role="img" aria-label="Weibull SEE 단면적 대 LET 곡선 (불확실도 포함)"></canvas></div>
+      <div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--muted)">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:20px;height:2px;background:var(--accent);display:inline-block"></span>현재 파라미터</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:20px;height:8px;background:rgba(26,82,200,.15);display:inline-block;border-radius:2px"></span>±30% 파라미터 불확실도 구간</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:20px;height:2px;background:var(--ok);display:inline-block;border-top:2px dashed var(--ok)"></span>물리 추정값</span>
       </div>
     </div>
   </div>
+
+  <div class="panel">
+    <div class="panel-hd"><div class="panel-hd-dot" style="background:var(--muted)"></div><div class="panel-hd-txt">파라미터 민감도 분석 — 각 변수가 발생률에 미치는 영향</div></div>
+    <div style="padding:14px">
+      <div style="position:relative;height:200px"><canvas id="chart-sens" role="img" aria-label="파라미터 민감도 토네이도 차트"></canvas></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">각 파라미터를 ±30% 변화시킬 때 SEE 발생률 변동폭. 막대가 길수록 해당 파라미터의 불확실성이 최종 판정에 미치는 영향이 큼.</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hd"><div class="panel-hd-dot" style="background:var(--muted)"></div><div class="panel-hd-txt">도출 파라미터 요약</div></div>
+    <div class="panel-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="derived-metrics"></div>
+  </div>
+
+  <!-- 파라미터 신뢰도 경고 -->
+  <div style="background:rgba(196,125,10,.08);border:1px solid var(--warn-bd);border-radius:6px;padding:12px 14px">
+    <div style="font-family:var(--mono);font-size:12px;color:var(--warn);letter-spacing:.06em;margin-bottom:6px;text-transform:uppercase">파라미터 신뢰성 안내</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7" id="reliability-note">
+      현재 파라미터는 <strong>문헌/DB 기반 참조값</strong>입니다. 실제 소자의 헤비이온 빔 시험(JESD57 기준) 없이는 L₀·σ_sat 모두 ±1~2 오더의 불확실도가 존재합니다. 판정 결과는 <strong>예비 스크리닝 용도</strong>로만 활용하고, 비행 승인 전 반드시 실측 데이터로 검증하십시오.
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div id="param-summary" style="display:none"></div>
 </div>
 
 <!-- ══════════════════ TAB 3: DB ══════════════════ -->
@@ -731,45 +1007,283 @@ function update() {
   drawCurve();
 }
 
+// ── 물리 추정기 데이터 ──
+const MAT_DATA = {
+  si:   { density:2.33, ionE:3.62, niel:1.00, name:'Si' },
+  gaas: { density:5.32, ionE:4.20, niel:1.99, name:'GaAs' },
+  gan:  { density:6.15, ionE:8.90, niel:0.33, name:'GaN' },
+  sic:  { density:3.21, ionE:7.80, niel:0.51, name:'SiC' },
+  ge:   { density:5.32, ionE:2.97, niel:2.69, name:'Ge' },
+  inp:  { density:4.79, ionE:4.20, niel:3.33, name:'InP' },
+};
+const TYPE_DATA = {
+  sram:   { wFactor:0.9,  sFactor:1.2, confBase:'mid',  name:'SRAM' },
+  ff:     { wFactor:0.7,  sFactor:1.5, confBase:'mid',  name:'FF' },
+  mosfet: { wFactor:1.8,  sFactor:2.5, confBase:'low',  name:'MOSFET' },
+  hemt:   { wFactor:2.2,  sFactor:2.5, confBase:'low',  name:'HEMT' },
+  hbt:    { wFactor:1.5,  sFactor:1.8, confBase:'low',  name:'HBT' },
+  flash:  { wFactor:0.8,  sFactor:1.6, confBase:'mid',  name:'Flash' },
+  ccd:    { wFactor:1.2,  sFactor:1.4, confBase:'low',  name:'CCD' },
+};
+const NODE_CONF = {
+  1000:'high', 350:'high', 180:'high', 130:'high',
+  90:'mid', 65:'mid', 28:'low', 14:'low', 7:'low'
+};
+const ANGLE_FACTOR = { normal:1.0, tilt30:1/Math.cos(30*Math.PI/180), tilt60:1/Math.cos(60*Math.PI/180) };
+
+let estimatedL0 = null, estimatedSig = null, estimatedW = null, estimatedS = null;
+let sensitivityChart = null;
+
+function estimateParams() {
+  const mat    = document.getElementById('e-material').value;
+  const type   = document.getElementById('e-type').value;
+  const node   = parseInt(document.getElementById('e-node').value);
+  const angle  = document.getElementById('e-angle').value;
+  const depth  = parseFloat(document.getElementById('e-depth').value);
+  const qcrit  = parseFloat(document.getElementById('e-qcrit').value);
+  const ncells = parseFloat(document.getElementById('e-ncells').value);
+
+  document.getElementById('e-dv').textContent = depth.toFixed(1) + ' μm';
+  document.getElementById('e-nv').textContent = '10' + supExp(Math.round(ncells));
+  document.getElementById('e-qv').textContent = qcrit.toFixed(0) + ' fC';
+
+  const m = MAT_DATA[mat];
+  const t = TYPE_DATA[type];
+  const af = ANGLE_FACTOR[angle];
+
+  // L₀ 추정: Qcrit / (ρ·d·0.0226) — Pickel & Blandford 관계식
+  const L0_est = (qcrit / (m.density * depth * 0.0226)) / af;
+
+  // σ_sat 추정: 민감 셀 면적 × 셀 수 (node 크기 기반 셀 면적)
+  const cellArea_cm2 = Math.pow(node * 1e-7, 2) * 6; // 6T SRAM factor
+  const sigSat_est = cellArea_cm2 * Math.pow(10, ncells);
+  const sigExp_est = Math.log10(Math.max(sigSat_est, 1e-12));
+
+  // W 추정: 공정 균일도 + 소자 유형 계수
+  const nodeNorm = Math.log10(node / 7) / Math.log10(1000 / 7);
+  const W_est = Math.max(1, t.wFactor * (3 + nodeNorm * 20));
+
+  // s 추정: 소자 유형 × 입사 각도 보정
+  const s_est = Math.min(4.5, Math.max(0.5, t.sFactor * (angle === 'normal' ? 1.0 : 0.8)));
+
+  estimatedL0  = Math.max(0.1, Math.min(30, L0_est));
+  estimatedSig = Math.max(-10, Math.min(-4, sigExp_est));
+  estimatedW   = Math.max(1,  Math.min(50, W_est));
+  estimatedS   = s_est;
+
+  // 신뢰도 판정
+  const nodeConf = NODE_CONF[node] || 'low';
+  const typeConf = t.confBase;
+  const overallConf = (nodeConf==='high' && typeConf==='mid') ? 'mid'
+                    : (nodeConf==='high' && typeConf==='high') ? 'high'
+                    : (nodeConf==='low' || typeConf==='low') ? 'low' : 'mid';
+
+  const confLabel = { high:'높음 (±30%)', mid:'중간 (±1오더)', low:'낮음 (±2오더)' };
+  const confClass = { high:'conf-high', mid:'conf-mid', low:'conf-low' };
+
+  // 추정 결과 표시
+  const fmtL0  = estimatedL0.toFixed(1);
+  const fmtSig = '10^' + estimatedSig.toFixed(1);
+  const fmtW   = estimatedW.toFixed(1);
+  const fmtS   = estimatedS.toFixed(1);
+
+  const L0range  = [estimatedL0*0.5, estimatedL0*2].map(v=>v.toFixed(1)).join('–');
+  const sigRange = [(estimatedSig-1).toFixed(1), (estimatedSig+0.5).toFixed(1)].join('–');
+
+  document.getElementById('est-results').innerHTML = `
+    <div class="est-result-card">
+      <div class="est-result-label">L₀ 추정</div>
+      <div class="est-result-val">${fmtL0}</div>
+      <div class="est-result-range">범위: ${L0range}</div>
+    </div>
+    <div class="est-result-card">
+      <div class="est-result-label">σ_sat 추정</div>
+      <div class="est-result-val">${fmtSig}</div>
+      <div class="est-result-range">범위: 10^${sigRange}</div>
+    </div>
+    <div class="est-result-card">
+      <div class="est-result-label">W 추정</div>
+      <div class="est-result-val">${fmtW}</div>
+      <div class="est-result-range">±50%</div>
+    </div>
+    <div class="est-result-card">
+      <div class="est-result-label">s 추정</div>
+      <div class="est-result-val">${fmtS}</div>
+      <div class="est-result-range">±0.5</div>
+    </div>`;
+
+  document.getElementById('est-warning').innerHTML =
+    `<strong>신뢰도:</strong> <span class="${confClass[overallConf]}" style="padding:1px 7px;border-radius:3px;font-family:var(--mono);font-size:11px">${confLabel[overallConf]}</span> — ` +
+    `${m.name} ${t.name} @${node}nm · 추정값은 물리 모델 기반 근사이며 ` +
+    `<strong>헤비이온 빔 시험(JESD57)으로 반드시 검증</strong>이 필요합니다. ` +
+    (mat==='gan'||mat==='sic' ? `${m.name}은 Si 대비 이온화 에너지가 높아(${m.ionE} eV) L₀가 상향 보정됩니다. ` : '') +
+    (node<=14 ? `${node}nm 이하 FinFET/GAA 구조는 3D 전하 수집 효과로 실제 σ_sat가 추정보다 작을 수 있습니다. ` : '');
+
+  drawCurve();
+}
+
+function applyEstimated() {
+  if (estimatedL0 === null) { alert('먼저 소자 정보를 입력하여 추정값을 생성하세요.'); return; }
+  document.getElementById('L0').value  = estimatedL0.toFixed(1);
+  document.getElementById('sig').value = estimatedSig.toFixed(1);
+  document.getElementById('W').value   = estimatedW.toFixed(1);
+  document.getElementById('S').value   = estimatedS.toFixed(1);
+  update();
+  // 판정 탭으로 이동
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-assess').classList.add('active');
+  document.querySelectorAll('.tab')[0].classList.add('active');
+}
+
+function supExp(e){const s={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};return String(e).split('').map(c=>s[c]||c).join('')}
+
 function drawCurve() {
-  const L0    = parseFloat(document.getElementById('L0').value);
-  const sExp  = parseFloat(document.getElementById('sig').value);
-  const W     = parseFloat(document.getElementById('W').value);
-  const s     = parseFloat(document.getElementById('S').value);
-  const sigS  = Math.pow(10, sExp);
+  const L0   = parseFloat(document.getElementById('L0').value);
+  const sExp = parseFloat(document.getElementById('sig').value);
+  const W    = parseFloat(document.getElementById('W').value);
+  const s    = parseFloat(document.getElementById('S').value);
+  const sigS = Math.pow(10, sExp);
 
-  const data = [];
-  for (let L = 0; L <= 100; L += 0.5) {
-    const v = weibull(L, L0, sigS, W, s);
-    data.push({x:L, y: v > 0 ? v : null});
-  }
+  // ── 파라미터 의미 UI 업데이트 ──
+  const L0pct  = ((L0 - 0.1) / (30 - 0.1) * 100).toFixed(0);
+  const sigPct = ((sExp - (-10)) / 6 * 100).toFixed(0);
+  const WPct   = ((W - 1) / 49 * 100).toFixed(0);
+  const sPct   = ((s - 0.5) / 4.5 * 100).toFixed(0);
 
-  if (chart1) {
-    chart1.data.datasets[0].data = data;
-    chart1.update('none');
-    return;
-  }
-  if (!document.getElementById('chart1')) return;
-  chart1 = new Chart(document.getElementById('chart1'), {
-    type:'line',
-    data:{datasets:[{label:'σ(L)',data,parsing:false,borderColor:'#1a52c8',borderWidth:2,pointRadius:0,tension:.3,fill:true,backgroundColor:'rgba(26,82,200,.07)'}]},
-    options:{
-      responsive:true, maintainAspectRatio:false, animation:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`σ = ${c.parsed.y.toExponential(2)} cm²`}}},
-      scales:{
-        x:{type:'linear',min:0,max:100,title:{display:true,text:'LET (MeV·cm²/mg)',color:'#3a5070',font:{size:13}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:12}}},
-        y:{type:'linear',title:{display:true,text:'σ (cm²/device)',color:'#3a5070',font:{size:13}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:12},callback:v=>v.toExponential(0)}}
-      }
+  const setBar = (id, pct) => { const el=document.getElementById(id); if(el) el.style.width=pct+'%'; };
+  const setTxt = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent=txt; };
+
+  setBar('bar-L0',  L0pct);  setTxt('cur-L0',  L0.toFixed(1)+' MeV·cm²/mg');
+  setBar('bar-sig', sigPct); setTxt('cur-sig', '10^'+sExp.toFixed(1)+' cm²');
+  setBar('bar-W',   WPct);   setTxt('cur-W',   W.toFixed(1)+' MeV·cm²/mg');
+  setBar('bar-s',   sPct);   setTxt('cur-s',   s.toFixed(1));
+
+  // 신뢰도 배지
+  const confBadge = (val, lo, hi, id) => {
+    const el = document.getElementById(id); if(!el) return;
+    const inRange = val>=lo && val<=hi;
+    const near = val>= lo*0.7 && val<=hi*1.3;
+    if(inRange){ el.textContent='전형적 범위'; el.className='confidence-badge conf-high'; }
+    else if(near){ el.textContent='주의 범위'; el.className='confidence-badge conf-mid'; }
+    else{ el.textContent='비전형적'; el.className='confidence-badge conf-low'; }
+  };
+  confBadge(L0, 0.5, 20, 'conf-L0');
+  confBadge(sExp, -9, -5, 'conf-sig');
+  confBadge(W, 5, 40, 'conf-W');
+  confBadge(s, 1, 4, 'conf-s');
+
+  // 도출값
+  const LET50 = L0 + W * Math.pow(Math.log(2), 1/s);
+  const LET90 = L0 + W * Math.pow(-Math.log(0.1), 1/s);
+  const dmGrid = document.getElementById('derived-metrics');
+  if(dmGrid) dmGrid.innerHTML = [
+    ['50% 포화 LET', LET50.toFixed(1)+' MeV·cm²/mg'],
+    ['90% 포화 LET', LET90.toFixed(1)+' MeV·cm²/mg'],
+    ['σ @ LET=30',   weibull(30,L0,sigS,W,s).toExponential(2)+' cm²'],
+    ['σ @ LET=60',   weibull(60,L0,sigS,W,s).toExponential(2)+' cm²'],
+  ].map(([l,v])=>`<div style="background:var(--bg2);border-radius:4px;padding:9px 11px"><div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:3px">${l}</div><div style="font-size:14px;font-weight:700;font-family:var(--mono);color:var(--text)">${v}</div></div>`).join('');
+
+  // ── 메인 Weibull 곡선 + 불확실도 띠 ──
+  const mainData=[], hiData=[], loData=[], estData=[];
+  for(let L=0;L<=100;L+=0.5){
+    const v   = weibull(L,L0,sigS,W,s);
+    const vHi = weibull(L,L0*0.7, sigS*Math.pow(10,0.3), W*1.3, s*1.2);
+    const vLo = weibull(L,L0*1.3, sigS*Math.pow(10,-0.3), W*0.7, s*0.8);
+    mainData.push({x:L, y:v>0?v:null});
+    hiData.push({x:L, y:vHi>0?vHi:null});
+    loData.push({x:L, y:vLo>0?vLo:null});
+    if(estimatedL0!==null){
+      const vE = weibull(L,estimatedL0,Math.pow(10,estimatedSig),estimatedW,estimatedS);
+      estData.push({x:L, y:vE>0?vE:null});
     }
+  }
+
+  const chart1El = document.getElementById('chart1');
+  if(!chart1El) return;
+
+  const datasets = [
+    {label:'±30% 상한',data:hiData,parsing:false,borderColor:'rgba(26,82,200,.0)',borderWidth:0,pointRadius:0,tension:.3,fill:'+1',backgroundColor:'rgba(26,82,200,.12)'},
+    {label:'±30% 하한',data:loData,parsing:false,borderColor:'rgba(26,82,200,.0)',borderWidth:0,pointRadius:0,tension:.3,fill:false,backgroundColor:'transparent'},
+    {label:'현재 파라미터',data:mainData,parsing:false,borderColor:'#1a52c8',borderWidth:2.5,pointRadius:0,tension:.3,fill:false},
+  ];
+  if(estimatedL0!==null){
+    datasets.push({label:'물리 추정값',data:estData,parsing:false,borderColor:'#0d8a5e',borderWidth:2,borderDash:[5,3],pointRadius:0,tension:.3,fill:false});
+  }
+
+  if(chart1){
+    chart1.data.datasets = datasets;
+    chart1.update('none');
+  } else {
+    chart1 = new Chart(chart1El,{
+      type:'line',
+      data:{datasets},
+      options:{
+        responsive:true,maintainAspectRatio:false,animation:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`σ = ${c.parsed.y?.toExponential(2)||'—'} cm²`}}},
+        scales:{
+          x:{type:'linear',min:0,max:100,title:{display:true,text:'LET (MeV·cm²/mg)',color:'#3a5070',font:{size:13}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:12}}},
+          y:{type:'linear',title:{display:true,text:'σ (cm²/device)',color:'#3a5070',font:{size:13}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:12},callback:v=>v.toExponential(0)}}
+        }
+      }
+    });
+  }
+
+  // ── 민감도 토네이도 차트 ──
+  const orbKey = document.getElementById('orbit').value;
+  const solar  = document.getElementById('solar').value;
+  const t_mm   = parseFloat(document.getElementById('shield').value);
+  const baseRate = computeRate(L0,sigS,W,s,orbKey,solar,t_mm);
+
+  const params = [
+    { label:'L₀ +30%',  rate: computeRate(L0*1.3,sigS,W,s,orbKey,solar,t_mm) },
+    { label:'L₀ −30%',  rate: computeRate(L0*0.7,sigS,W,s,orbKey,solar,t_mm) },
+    { label:'σ_sat +1오더', rate: computeRate(L0,sigS*10,W,s,orbKey,solar,t_mm) },
+    { label:'σ_sat −1오더', rate: computeRate(L0,sigS*0.1,W,s,orbKey,solar,t_mm) },
+    { label:'W +30%',   rate: computeRate(L0,sigS,W*1.3,s,orbKey,solar,t_mm) },
+    { label:'W −30%',   rate: computeRate(L0,sigS,W*0.7,s,orbKey,solar,t_mm) },
+    { label:'s +30%',   rate: computeRate(L0,sigS,W,s*1.3,orbKey,solar,t_mm) },
+    { label:'s −30%',   rate: computeRate(L0,sigS,W,s*0.7,orbKey,solar,t_mm) },
+  ];
+
+  const sensEl = document.getElementById('chart-sens');
+  if(!sensEl) return;
+
+  const sensData = params.map(p => {
+    const delta = baseRate > 0 ? (p.rate - baseRate)/baseRate*100 : 0;
+    return { label: p.label, delta };
   });
+
+  const labels  = sensData.map(d=>d.label);
+  const deltas  = sensData.map(d=>d.delta);
+  const colors  = deltas.map(d=>d>0?'rgba(192,37,29,.7)':'rgba(13,138,94,.7)');
+
+  if(sensitivityChart){
+    sensitivityChart.data.labels = labels;
+    sensitivityChart.data.datasets[0].data = deltas;
+    sensitivityChart.data.datasets[0].backgroundColor = colors;
+    sensitivityChart.update('none');
+  } else {
+    sensitivityChart = new Chart(sensEl,{
+      type:'bar',
+      data:{labels,datasets:[{data:deltas,backgroundColor:colors,borderRadius:3}]},
+      options:{
+        indexAxis:'y',responsive:true,maintainAspectRatio:false,animation:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`발생률 변화: ${c.parsed.x>0?'+':''}${c.parsed.x.toFixed(0)}%`}}},
+        scales:{
+          x:{title:{display:true,text:'SEE 발생률 변동 (%)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
+          y:{grid:{display:false},ticks:{color:'#3a5070',font:{size:12,family:"'Space Mono'"}}}
+        }
+      }
+    });
+  }
 }
 
 // Custom legend for chart2 overlay
-function buildLegend() {
-  // injected below chart
-}
+function buildLegend() {}
 
 update();
+estimateParams();
 </script>
 </body>
 </html>

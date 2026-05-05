@@ -240,9 +240,16 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
       <div class="pb">
         <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
         <div class="legend">
-          <div class="leg-item"><div class="leg-dot" style="background:var(--c-se)"></div>전자 저지능 Sₑ (Bethe-Bloch)</div>
-          <div class="leg-item"><div class="leg-dot" style="background:var(--c-sn)"></div>핵 저지능 Sₙ (ZBL)</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#aaa"></div>현재 에너지</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--c-se)"></div>전자 저지능 Sₑ — TID(전리 손상) 기여</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--c-sn)"></div>핵 저지능 Sₙ — NIEL(격자 변위) 기여</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#aaa;border-top:2px dashed #aaa;height:2px"></div>현재 선택 에너지</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:5px;padding:9px 13px;margin-top:10px;font-size:13px;color:var(--muted);line-height:1.7">
+          <b style="color:var(--text)">이 곡선 읽는 법:</b>
+          곡선이 높을수록 이온이 해당 에너지에서 소재를 빨리 통과하며 단위 경로당 더 많은 에너지를 잃습니다.
+          세로 점선이 현재 선택한 이온 에너지 위치입니다.
+          Sₑ > Sₙ 구간 → TID 손상 지배 / Sₙ > Sₑ 구간 → NIEL(변위 손상) 지배.
+          곡선의 최대값(Bragg Peak)이 소재 표면 근처라면 이 이온은 소재 안에서 정지합니다.
         </div>
       </div>
     </div>
@@ -283,7 +290,8 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
   <div class="panel">
     <div class="ph"><div class="phdot"></div><div class="phtxt">깊이별 저지능 — Bragg 곡선</div></div>
     <div class="pb">
-      <div class="chart-wrap" style="height:320px"><canvas id="depthChart"></canvas></div>
+      <div id="braggStats" style="margin-bottom:14px"></div>
+      <div class="chart-wrap" style="height:300px"><canvas id="depthChart"></canvas></div>
       <div class="legend" style="margin-top:10px">
         <div class="leg-item"><div class="leg-dot" style="background:var(--c-se)"></div>전자 저지능 Sₑ(x)</div>
         <div class="leg-item"><div class="leg-dot" style="background:var(--c-sn)"></div>핵 저지능 Sₙ(x)</div>
@@ -596,7 +604,7 @@ function update(){
     ]},options:{responsive:true,maintainAspectRatio:false,animation:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y)} MeV·cm²/mg`}}},
       scales:{
-        x:{type:'logarithmic',title:{display:true,text:`에너지 (MeV) — ${ion.name}`,color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
+        x:{type:'logarithmic',title:{display:true,text:'에너지 (MeV)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
         y:{type:'logarithmic',title:{display:true,text:'저지능 (MeV·cm²/mg)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toPrecision(2)}}
       }}});
   }
@@ -627,8 +635,12 @@ function buildLayerInputs(){
 
 function updateDepth(){
   const ionKey=document.getElementById('ion').value;
+  const tarKey2=document.getElementById('target').value;
   const ion=IONS[ionKey];
+  const tar2=TARGETS[tarKey2]||TARGETS.si;
+  const rho2=parseFloat(document.getElementById('density').value)||tar2.rho;
   const Emev=toMeV(parseFloat(document.getElementById('eVal').value)||1, document.getElementById('eUnit').value);
+  const rng=Range(Emev,ion.Z,ion.A,tar2.Z,tar2.A,tar2.I,rho2);
   const layers=[0,1,2].map(i=>({tar:TARGETS[document.getElementById(`lm${i}`)?.value||'si']||TARGETS.si, thick:parseFloat(document.getElementById(`lt${i}`)?.value)||0})).filter(l=>l.thick>0);
   const totalThick=layers.reduce((s,l)=>s+l.thick,0);
 
@@ -672,20 +684,68 @@ function updateDepth(){
     </div>`;
   }).join('');
 
-  // Bragg 차트
+  // ── Bragg 차트 수치 표시 박스 업데이트 ──
+  const totalT=layers.reduce((s,l)=>s+l.thick,0);
+  // 스트래글 근사: σ_R ≈ 0.04 × R (경험적, Janni 1982)
+  const straggle=rng*0.04;
+
+  // 수치 요약 박스
+  document.getElementById('braggStats').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+      <div style="background:var(--bg2);border-radius:5px;padding:9px 12px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-bottom:4px">Bragg Peak 위치</div>
+        <div style="font-size:17px;font-weight:700;font-family:var(--mono);color:var(--c-rng)">${bx.toFixed(2)} μm</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:5px;padding:9px 12px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-bottom:4px">Peak 저지능</div>
+        <div style="font-size:17px;font-weight:700;font-family:var(--mono);color:var(--accent)">${fmt(by)} MeV·cm²/mg</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:5px;padding:9px 12px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-bottom:4px">CSDA Range (자유공간)</div>
+        <div style="font-size:17px;font-weight:700;font-family:var(--mono);color:var(--c-sn)">${fmt(rng)} μm</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:5px;padding:9px 12px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-bottom:4px">Range Straggling (±σ)</div>
+        <div style="font-size:17px;font-weight:700;font-family:var(--mono);color:var(--c-niel)">±${straggle.toFixed(2)} μm</div>
+        <div style="font-size:10px;color:var(--dim)">≈ 4% × Range (Janni 근사)</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:13px;color:var(--muted);padding:8px 12px;background:${E<0.01?'var(--bad-bg)':'var(--ok-bg)'};border:1px solid ${E<0.01?'var(--bad-bd)':'var(--ok-bd)'};border-radius:5px">
+      ${E<0.01
+        ? `<b style="color:var(--bad)">✕ 이온 정지</b> — 총 두께 ${totalT.toFixed(1)}μm 이내에서 이온이 정지합니다. Bragg Peak가 구조물 내부에 위치.`
+        : `<b style="color:var(--ok)">✓ 투과</b> — 이온이 총 두께 ${totalT.toFixed(1)}μm를 통과합니다. 잔여 에너지 ≈ ${E.toFixed(2)} MeV.`}
+    </div>`;
+
+  // Bragg 차트 — 스케일 동적 갱신
+  const xMax=Math.max(totalT*1.1, bx*1.2, 1);
+  const yMax=by*1.4||1;
   const el=document.getElementById('depthChart');
   if(!el) return;
-  if(depthChart_){depthChart_.data.datasets[0].data=seD;depthChart_.data.datasets[1].data=snD;depthChart_.data.datasets[2].data=[{x:bx,y:0},{x:bx,y:by*1.3}];depthChart_.update('none');}
-  else{
+  if(depthChart_){
+    depthChart_.data.datasets[0].data=seD;
+    depthChart_.data.datasets[1].data=snD;
+    depthChart_.data.datasets[2].data=[{x:bx,y:0},{x:bx,y:yMax}];
+    depthChart_.options.scales.x.max=xMax;
+    depthChart_.options.scales.y.max=yMax;
+    depthChart_.options.plugins.annotation={annotations:{
+      braggLabel:{type:'label',xValue:bx,yValue:yMax*0.95,content:[`Bragg Peak`,`${bx.toFixed(1)} μm`],font:{size:11,family:"'Space Mono'"},color:'#b86e00',backgroundColor:'rgba(184,110,0,.1)',borderRadius:3,padding:4},
+    }};
+    depthChart_.update('none');
+  } else{
     depthChart_=new Chart(el,{type:'line',data:{datasets:[
       {label:'Sₑ(x)',data:seD,parsing:false,borderColor:'#1a52c8',borderWidth:2,pointRadius:0,tension:.3,fill:true,backgroundColor:'rgba(26,82,200,.07)'},
       {label:'Sₙ(x)',data:snD,parsing:false,borderColor:'#0d8a5e',borderWidth:2,pointRadius:0,tension:.3,fill:false},
-      {label:'Bragg',data:[{x:bx,y:0},{x:bx,y:by*1.3}],parsing:false,borderColor:'rgba(184,110,0,.7)',borderWidth:1.5,borderDash:[4,4],pointRadius:0},
+      {label:'Bragg Peak',data:[{x:bx,y:0},{x:bx,y:yMax}],parsing:false,borderColor:'rgba(184,110,0,.8)',borderWidth:2,borderDash:[5,4],pointRadius:0},
     ]},options:{responsive:true,maintainAspectRatio:false,animation:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y)} MeV·cm²/mg`}}},
+      plugins:{legend:{display:true,labels:{font:{size:12,family:"'DM Sans'"},color:'#3a5070',boxWidth:14,boxHeight:3,usePointStyle:false}},
+        tooltip:{callbacks:{
+          title:ctx=>`깊이: ${ctx[0].parsed.x.toFixed(2)} μm`,
+          label:c=>c.datasetIndex<2?`${c.dataset.label}: ${fmt(c.parsed.y)} MeV·cm²/mg`:null
+        }}
+      },
       scales:{
-        x:{type:'linear',title:{display:true,text:'깊이 (μm)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
-        y:{type:'linear',title:{display:true,text:'저지능 (MeV·cm²/mg)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toPrecision(2)}}
+        x:{type:'linear',min:0,max:xMax,title:{display:true,text:'깊이 (μm)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
+        y:{type:'linear',min:0,max:yMax,title:{display:true,text:'저지능 (MeV·cm²/mg)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toPrecision(2)}}
       }}});
   }
 }

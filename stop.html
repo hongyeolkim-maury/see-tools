@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HELIAS Lab — STOP: 이온 저지능 / 사정거리 계산기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f9;--bg1:#ffffff;--bg2:#eef1f6;--bg3:#dde3ee;
+  --border:rgba(30,64,120,.12);--border2:rgba(30,64,120,.22);
+  --accent:#1a52c8;--accent2:#1a3e8f;--text:#0f1f3d;--muted:#3a5070;--dim:#8fa0b8;
+  --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+  --ok:#0d8a5e;--warn:#b86e00;--bad:#b52020;
+  --ok-bg:rgba(13,138,94,.09);--warn-bg:rgba(184,110,0,.09);--bad-bg:rgba(181,32,32,.09);
+  --ok-bd:rgba(13,138,94,.35);--warn-bd:rgba(184,110,0,.35);--bad-bd:rgba(181,32,32,.35);
+  --c-se:#1a52c8;--c-sn:#0d8a5e;--c-niel:#8b2fc9;--c-rng:#b86e00;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;min-height:100vh}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px 60px}
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 18px;border-bottom:1px solid var(--border2);margin-bottom:28px;flex-wrap:wrap;gap:10px}
+.logo-main{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:.12em}
+.logo-main span{color:var(--accent)}
+.logo-sub{font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.htags{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.htag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--border2);padding:4px 10px;border-radius:3px}
+.nav-btn{font-family:var(--mono);font-size:12px;padding:5px 12px;border-radius:4px;text-decoration:none;letter-spacing:.04em;transition:all .2s;border:1px solid var(--border2);color:var(--accent);background:transparent;white-space:nowrap}
+.nav-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+.live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto}
+.tab{font-family:var(--mono);font-size:13px;color:var(--muted);padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;user-select:none;white-space:nowrap}
+.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.panel{background:var(--bg1);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.ph{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.phdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.phtxt{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.pb{padding:16px}
+.g2{display:grid;grid-template-columns:330px 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.field{margin-bottom:14px}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+select,input[type=number]{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:4px;font-family:var(--sans);font-size:14px;outline:none}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231a3e8f'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;cursor:pointer}
+select:focus,input[type=number]:focus{border-color:var(--accent)}
+.srow{margin-bottom:12px}.srow:last-child{margin-bottom:0}
+.shdr{display:flex;justify-content:space-between;margin-bottom:5px}
+.sname{font-size:13px;color:var(--muted)}
+.sval{font-size:14px;font-weight:700;color:var(--text);font-family:var(--mono)}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:2px;background:#cdd5e0;border-radius:1px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid #fff;cursor:pointer;transition:transform .15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
+.mc{background:var(--bg1);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+.mcl{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;font-family:var(--mono)}
+.mcv{font-size:18px;font-weight:700;font-family:var(--mono);color:var(--text);line-height:1.2}
+.mcu{font-size:11px;color:var(--muted);margin-top:3px}
+.chart-wrap{position:relative;height:260px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.leg-dot{width:12px;height:4px;border-radius:2px;flex-shrink:0}
+.formula{background:var(--bg2);border-left:3px solid var(--accent);border-radius:0 4px 4px 0;padding:10px 14px;font-family:var(--mono);font-size:13px;color:var(--accent2);line-height:2;margin:8px 0}
+.rtbl{width:100%;border-collapse:collapse;font-size:13px}
+.rtbl th{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);letter-spacing:.06em;text-transform:uppercase}
+.rtbl td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text)}
+.rtbl tr:hover td{background:var(--bg2)}
+.rtbl tr:last-child td{border-bottom:none}
+.mnote{font-size:13px;color:var(--dim);border:1px solid var(--border);border-radius:4px;padding:9px 13px;line-height:1.6;margin-top:10px}
+.mnote strong{color:var(--muted)}
+.preset-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.preset-btn{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:3px;border:1px solid var(--border2);background:var(--bg2);color:var(--muted);cursor:pointer;transition:all .15s}
+.preset-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.validity{display:inline-flex;align-items:center;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:3px;margin-left:8px}
+.v-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)}
+.v-warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd)}
+footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.ft{font-family:var(--mono);font-size:12px;color:var(--dim)}
+@media(max-width:900px){.g2{grid-template-columns:1fr}.g3,.g4{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.g3,.g4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <div class="logo-main">HELIAS<span>/</span>STOP</div>
+    <div class="logo-sub">이온 저지능 · 사정거리 · NIEL 계산기 — Module 7</div>
+  </div>
+  <div class="htags">
+    <nav style="display:flex;gap:4px;margin-right:10px;flex-wrap:wrap">
+      <a href="index.html" class="nav-btn">SEE Tool</a>
+      <a href="niel-tid.html" class="nav-btn">NIEL·TID</a>
+      <a href="compare.html" class="nav-btn">Compare</a>
+      <a href="solar-rad.html" class="nav-btn">Solar-Rad</a>
+      <a href="stop.html" class="nav-btn active">STOP</a>
+    </nav>
+    <span class="htag">Bethe-Bloch</span>
+    <span class="htag">ZBL 포텐셜</span>
+    <div class="live"></div>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('calc',this)">저지능 계산</div>
+  <div class="tab" onclick="switchTab('depth',this)">깊이별 프로파일</div>
+  <div class="tab" onclick="switchTab('niel',this)">NIEL 계산</div>
+  <div class="tab" onclick="switchTab('theory',this)">이론 / 수식</div>
+</div>
+
+<!-- ══ TAB 1: 저지능 계산 ══ -->
+<div id="tab-calc" class="tab-panel active">
+<div class="g2">
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">입사 이온</div></div>
+      <div class="pb">
+        <div class="field">
+          <label>이온 종류</label>
+          <select id="ion" onchange="update()">
+            <optgroup label="경이온">
+              <option value="p">양성자 (H⁺, Z=1, A=1)</option>
+              <option value="he4">알파 입자 (He-4, Z=2, A=4)</option>
+            </optgroup>
+            <optgroup label="중이온 — 저Z">
+              <option value="c">탄소 (C, Z=6, A=12)</option>
+              <option value="n">질소 (N, Z=7, A=14)</option>
+              <option value="o">산소 (O, Z=8, A=16)</option>
+              <option value="ne">네온 (Ne, Z=10, A=20)</option>
+            </optgroup>
+            <optgroup label="중이온 — 중Z">
+              <option value="si_ion">규소 (Si, Z=14, A=28)</option>
+              <option value="ar">아르곤 (Ar, Z=18, A=40)</option>
+              <option value="fe" selected>철 (Fe, Z=26, A=56)</option>
+              <option value="ni">니켈 (Ni, Z=28, A=58)</option>
+            </optgroup>
+            <optgroup label="중이온 — 고Z">
+              <option value="kr">크립톤 (Kr, Z=36, A=84)</option>
+              <option value="xe">크세논 (Xe, Z=54, A=131)</option>
+              <option value="au">금 (Au, Z=79, A=197)</option>
+              <option value="bi">비스무트 (Bi, Z=83, A=209)</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="field">
+          <label>이온 에너지</label>
+          <div style="display:flex;gap:8px">
+            <input type="number" id="eVal" value="100" min="0.01" max="100000" step="0.1" oninput="syncSlider()" style="flex:1">
+            <select id="eUnit" onchange="update()" style="width:80px">
+              <option value="keV">keV</option>
+              <option value="MeV" selected>MeV</option>
+              <option value="GeV">GeV</option>
+            </select>
+          </div>
+          <input type="range" id="eSlider" min="-1" max="5" step="0.02" value="2" oninput="syncFromSlider()" style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:2px">
+            <span>0.1MeV</span><span>1MeV</span><span>10MeV</span><span>100MeV</span><span>100GeV</span>
+          </div>
+          <div class="preset-row">
+            <button class="preset-btn" onclick="setE(1,'MeV')">1 MeV</button>
+            <button class="preset-btn" onclick="setE(10,'MeV')">10 MeV</button>
+            <button class="preset-btn" onclick="setE(100,'MeV')">100 MeV</button>
+            <button class="preset-btn" onclick="setE(68,'MeV')">68 MeV (RIKEN)</button>
+            <button class="preset-btn" onclick="setE(1000,'MeV')">1 GeV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">표적 소재</div></div>
+      <div class="pb">
+        <div class="field">
+          <label>소재 선택</label>
+          <select id="target" onchange="onTargetChange()">
+            <optgroup label="원소 반도체">
+              <option value="si" selected>Si — 실리콘 (ρ=2.33)</option>
+              <option value="ge">Ge — 게르마늄 (ρ=5.32)</option>
+            </optgroup>
+            <optgroup label="화합물 반도체">
+              <option value="gaas">GaAs (ρ=5.32)</option>
+              <option value="gan">GaN (ρ=6.15)</option>
+              <option value="sic">SiC (ρ=3.21)</option>
+              <option value="inp">InP (ρ=4.79)</option>
+              <option value="aln">AlN (ρ=3.26)</option>
+            </optgroup>
+            <optgroup label="절연체 / 산화물">
+              <option value="sio2">SiO₂ (ρ=2.20)</option>
+              <option value="hfo2">HfO₂ (ρ=9.68)</option>
+            </optgroup>
+            <optgroup label="차폐 소재">
+              <option value="al">Al — 알루미늄 (ρ=2.70)</option>
+              <option value="cu_m">Cu — 구리 (ρ=8.96)</option>
+              <option value="pb_m">Pb — 납 (ρ=11.35)</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="field">
+          <label>밀도 ρ (g/cm³)</label>
+          <input type="number" id="density" value="2.33" min="0.01" max="25" step="0.01" oninput="update()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="g4" style="margin-bottom:0">
+      <div class="mc" style="border-top:3px solid var(--c-se)">
+        <div class="mcl">전자 저지능 Sₑ</div>
+        <div class="mcv" id="m-se">—</div>
+        <div class="mcu">MeV·cm²/mg</div>
+      </div>
+      <div class="mc" style="border-top:3px solid var(--c-sn)">
+        <div class="mcl">핵 저지능 Sₙ</div>
+        <div class="mcv" id="m-sn">—</div>
+        <div class="mcu">MeV·cm²/mg</div>
+      </div>
+      <div class="mc" style="border-top:3px solid var(--accent)">
+        <div class="mcl">총 저지능 = LET</div>
+        <div class="mcv" id="m-stot">—</div>
+        <div class="mcu">MeV·cm²/mg</div>
+      </div>
+      <div class="mc" style="border-top:3px solid var(--c-rng)">
+        <div class="mcl">CSDA 사정거리</div>
+        <div class="mcv" id="m-range">—</div>
+        <div class="mcu">μm</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph">
+        <div class="phdot"></div>
+        <div class="phtxt">에너지별 저지능 곡선</div>
+        <span class="validity v-ok" id="vbadge">유효 범위</span>
+      </div>
+      <div class="pb">
+        <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+        <div class="legend">
+          <div class="leg-item"><div class="leg-dot" style="background:var(--c-se)"></div>전자 저지능 Sₑ (Bethe-Bloch)</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--c-sn)"></div>핵 저지능 Sₙ (ZBL)</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#aaa"></div>현재 에너지</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">물리 해석</div></div>
+      <div class="pb" id="interp" style="font-size:14px;line-height:1.9;color:var(--text)">—</div>
+    </div>
+  </div>
+</div>
+<div class="mnote">
+  <strong>물리 모델:</strong> 전자 저지능(Sₑ): Bethe-Bloch 방정식 (Bethe 1930; Bloch 1933) + ZBL 유효전하 보정. 핵 저지능(Sₙ): Ziegler-Biersack-Littmark 보편 포텐셜 (1985). 사정거리: CSDA 수치 적분. <strong>저에너지 영역(≲0.3 MeV/u)에서는 전하 상태 변동 효과로 오차 증가.</strong> 저작권 없는 공개 물리 이론 기반 독립 구현.
+</div>
+</div>
+
+<!-- ══ TAB 2: 깊이 프로파일 ══ -->
+<div id="tab-depth" class="tab-panel">
+<div class="g2">
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">다층 소재 구조</div></div>
+      <div class="pb">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">최대 3층 설정 (예: 커버유리 / 절연막 / 반도체)</div>
+        <div id="layerInputs"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--c-sn)"></div><div class="phtxt">층별 에너지 소비</div></div>
+      <div class="pb" id="layerBars"></div>
+    </div>
+    <div class="g3" style="gap:10px">
+      <div class="mc"><div class="mcl">Bragg Peak 위치</div><div class="mcv" id="d-bragg">—</div><div class="mcu">μm</div></div>
+      <div class="mc"><div class="mcl">표면 LET</div><div class="mcv" id="d-surf">—</div><div class="mcu">MeV·cm²/mg</div></div>
+      <div class="mc"><div class="mcl">투과 여부</div><div class="mcv" id="d-pass" style="font-size:15px">—</div><div class="mcu">총 두께 기준</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><div class="phdot"></div><div class="phtxt">깊이별 저지능 — Bragg 곡선</div></div>
+    <div class="pb">
+      <div class="chart-wrap" style="height:320px"><canvas id="depthChart"></canvas></div>
+      <div class="legend" style="margin-top:10px">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-se)"></div>전자 저지능 Sₑ(x)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-sn)"></div>핵 저지능 Sₙ(x)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-rng);height:2px;border-top:2px dashed var(--c-rng)"></div>Bragg Peak</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="mnote">
+  <strong>Bragg 곡선:</strong> 이온이 소재 내에서 감속될수록 저지능이 증가하고, 정지 직전 최대값(Bragg Peak)에 달합니다. 다층 구조에서는 각 계면에서 이온 에너지를 갱신합니다. CSDA 근사 기반 수치 계산.
+</div>
+</div>
+
+<!-- ══ TAB 3: NIEL ══ -->
+<div id="tab-niel" class="tab-panel">
+<div class="g2">
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--c-niel)"></div><div class="phtxt">NIEL 계산 파라미터</div></div>
+      <div class="pb">
+        <div style="background:var(--bg2);border-radius:4px;padding:9px 12px;font-family:var(--mono);font-size:13px;color:var(--accent2);margin-bottom:14px" id="nielSummary">—</div>
+        <div class="srow">
+          <div class="shdr"><span class="sname">임무 기간 (년)</span><span class="sval" id="nDurV">3 yr</span></div>
+          <input type="range" id="nDur" min="0.5" max="15" step="0.5" value="3" oninput="updateNIEL()">
+        </div>
+        <div class="srow">
+          <div class="shdr"><span class="sname">궤도 플럭스 (log₁₀ p⁺/cm²/yr)</span><span class="sval" id="nFluxV">10¹⁰</span></div>
+          <input type="range" id="nFlux" min="8" max="13" step="0.5" value="10" oninput="updateNIEL()">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">계산 결과</div></div>
+      <div class="pb">
+        <div class="g2" style="gap:8px;margin-bottom:10px">
+          <div class="mc"><div class="mcl">핵 저지능 = NIEL</div><div class="mcv" id="nSn">—</div><div class="mcu">MeV·cm²/mg</div></div>
+          <div class="mc"><div class="mcl">전자 저지능 Sₑ</div><div class="mcv" id="nSe">—</div><div class="mcu">MeV·cm²/mg</div></div>
+        </div>
+        <div class="g2" style="gap:8px;margin-bottom:10px">
+          <div class="mc"><div class="mcl">임무 TNID</div><div class="mcv" id="nTnid">—</div><div class="mcu">MeV/g</div></div>
+          <div class="mc"><div class="mcl">Si 대비 NIEL 비</div><div class="mcv" id="nRatio">—</div><div class="mcu">소재/Si</div></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Sₙ : Sₑ 비율</div>
+        <div style="display:flex;height:12px;border-radius:4px;overflow:hidden;gap:2px" id="nFracBar"></div>
+        <div class="legend" style="margin-top:6px">
+          <div class="leg-item"><div class="leg-dot" style="background:var(--c-niel);height:8px"></div>Sₙ=NIEL (격자 변위)</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--c-se);height:8px"></div>Sₑ (전리/TID 기여)</div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:14px;line-height:1.8;color:var(--text)" id="nielInterp">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--c-niel)"></div><div class="phtxt">에너지별 NIEL 곡선</div></div>
+    <div class="pb">
+      <div class="chart-wrap" style="height:360px"><canvas id="nielChart"></canvas></div>
+      <div class="legend" style="margin-top:10px">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-niel)"></div>NIEL = Sₙ (핵 저지능)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-se);opacity:.5"></div>Sₑ (전자 저지능, 참고)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-rng)"></div>현재 에너지</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="mnote">
+  <strong>NIEL 근거:</strong> 핵 저지능 Sₙ(ZBL 포텐셜 기반)이 NIEL에 해당합니다. Si 대비 NIEL 비율은 Jun et al. (2003) IEEE TNS 50(6):1919 기준값 사용. GaN·SiC는 에너지 의존성이 강하므로 정밀 계산 시 sr-niel.org 활용 권장.
+</div>
+</div>
+
+<!-- ══ TAB 4: 이론 ══ -->
+<div id="tab-theory" class="tab-panel">
+<div class="g2">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">전자 저지능 — Bethe-Bloch 방정식</div></div>
+      <div class="pb">
+        <div class="formula">
+          Sₑ = (K·Z²_eff·Z₂)/(A₂·β²) · [½·ln(2mₑc²β²γ²T_max/I²) − β²]<br><br>
+          K = 4πNₐr²ₑmₑc² = 0.307075 MeV·cm²/mol<br>
+          β = v/c, γ = 1/√(1−β²)<br>
+          Z_eff = Z₁·[1 − exp(−125β/Z₁^(2/3))]  (Barkas-Andersen)<br>
+          I ≈ 13.5·Z₂ eV  (Bloch 1933 근사)
+        </div>
+        <p style="font-size:14px;color:var(--text);line-height:1.8">고에너지(수 MeV/u 이상) 영역에서 정확. 우주 방사선의 고에너지 양성자·중이온에 적합. 저에너지에서는 이온 전하 상태 변동으로 오차 발생.</p>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted)">참고: Bethe (1930) Ann. Phys.; Bloch (1933) Z. Phys.; Ziegler, Biersack, Littmark (1985)</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--c-sn)"></div><div class="phtxt">핵 저지능 — ZBL 보편 포텐셜</div></div>
+      <div class="pb">
+        <div class="formula">
+          ε = 32.536·M₂·E / [Z₁Z₂(M₁+M₂)(Z₁^0.23+Z₂^0.23)]<br><br>
+          sₙ(ε) = ln(1+1.1383ε) / [2(ε+0.01321ε^0.21226+0.19593√ε)]  (ε≤30)<br>
+          sₙ(ε) = ln(ε) / (2ε)  (ε&gt;30)<br><br>
+          Sₙ [MeV·cm²/mg] = 8.462×10⁻¹⁵·Z₁Z₂·A₁ / [(A₁+A₂)(Z₁^0.23+Z₂^0.23)] · sₙ(ε) · N/ρ
+        </div>
+        <p style="font-size:14px;color:var(--text);line-height:1.8">저에너지 영역에서 지배적. NIEL(격자 변위 손상)의 핵심 구성 요소. Sₙ = NIEL.</p>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted)">참고: Ziegler, Biersack, Littmark (1985) "The Stopping and Range of Ions in Matter"</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--c-rng)"></div><div class="phtxt">CSDA 사정거리</div></div>
+      <div class="pb">
+        <div class="formula">
+          R(E₀) = ∫₀^E₀ dE / [Sₑ(E)+Sₙ(E)]  [g/cm²]<br><br>
+          R[μm] = R[g/cm²] / ρ[g/cm³] × 10⁴
+        </div>
+        <p style="font-size:14px;color:var(--text);line-height:1.8">수치 적분(500 스텝). 실제 이온은 산란으로 인해 CSDA보다 짧은 투사 사정거리(Projected Range, Rp)를 가집니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">소재별 물성 파라미터</div></div>
+    <div class="pb" style="padding:0">
+      <table class="rtbl">
+        <thead><tr><th>소재</th><th>Z_eff</th><th>A_eff</th><th>ρ (g/cm³)</th><th>I (eV)</th><th>NIEL 비 (vs Si)</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>Si</td><td>14</td><td>28.09</td><td>2.33</td><td>173</td><td>1.00 (기준)</td><td>CMOS 표준</td></tr>
+          <tr><td>Ge</td><td>32</td><td>72.63</td><td>5.32</td><td>350</td><td>2.69</td><td>SiGe HBT</td></tr>
+          <tr><td>GaAs</td><td>32</td><td>72.32</td><td>5.32</td><td>384</td><td>1.99</td><td>RF/광소자</td></tr>
+          <tr><td>GaN</td><td>19.5</td><td>41.87</td><td>6.15</td><td>~210</td><td>0.33 †</td><td>전력/RF HEMT</td></tr>
+          <tr><td>SiC</td><td>14</td><td>20.04</td><td>3.21</td><td>~150</td><td>0.51 †</td><td>전력 MOSFET</td></tr>
+          <tr><td>InP</td><td>32</td><td>72.90</td><td>4.79</td><td>~380</td><td>3.33</td><td>광통신 HBT</td></tr>
+          <tr><td>SiO₂</td><td>10</td><td>20.03</td><td>2.20</td><td>139</td><td>~0.8</td><td>게이트 절연막</td></tr>
+          <tr><td>Al</td><td>13</td><td>26.98</td><td>2.70</td><td>166</td><td>—</td><td>차폐 기준 소재</td></tr>
+        </tbody>
+      </table>
+      <div class="mnote" style="margin:10px 14px 14px">
+        <strong>†</strong> GaN·SiC NIEL 비율은 에너지·입자 종류에 강하게 의존. 출처: Jun et al. (2003) IEEE TNS 50(6):1919. 평균 이온화 에너지 I: ICRU Report 49 (1993).
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<footer>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v1.0 — 저작권 없는 공개 물리 이론 독립 구현</span>
+  <span class="ft">Bethe-Bloch (1930/1933) · ZBL (Ziegler 1985) · LSS (1963) · Jun+ (2003) IEEE TNS</span>
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── 데이터베이스 ──
+const IONS = {
+  p:     {name:'양성자(H⁺)',  Z:1,  A:1  },
+  he4:   {name:'알파(He-4)', Z:2,  A:4  },
+  c:     {name:'탄소(C)',     Z:6,  A:12 },
+  n:     {name:'질소(N)',     Z:7,  A:14 },
+  o:     {name:'산소(O)',     Z:8,  A:16 },
+  ne:    {name:'네온(Ne)',    Z:10, A:20 },
+  si_ion:{name:'규소(Si)',    Z:14, A:28 },
+  ar:    {name:'아르곤(Ar)', Z:18, A:40 },
+  fe:    {name:'철(Fe)',      Z:26, A:56 },
+  ni:    {name:'니켈(Ni)',    Z:28, A:58 },
+  kr:    {name:'크립톤(Kr)', Z:36, A:84 },
+  xe:    {name:'크세논(Xe)', Z:54, A:131},
+  au:    {name:'금(Au)',      Z:79, A:197},
+  bi:    {name:'비스무트(Bi)',Z:83, A:209},
+};
+const TARGETS = {
+  si:    {name:'Si',   Z:14,   A:28.09, rho:2.33,  I:173, nr:1.00},
+  ge:    {name:'Ge',   Z:32,   A:72.63, rho:5.32,  I:350, nr:2.69},
+  gaas:  {name:'GaAs', Z:32,   A:72.32, rho:5.32,  I:384, nr:1.99},
+  gan:   {name:'GaN',  Z:19.5, A:41.87, rho:6.15,  I:210, nr:0.33},
+  sic:   {name:'SiC',  Z:14,   A:20.04, rho:3.21,  I:150, nr:0.51},
+  inp:   {name:'InP',  Z:32,   A:72.90, rho:4.79,  I:380, nr:3.33},
+  aln:   {name:'AlN',  Z:10,   A:20.49, rho:3.26,  I:130, nr:0.40},
+  sio2:  {name:'SiO₂', Z:10,   A:20.03, rho:2.20,  I:139, nr:0.80},
+  hfo2:  {name:'HfO₂', Z:28.7, A:59.22, rho:9.68,  I:340, nr:1.50},
+  al:    {name:'Al',   Z:13,   A:26.98, rho:2.70,  I:166, nr:0.90},
+  cu_m:  {name:'Cu',   Z:29,   A:63.55, rho:8.96,  I:322, nr:1.80},
+  pb_m:  {name:'Pb',   Z:82,   A:207.2, rho:11.35, I:823, nr:4.50},
+};
+
+// ── 물리 엔진 ──
+function beta(E, A){ const mp=931.494; const Et=E+A*mp; return Math.sqrt(1-(A*mp/Et)**2); }
+function Zeff(Z1,b){ return Z1*(1-Math.exp(-125*b/Math.pow(Z1,2/3))); }
+
+function Se(E, Z1, A1, Z2, A2, I_eV, rho){
+  const K=0.307075, me=0.511, mp=931.494;
+  const b=beta(E,A1); if(b<1e-6) return 0.001;
+  const b2=b*b, g=1/Math.sqrt(1-b2);
+  const ze=Zeff(Z1,b);
+  const I=I_eV*1e-6;
+  const Tmax=(2*me*b2*g*g)/(1+2*g*me/(A1*mp)+(me/(A1*mp))**2);
+  const arg=2*me*b2*g*g*Tmax/(I*I);
+  if(arg<=1) return 0.01;
+  return Math.max(0.001, K*ze*ze*Z2/(A2*b2)*(0.5*Math.log(arg)-b2)/rho );
+}
+
+function snr(e){
+  if(e<=30) return Math.log(1+1.1383*e)/(2*(e+0.01321*Math.pow(e,0.21226)+0.19593*Math.sqrt(e)));
+  return Math.log(e)/(2*e);
+}
+function Sn(E, Z1, A1, Z2, A2, rho){
+  const e=32.536*A2*E/(Z1*Z2*(A1+A2)*(Math.pow(Z1,.23)+Math.pow(Z2,.23)));
+  const sn0=8.462e-15*Z1*Z2*A1/((A1+A2)*(Math.pow(Z1,.23)+Math.pow(Z2,.23)));
+  const N=rho*6.022e23/(A2*1e-3);
+  return Math.max(0, sn0*snr(e)*N*A2/(rho*1e3));
+}
+
+function Range(E0, Z1, A1, Z2, A2, I, rho){
+  let E=E0, R=0; const steps=500, dE=E0/steps;
+  for(let i=0;i<steps;i++){
+    if(E<1e-4) break;
+    const st=Se(E,Z1,A1,Z2,A2,I,rho)+Sn(E,Z1,A1,Z2,A2,rho);
+    if(st<1e-9) break;
+    R+=dE/(st*rho); E-=dE;
+  }
+  return R*1e4; // μm
+}
+
+function toMeV(v,u){ return u==='keV'?v/1e3:u==='GeV'?v*1e3:v; }
+function fmt(v,d=3){
+  if(!v||v===0) return '0';
+  if(v>=0.01&&v<1e4) return v.toPrecision(d);
+  const e=Math.floor(Math.log10(Math.abs(v)));
+  const sup={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+  return (v/10**e).toFixed(2)+'×10'+String(e).split('').map(c=>sup[c]||c).join('');
+}
+function supE(e){const s={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};return String(e).split('').map(c=>s[c]||c).join('')}
+
+// ── 탭 전환 ──
+function switchTab(id,el){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active'); el.classList.add('active');
+  if(id==='depth') updateDepth();
+  if(id==='niel') updateNIEL();
+}
+
+// ── 소재 변경 ──
+document.getElementById('target').addEventListener('change', function(){ onTargetChange(); });
+function onTargetChange(){
+  const t=TARGETS[document.getElementById('target').value];
+  if(t) document.getElementById('density').value=t.rho;
+  update();
+}
+
+// ── 에너지 슬라이더 ──
+function syncSlider(){
+  const v=parseFloat(document.getElementById('eVal').value)||1;
+  const u=document.getElementById('eUnit').value;
+  const E=toMeV(v,u);
+  document.getElementById('eSlider').value=Math.max(-1,Math.min(5,Math.log10(Math.max(E,0.01))));
+  update();
+}
+function syncFromSlider(){
+  const log=parseFloat(document.getElementById('eSlider').value);
+  document.getElementById('eVal').value=Math.pow(10,log).toPrecision(3);
+  document.getElementById('eUnit').value='MeV';
+  update();
+}
+function setE(v,u){ document.getElementById('eVal').value=v; document.getElementById('eUnit').value=u; syncSlider(); }
+
+// ── 차트 인스턴스 ──
+let mainChart=null, depthChart_=null, nielChart_=null;
+
+// ══ 메인 계산 ══
+function update(){
+  const ionKey=document.getElementById('ion').value;
+  const tarKey=document.getElementById('target').value;
+  const ion=IONS[ionKey], tar=TARGETS[tarKey]||TARGETS.si;
+  const rho=parseFloat(document.getElementById('density').value)||tar.rho;
+  const Emev=toMeV(parseFloat(document.getElementById('eVal').value)||1, document.getElementById('eUnit').value);
+
+  const se=Se(Emev,ion.Z,ion.A,tar.Z,tar.A,tar.I,rho);
+  const sn=Sn(Emev,ion.Z,ion.A,tar.Z,tar.A,rho);
+  const st=se+sn;
+  const rng=Range(Emev,ion.Z,ion.A,tar.Z,tar.A,tar.I,rho);
+
+  document.getElementById('m-se').textContent=fmt(se);
+  document.getElementById('m-sn').textContent=fmt(sn);
+  document.getElementById('m-stot').textContent=fmt(st);
+  document.getElementById('m-range').textContent=fmt(rng);
+
+  const epu=Emev/ion.A;
+  const bdg=document.getElementById('vbadge');
+  if(epu<0.1){bdg.textContent='⚠️ 저에너지 — 오차 증가'; bdg.className='validity v-warn';}
+  else{bdg.textContent='Bethe-Bloch 유효 범위'; bdg.className='validity v-ok';}
+
+  const snPct=(sn/st*100).toFixed(0);
+  const regime=epu<0.1?'핵 저지 지배 (저에너지)':epu<2?'전이 영역 (Bragg Peak 부근)':epu<100?'전자 저지 지배 (Bethe-Bloch)':'상대론적 영역';
+  const seeNote=st>20?'→ 대부분 소자에서 SEE 유발 가능 (고LET)':st>3?'→ 민감 소자에서 SEE 발생 가능':st>0.5?'→ 중간 감도 소자 주의 영역':'→ 저LET, 강화 소자는 안전';
+  document.getElementById('interp').innerHTML=
+    `<b>에너지 영역:</b> ${regime} (${epu.toFixed(2)} MeV/u)<br>
+     <b>Sₑ ${fmt(se)} MeV·cm²/mg</b> (전체 ${100-snPct}%) → TID(전리 손상) 기여<br>
+     <b>Sₙ ${fmt(sn)} MeV·cm²/mg</b> (전체 ${snPct}%) → NIEL(격자 변위) 기여<br>
+     <b>LET = ${fmt(st)} MeV·cm²/mg</b>  ${seeNote}<br>
+     <b>CSDA 사정거리:</b> ${fmt(rng)} μm  (ρ = ${rho} g/cm³)`;
+
+  // 에너지 곡선
+  const Es=[], seD=[], snD=[];
+  for(let log=-1;log<=5;log+=0.07){ const E=10**log; Es.push(E); seD.push({x:E,y:Se(E,ion.Z,ion.A,tar.Z,tar.A,tar.I,rho)}); snD.push({x:E,y:Sn(E,ion.Z,ion.A,tar.Z,tar.A,rho)}); }
+  const curL=[{x:Emev,y:1e-4},{x:Emev,y:Math.max(se,sn)*3}];
+
+  const el=document.getElementById('mainChart');
+  if(mainChart){ mainChart.data.datasets[0].data=seD; mainChart.data.datasets[1].data=snD; mainChart.data.datasets[2].data=curL; mainChart.update('none'); }
+  else{
+    mainChart=new Chart(el,{type:'line',data:{datasets:[
+      {label:'Sₑ',data:seD,parsing:false,borderColor:'#1a52c8',borderWidth:2,pointRadius:0,tension:.2,fill:false},
+      {label:'Sₙ',data:snD,parsing:false,borderColor:'#0d8a5e',borderWidth:2,pointRadius:0,tension:.2,fill:false},
+      {label:'현재',data:curL,parsing:false,borderColor:'rgba(100,100,100,.4)',borderWidth:1.5,borderDash:[4,4],pointRadius:0},
+    ]},options:{responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y)} MeV·cm²/mg`}}},
+      scales:{
+        x:{type:'logarithmic',title:{display:true,text:`에너지 (MeV) — ${ion.name}`,color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
+        y:{type:'logarithmic',title:{display:true,text:'저지능 (MeV·cm²/mg)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toPrecision(2)}}
+      }}});
+  }
+
+  // 다른 탭 요약
+  document.getElementById('nielSummary').textContent=`${ion.name} @ ${document.getElementById('eVal').value} ${document.getElementById('eUnit').value}  |  표적: ${tar.name}  ρ=${rho}`;
+}
+
+// ══ 깊이 프로파일 ══
+function buildLayerInputs(){
+  const defaults=[{mat:'sio2',thick:0.5},{mat:'si',thick:10},{mat:'si',thick:200}];
+  const labels=['Layer 1 (표면층)','Layer 2 (중간층)','Layer 3 (기판)'];
+  const colors=['rgba(26,82,200,.08)','rgba(13,138,94,.08)','rgba(184,110,0,.08)'];
+  document.getElementById('layerInputs').innerHTML=defaults.map((d,i)=>`
+    <div style="background:${colors[i]};border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:8px">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase">${labels[i]}</div>
+      <div style="display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center">
+        <select id="lm${i}" onchange="updateDepth()" style="font-size:13px;background:var(--bg1);border:1px solid var(--border2);color:var(--text);padding:5px 8px;border-radius:4px;outline:none;cursor:pointer">
+          ${Object.entries(TARGETS).map(([k,v])=>`<option value="${k}" ${k===d.mat?'selected':''}>${v.name} (ρ=${v.rho})</option>`).join('')}
+        </select>
+        <div style="display:flex;align-items:center;gap:5px">
+          <input type="number" id="lt${i}" value="${d.thick}" min="0" step="0.1" oninput="updateDepth()" style="width:100%;font-size:13px;background:var(--bg1);border:1px solid var(--border2);color:var(--text);padding:5px;border-radius:4px;outline:none">
+          <span style="font-size:11px;color:var(--muted);flex-shrink:0">μm</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updateDepth(){
+  const ionKey=document.getElementById('ion').value;
+  const ion=IONS[ionKey];
+  const Emev=toMeV(parseFloat(document.getElementById('eVal').value)||1, document.getElementById('eUnit').value);
+  const layers=[0,1,2].map(i=>({tar:TARGETS[document.getElementById(`lm${i}`)?.value||'si']||TARGETS.si, thick:parseFloat(document.getElementById(`lt${i}`)?.value)||0})).filter(l=>l.thick>0);
+  const totalThick=layers.reduce((s,l)=>s+l.thick,0);
+
+  const xD=[], seD=[], snD=[]; let E=Emev, xc=0, bx=0, by=0;
+  const steps=300;
+  for(const layer of layers){
+    const dx=layer.thick/steps;
+    for(let i=0;i<steps;i++){
+      if(E<0.001) break;
+      const se=Se(E,ion.Z,ion.A,layer.tar.Z,layer.tar.A,layer.tar.I,layer.tar.rho);
+      const sn=Sn(E,ion.Z,ion.A,layer.tar.Z,layer.tar.A,layer.tar.rho);
+      xD.push(xc); seD.push({x:xc,y:se}); snD.push({x:xc,y:sn});
+      if(se+sn>by){by=se+sn;bx=xc;}
+      E=Math.max(0,E-(se+sn)*layer.tar.rho*dx*0.1);
+      xc+=dx;
+    }
+  }
+
+  document.getElementById('d-bragg').textContent=bx.toFixed(1);
+  document.getElementById('d-surf').textContent=seD[0]?fmt(seD[0].y+snD[0].y):'—';
+  const passes=E>0.01;
+  const dp=document.getElementById('d-pass');
+  dp.textContent=passes?'✓ 투과':'✕ 정지'; dp.style.color=passes?'var(--ok)':'var(--bad)';
+
+  // 층별 에너지 막대
+  let Etmp=Emev;
+  document.getElementById('layerBars').innerHTML=layers.map((layer,i)=>{
+    const Ein=Etmp;
+    const se=Se(Etmp,ion.Z,ion.A,layer.tar.Z,layer.tar.A,layer.tar.I,layer.tar.rho);
+    const sn=Sn(Etmp,ion.Z,ion.A,layer.tar.Z,layer.tar.A,layer.tar.rho);
+    const dE=Math.min(Etmp,(se+sn)*layer.tar.rho*layer.thick*0.1);
+    Etmp=Math.max(0,Etmp-dE);
+    const pct=Ein>0?Math.min(100,dE/Ein*100):0;
+    const cols=['var(--c-se)','var(--c-sn)','var(--c-rng)'];
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-family:var(--mono);margin-bottom:4px">
+        <span>${layer.tar.name} (${layer.thick}μm)</span><span>${Ein.toFixed(1)} → ${Etmp.toFixed(1)} MeV</span></div>
+      <div style="background:var(--bg3);height:10px;border-radius:3px;overflow:hidden">
+        <div style="width:${pct.toFixed(0)}%;height:100%;background:${cols[i]};border-radius:3px;transition:width .4s"></div></div>
+      <div style="font-size:11px;color:var(--dim);text-align:right;margin-top:2px">${pct.toFixed(0)}% 에너지 소비</div>
+    </div>`;
+  }).join('');
+
+  // Bragg 차트
+  const el=document.getElementById('depthChart');
+  if(!el) return;
+  if(depthChart_){depthChart_.data.datasets[0].data=seD;depthChart_.data.datasets[1].data=snD;depthChart_.data.datasets[2].data=[{x:bx,y:0},{x:bx,y:by*1.3}];depthChart_.update('none');}
+  else{
+    depthChart_=new Chart(el,{type:'line',data:{datasets:[
+      {label:'Sₑ(x)',data:seD,parsing:false,borderColor:'#1a52c8',borderWidth:2,pointRadius:0,tension:.3,fill:true,backgroundColor:'rgba(26,82,200,.07)'},
+      {label:'Sₙ(x)',data:snD,parsing:false,borderColor:'#0d8a5e',borderWidth:2,pointRadius:0,tension:.3,fill:false},
+      {label:'Bragg',data:[{x:bx,y:0},{x:bx,y:by*1.3}],parsing:false,borderColor:'rgba(184,110,0,.7)',borderWidth:1.5,borderDash:[4,4],pointRadius:0},
+    ]},options:{responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y)} MeV·cm²/mg`}}},
+      scales:{
+        x:{type:'linear',title:{display:true,text:'깊이 (μm)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
+        y:{type:'linear',title:{display:true,text:'저지능 (MeV·cm²/mg)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toPrecision(2)}}
+      }}});
+  }
+}
+
+// ══ NIEL ══
+function updateNIEL(){
+  const ionKey=document.getElementById('ion').value;
+  const tarKey=document.getElementById('target').value;
+  const ion=IONS[ionKey], tar=TARGETS[tarKey]||TARGETS.si;
+  const rho=parseFloat(document.getElementById('density').value)||tar.rho;
+  const Emev=toMeV(parseFloat(document.getElementById('eVal').value)||1, document.getElementById('eUnit').value);
+  const dur=parseFloat(document.getElementById('nDur').value);
+  const logFlux=parseFloat(document.getElementById('nFlux').value);
+  const flux=10**logFlux;
+
+  document.getElementById('nDurV').textContent=dur.toFixed(1)+' yr';
+  document.getElementById('nFluxV').textContent='10'+supE(Math.round(logFlux));
+
+  const se=Se(Emev,ion.Z,ion.A,tar.Z,tar.A,tar.I,rho);
+  const sn=Sn(Emev,ion.Z,ion.A,tar.Z,tar.A,rho);
+  const tnid=sn*flux*dur;
+  document.getElementById('nSe').textContent=fmt(se);
+  document.getElementById('nSn').textContent=fmt(sn);
+  document.getElementById('nTnid').textContent=fmt(tnid);
+  document.getElementById('nRatio').textContent=(tar.nr||1).toFixed(2)+'×';
+
+  const st=se+sn, snp=st>0?sn/st*100:0, sep=100-snp;
+  document.getElementById('nFracBar').innerHTML=
+    `<div style="width:${snp.toFixed(0)}%;background:var(--c-niel);border-radius:4px 0 0 4px"></div>
+     <div style="width:${sep.toFixed(0)}%;background:var(--c-se);border-radius:0 4px 4px 0"></div>`;
+
+  const warn=(tarKey==='gan'||tarKey==='sic')?'<br>⚠️ '+tar.name+' NIEL 비율은 에너지 의존성이 강합니다. 정밀 계산: sr-niel.org':'';
+  document.getElementById('nielInterp').innerHTML=
+    `<b>${tar.name}</b> 소재, <b>${ion.name}</b> @ ${document.getElementById('eVal').value} ${document.getElementById('eUnit').value}<br>
+     NIEL = Sₙ = <b>${fmt(sn)} MeV·cm²/mg</b>  (Si 대비 <b>${(tar.nr||1).toFixed(2)}배</b>)<br>
+     임무 ${dur}yr × 10^${logFlux} p⁺/cm²/yr → <b>TNID = ${fmt(tnid)} MeV/g</b>${warn}`;
+
+  // NIEL 차트
+  const Es=[], nielD=[], seD2=[];
+  for(let log=-1;log<=5;log+=0.07){const E=10**log;Es.push(E);nielD.push({x:E,y:Sn(E,ion.Z,ion.A,tar.Z,tar.A,rho)});seD2.push({x:E,y:Se(E,ion.Z,ion.A,tar.Z,tar.A,tar.I,rho)});}
+  const curL2=[{x:Emev,y:1e-6},{x:Emev,y:Math.max(sn,se)*3}];
+  const el=document.getElementById('nielChart');
+  if(!el) return;
+  if(nielChart_){nielChart_.data.datasets[0].data=nielD;nielChart_.data.datasets[1].data=seD2;nielChart_.data.datasets[2].data=curL2;nielChart_.update('none');}
+  else{
+    nielChart_=new Chart(el,{type:'line',data:{datasets:[
+      {label:'NIEL=Sₙ',data:nielD,parsing:false,borderColor:'#8b2fc9',borderWidth:2.5,pointRadius:0,tension:.2,fill:true,backgroundColor:'rgba(139,47,201,.07)'},
+      {label:'Sₑ',data:seD2,parsing:false,borderColor:'rgba(26,82,200,.4)',borderWidth:1.5,pointRadius:0,tension:.2,fill:false,borderDash:[3,3]},
+      {label:'현재',data:curL2,parsing:false,borderColor:'rgba(184,110,0,.6)',borderWidth:1.5,borderDash:[4,4],pointRadius:0},
+    ]},options:{responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y)} MeV·cm²/mg`}}},
+      scales:{
+        x:{type:'logarithmic',title:{display:true,text:`에너지 (MeV) — ${ion.name}`,color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
+        y:{type:'logarithmic',title:{display:true,text:'NIEL (MeV·cm²/mg)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toPrecision(2)}}
+      }}});
+  }
+}
+
+buildLayerInputs();
+update();
+</script>
+</body>
+</html>

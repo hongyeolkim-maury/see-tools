@@ -3,126 +3,139 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HELIAS Lab — Tandem Solar Cell Radiation Assessment</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>HELIAS Lab — Solar-Rad v2: 탠덤 태양전지 우주방사선 평가</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f4f6f9;--bg1:#ffffff;--bg2:#eef1f6;--bg3:#dde3ee;
+  --bg:#f4f6f9;--bg1:#fff;--bg2:#eef1f6;--bg3:#dde3ee;
   --border:rgba(30,64,120,.12);--border2:rgba(30,64,120,.22);
   --accent:#1a52c8;--accent2:#1a3e8f;--text:#0f1f3d;--muted:#3a5070;--dim:#8fa0b8;
   --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
   --ok:#0d8a5e;--warn:#b86e00;--bad:#b52020;
   --ok-bg:rgba(13,138,94,.09);--warn-bg:rgba(184,110,0,.09);--bad-bg:rgba(181,32,32,.09);
   --ok-bd:rgba(13,138,94,.35);--warn-bd:rgba(184,110,0,.35);--bad-bd:rgba(181,32,32,.35);
-  --perv:#7c3aed;--cigs:#0d8a5e;--si:#b86e00;
-  --perv-a:rgba(124,58,237,.1);--cigs-a:rgba(13,138,94,.1);--si-a:rgba(184,110,0,.1);
+  --perv:#7c3aed;--cigs:#0d8a5e;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;min-height:100vh}
-.wrap{max-width:1200px;margin:0 auto;padding:0 20px 60px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px 60px}
 
-header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 18px;border-bottom:1px solid var(--border2);margin-bottom:28px}
-.logo-main{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:.12em}
+/* ── header ── */
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 16px;border-bottom:1px solid var(--border2);margin-bottom:24px;flex-wrap:wrap;gap:10px}
+.logo-main{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.1em}
 .logo-main span{color:var(--accent)}
-.logo-sub{font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
-.htags{display:flex;align-items:center;gap:6px}
-.htag{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--border2);padding:4px 10px;border-radius:3px;letter-spacing:.04em}
-.nav-btn{font-family:var(--mono);font-size:13px;padding:5px 13px;border-radius:4px;text-decoration:none;letter-spacing:.04em;transition:all .2s;border:1px solid var(--border2);color:var(--accent);background:transparent}
+.logo-sub{font-size:12px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:2px}
+.htags{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.nav-btn{font-family:var(--mono);font-size:12px;padding:4px 11px;border-radius:4px;text-decoration:none;letter-spacing:.04em;transition:all .2s;border:1px solid var(--border2);color:var(--accent);background:transparent;white-space:nowrap}
 .nav-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-.nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+.nav-btn.active{background:var(--accent);color:#fff;font-weight:700}
+.htag{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--border2);padding:3px 9px;border-radius:3px}
 .live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* tabs */
-.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px}
-.tab{font-family:var(--mono);font-size:13px;color:var(--muted);padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.06em;text-transform:uppercase;transition:color .2s,border-color .2s;user-select:none}
+/* ── tabs ── */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:22px;overflow-x:auto}
+.tab{font-family:var(--mono);font-size:12px;color:var(--muted);padding:9px 16px;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;user-select:none;white-space:nowrap}
 .tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .tab-panel{display:none}.tab-panel.active{display:block}
 
-/* panels */
-.panel{background:var(--bg1);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
-.ph{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+/* ── panels ── */
+.panel{background:var(--bg1);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.ph{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .phdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.phtxt{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-.pb{padding:16px}
+.phtxt{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.pb{padding:14px}
 
-/* grid */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+/* ── grids ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
 
-/* controls */
-.field{margin-bottom:14px}.field:last-child{margin-bottom:0}
-.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;letter-spacing:.03em}
-select,input[type=number]{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:8px 10px;border-radius:4px;font-family:var(--sans);font-size:14px;outline:none}
-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231a3e8f'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;cursor:pointer}
-select:focus,input[type=number]:focus{border-color:var(--accent);outline:none}
-.srow{margin-bottom:12px}.srow:last-child{margin-bottom:0}
-.shdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
-.sname{font-size:13px;color:var(--muted)}
-.sval{font-size:14px;font-weight:700;color:var(--text);font-family:var(--mono)}
-input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:2px;background:#cdd5e0;border-radius:1px;outline:none;cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid #fff;cursor:pointer;transition:transform .15s}
-input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
+/* ── controls ── */
+.field{margin-bottom:12px}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+select,input[type=number],input[type=text]{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 9px;border-radius:4px;font-family:var(--sans);font-size:13px;outline:none}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231a3e8f'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;cursor:pointer}
+select:focus,input:focus{border-color:var(--accent)}
+.srow{margin-bottom:11px}
+.shdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.sname{font-size:12px;color:var(--muted)}
+.sval{font-size:13px;font-weight:700;color:var(--text);font-family:var(--mono)}
+input[type=range]{width:100%;-webkit-appearance:none;height:2px;background:#cdd5e0;border-radius:1px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);border:2px solid #fff;cursor:pointer;transition:transform .15s}
 
-/* metric cards */
-.mc{background:var(--bg1);border:1px solid var(--border);border-radius:6px;padding:13px 15px}
-.mcl{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;font-family:var(--mono)}
-.mcv{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--text);line-height:1}
-.mcu{font-size:12px;color:var(--muted);margin-top:3px}
+/* ── metrics ── */
+.mc{background:var(--bg1);border:1px solid var(--border);border-radius:6px;padding:11px 13px}
+.mcl{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;font-family:var(--mono)}
+.mcv{font-size:17px;font-weight:700;font-family:var(--mono);color:var(--text)}
+.mcu{font-size:11px;color:var(--muted);margin-top:2px}
 
-/* layer stack vis */
-.stack{display:flex;flex-direction:column;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
-.layer{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.15)}
-.layer:last-child{border-bottom:none}
-.layer-name{font-size:13px;font-weight:500}
-.layer-sub{font-size:11px;opacity:.75;margin-top:1px;font-family:var(--mono)}
-.layer-val{font-family:var(--mono);font-size:13px;font-weight:700;text-align:right}
-.layer-bar{height:4px;border-radius:2px;margin-top:5px;transition:width .5s}
+/* ── verdict ── */
+.vring{width:64px;height:64px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px;font-family:var(--mono);font-weight:700;transition:all .4s}
+.vtitle{font-size:20px;font-weight:500;margin-bottom:4px}
+.vsub{font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;margin:0 auto 12px}
+.vdiv{border-top:1px solid var(--border);padding-top:12px;text-align:left}
+.act{display:flex;gap:7px;margin-bottom:8px;align-items:flex-start}
+.actn{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px;font-family:var(--mono)}
+.actt{font-size:13px;color:var(--text);line-height:1.5}
 
-/* verdict */
-.verdict-box{text-align:center;padding:20px 16px}
-.vring{width:70px;height:70px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px;font-family:var(--mono);font-weight:700;transition:all .4s}
-.vtitle{font-size:22px;font-weight:500;margin-bottom:6px}
-.vsub{font-size:14px;color:var(--muted);line-height:1.6;max-width:280px;margin:0 auto 14px}
-.vdiv{border-top:1px solid var(--border);padding-top:14px;text-align:left}
-.act{display:flex;gap:8px;margin-bottom:9px;align-items:flex-start}.act:last-child{margin-bottom:0}
-.actn{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px;font-family:var(--mono)}
-.actt{font-size:14px;color:var(--text);line-height:1.5}
+/* ── chart ── */
+.chart-wrap{position:relative;height:230px}
 
-/* degradation bar */
-.deg-bar-outer{height:18px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative;margin:6px 0}
-.deg-bar-inner{height:100%;border-radius:4px;transition:width .6s;display:flex;align-items:center;padding-left:8px;font-size:12px;font-weight:700;color:#fff;font-family:var(--mono);white-space:nowrap}
-.deg-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:2px}
+/* ── layer editor ── */
+.layer-row{background:var(--bg1);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:8px;position:relative;transition:box-shadow .2s}
+.layer-row:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.layer-row.dragging{opacity:.5}
+.layer-handle{cursor:grab;color:var(--muted);font-size:16px;margin-right:6px;user-select:none;flex-shrink:0}
+.layer-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.layer-color-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+.layer-name-txt{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.layer-btns{display:flex;gap:4px;flex-shrink:0}
+.lbtn{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:3px;border:1px solid var(--border2);background:var(--bg2);color:var(--muted);cursor:pointer;transition:all .15s}
+.lbtn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.lbtn.danger:hover{background:var(--bad);border-color:var(--bad)}
+.layer-fields{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.layer-fields label{font-size:11px;color:var(--muted);display:block;margin-bottom:3px}
+.layer-fields input,.layer-fields select{font-size:12px;padding:5px 7px}
+.add-layer-btn{width:100%;padding:9px;background:var(--bg2);border:1px dashed var(--border2);border-radius:6px;color:var(--muted);font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.add-layer-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);border-style:solid}
 
-/* chart */
-.chart-wrap{position:relative;height:240px}
-.chart-wrap-tall{position:relative;height:280px}
+/* ── stack vis ── */
+.stack-vis{border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.sv-row{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border-bottom:1px solid rgba(0,0,0,.06)}
+.sv-row:last-child{border-bottom:none}
+.sv-name{font-size:13px;font-weight:500}
+.sv-sub{font-size:11px;opacity:.7;font-family:var(--mono)}
+.sv-dmg{font-family:var(--mono);font-size:13px;font-weight:700;text-align:right}
+.sv-bar{height:4px;border-radius:2px;margin-top:5px;transition:width .5s}
 
-/* comparison table */
-.ctbl{width:100%;border-collapse:collapse;font-size:14px}
-.ctbl th{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);letter-spacing:.06em;text-transform:uppercase}
-.ctbl td{padding:10px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
-.ctbl tr:hover td{background:var(--bg2)}
-.ctbl tr:last-child td{border-bottom:none}
+/* ── orbit radiation pie ── */
+.orbit-rad-bar{display:flex;height:14px;border-radius:4px;overflow:hidden;margin:8px 0}
+.orb-seg{height:100%;transition:width .4s;position:relative}
+.orb-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.orb-leg{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+.orb-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 
-/* self-healing badge */
-.heal-badge{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:3px;background:var(--perv-a);color:var(--perv);border:1px solid rgba(124,58,237,.3);letter-spacing:.05em}
+/* ── grade ── */
+.grade-badge{display:inline-block;font-family:var(--mono);font-size:22px;font-weight:700;padding:8px 20px;border-radius:6px;letter-spacing:.1em}
+.grade-A{background:rgba(13,138,94,.12);color:#0d8a5e;border:2px solid rgba(13,138,94,.4)}
+.grade-B{background:rgba(5,100,200,.1);color:#1a52c8;border:2px solid rgba(26,82,200,.4)}
+.grade-C{background:rgba(184,110,0,.1);color:#b86e00;border:2px solid rgba(184,110,0,.4)}
+.grade-D{background:rgba(192,37,29,.1);color:#b52020;border:2px solid rgba(181,32,32,.4)}
 
-/* ref box */
-.ref-box{background:var(--bg2);border-left:3px solid var(--accent);border-radius:0 4px 4px 0;padding:10px 14px;font-size:13px;color:var(--muted);line-height:1.7;margin-top:10px}
-.ref-box a{color:var(--accent);text-decoration:none}
+/* ── info boxes ── */
+.info-box{background:var(--bg2);border-left:3px solid var(--accent);border-radius:0 5px 5px 0;padding:10px 14px;font-size:13px;color:var(--text);line-height:1.7;margin:8px 0}
+.warn-box{background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:5px;padding:9px 13px;font-size:13px;color:var(--text);line-height:1.6;margin-top:8px}
+.ok-box{background:var(--ok-bg);border:1px solid var(--ok-bd);border-radius:5px;padding:9px 13px;font-size:13px;color:var(--text);line-height:1.6;margin-top:8px}
 
-/* note */
-.mnote{font-size:13px;color:var(--dim);border:1px solid var(--border);border-radius:4px;padding:9px 13px;line-height:1.6;margin-top:10px}
+.mnote{font-size:12px;color:var(--dim);border:1px solid var(--border);border-radius:4px;padding:8px 12px;line-height:1.6;margin-top:10px}
 .mnote strong{color:var(--muted)}
+footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.ft{font-family:var(--mono);font-size:11px;color:var(--dim)}
 
-footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
-.ft{font-family:var(--mono);font-size:12px;color:var(--dim)}
-
-@media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}}
+@media(max-width:900px){.g2,.layer-fields{grid-template-columns:1fr 1fr}.g3,.g4,.g5{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.g2,.g3,.g4,.g5,.layer-fields{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -130,690 +143,831 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
 
 <header>
   <div>
-    <div class="logo-main">HELIAS<span>/</span>SOLAR-RAD</div>
-    <div class="logo-sub">Tandem Solar Cell · Space Radiation Assessment</div>
+    <div class="logo-main">HELIAS<span>/</span>SOLAR-RAD <span style="font-size:11px;color:var(--muted)">v2</span></div>
+    <div class="logo-sub">탠덤 태양전지 우주방사선 평가 — Layer Editor 탑재</div>
   </div>
   <div class="htags">
-    <nav style="display:flex;gap:4px;margin-right:10px">
+    <nav style="display:flex;gap:4px;margin-right:8px;flex-wrap:wrap">
       <a href="index.html" class="nav-btn">SEE Tool</a>
-      <a href="niel-tid.html" class="nav-btn">NIEL · TID</a>
+      <a href="niel-tid.html" class="nav-btn">NIEL·TID</a>
       <a href="compare.html" class="nav-btn">Compare</a>
       <a href="solar-rad.html" class="nav-btn active">Solar-Rad</a>
-      <a href="stop.html"
-         style="font-family:var(--mono);font-size:13px;color:var(--accent);
-                border:1px solid var(--border2);background:transparent;
-                padding:5px 14px;border-radius:4px;text-decoration:none;
-                letter-spacing:.04em;transition:all .2s"
-         onmouseover="this.style.background='var(--accent)';this.style.color='#fff'"
-         onmouseout="this.style.background='transparent';this.style.color='var(--accent)'">
-        STOP
-      </a>
+      <a href="stop.html" class="nav-btn">STOP</a>
     </nav>
-    <span class="htag">Perovskite / CIGS</span>
-    <span class="htag">EOL 출력 예측</span>
+    <span class="htag">Layer Editor</span>
+    <span class="htag">EOL 예측</span>
     <div class="live"></div>
   </div>
 </header>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('assess',this)">방사선 내성 평가</div>
-  <div class="tab" onclick="switchTab('layer',this)">층별 손상 분석</div>
-  <div class="tab" onclick="switchTab('eol',this)">EOL 출력 예측</div>
-  <div class="tab" onclick="switchTab('compare',this)">기술 비교</div>
-  <div class="tab" onclick="switchTab('ref',this)">모델 / 문헌</div>
+  <div class="tab active" onclick="sw('assess',this)">방사선 내성 평가</div>
+  <div class="tab" onclick="sw('layers',this)">레이어 구조 편집</div>
+  <div class="tab" onclick="sw('eol',this)">EOL 출력 예측</div>
+  <div class="tab" onclick="sw('orbit',this)">궤도 환경 상세</div>
+  <div class="tab" onclick="sw('guide',this)">평가 항목 해설</div>
 </div>
 
 <!-- ══ TAB 1: ASSESS ══ -->
 <div id="tab-assess" class="tab-panel active">
-  <div class="g2">
-    <!-- Left: inputs -->
-    <div>
-      <div class="panel">
-        <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">탠덤 구조 선택</div></div>
-        <div class="pb">
-          <div class="field">
-            <label>탠덤 구조</label>
-            <select id="tandem" onchange="update()">
-              <option value="perv_cigs">페로브스카이트 / CIGS (2T 모놀리식)</option>
-              <option value="perv_si">페로브스카이트 / Si-HJ (비교 기준)</option>
-              <option value="perv_perv">페로브스카이트 / 페로브스카이트 (올-페로브)</option>
-              <option value="cigs_only">CIGS 단일접합 (기준)</option>
-              <option value="gaas_3j">GaAs 3중접합 III-V (우주 표준)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>페로브스카이트 조성</label>
-            <select id="composition" onchange="update()">
-              <option value="famapb">FAMAPbI₃ (유기-무기, 표준)</option>
-              <option value="cspb">CsPbI₂Br (전무기, 고안정)</option>
-              <option value="cs_fama">Cs₀.₀₅(MA₀.₁₇FA₀.₈₃)₀.₉₅Pb(I₀.₈₃Br₀.₁₇)₃</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>초기 효율 PCE₀ (%)</label>
-            <input type="number" id="pce0" value="26.3" min="10" max="35" step="0.1" onchange="update()">
-          </div>
-          <div class="field">
-            <label>초기 Pmax (W/m²) — AM0 기준</label>
-            <input type="number" id="pmax0" value="356" min="100" max="500" step="1" onchange="update()">
-          </div>
-        </div>
-      </div>
+<div class="g2" style="align-items:start">
 
-      <div class="panel">
-        <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">임무 / 궤도 설정</div></div>
-        <div class="pb">
-          <div class="field">
-            <label>목표 궤도</label>
-            <select id="orbit" onchange="update()">
-              <option value="leo">LEO 400km (ISS형 — SAA 포함)</option>
-              <option value="leo_pol">LEO 극궤도 800km</option>
-              <option value="meo">MEO GPS 20,200km (고방사선)</option>
-              <option value="geo" selected>GEO 정지궤도 36,000km</option>
-              <option value="deep">심우주 / 행성간</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>태양 활동</label>
-            <select id="solar" onchange="update()">
-              <option value="min" selected>극소기 (GCR 최대 — 보수적)</option>
-              <option value="max">극대기</option>
-            </select>
-          </div>
-          <div class="srow">
-            <div class="shdr"><span class="sname">커버 유리 두께 (mm)</span><span class="sval" id="covv">0.5 mm</span></div>
-            <input type="range" id="cover" min="0" max="5" step="0.1" value="0.5" oninput="update()">
-          </div>
-          <div class="srow">
-            <div class="shdr"><span class="sname">임무 기간 (년)</span><span class="sval" id="durv">5 yr</span></div>
-            <input type="range" id="duration" min="0.5" max="15" step="0.5" value="5" oninput="update()">
-          </div>
-          <div class="srow" style="margin-bottom:0">
-            <div class="shdr"><span class="sname">자기회복 계수 (페로브스카이트)</span><span class="sval" id="healv">0.30</span></div>
-            <input type="range" id="heal" min="0" max="0.8" step="0.05" value="0.30" oninput="update()">
-            <div style="font-size:12px;color:var(--dim);margin-top:4px">0 = 회복 없음 · 0.8 = 최대 이온 이동 회복 (Lang+2020)</div>
-          </div>
+  <!-- 왼쪽: 기본 설정 -->
+  <div>
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">임무 환경 설정</div></div>
+      <div class="pb">
+        <div class="field">
+          <label>목표 궤도</label>
+          <select id="orbit" onchange="update()">
+            <option value="leo">LEO 400km — 저경사 (ISS형)</option>
+            <option value="leo_pol">LEO 800km — 극궤도</option>
+            <option value="meo">MEO 20,200km — GPS 궤도</option>
+            <option value="geo" selected>GEO 36,000km — 정지궤도</option>
+            <option value="deep">심우주 / 행성간 미션</option>
+          </select>
+        </div>
+
+        <!-- 궤도별 방사선 비율 바 -->
+        <div style="font-size:12px;color:var(--muted);margin-bottom:5px">궤도별 방사선 종류 비율</div>
+        <div class="orbit-rad-bar" id="orb-bar"></div>
+        <div class="orb-legend" id="orb-legend"></div>
+        <div style="font-size:12px;color:var(--dim);margin-top:5px;line-height:1.6" id="orb-note"></div>
+
+        <div class="field" style="margin-top:12px">
+          <label>태양 활동 조건</label>
+          <select id="solar" onchange="update()">
+            <option value="min" selected>태양 극소기 (GCR 최대 — 보수적)</option>
+            <option value="max">태양 극대기 (SPE 위험 최대)</option>
+          </select>
+        </div>
+        <div class="srow">
+          <div class="shdr"><span class="sname">커버 유리 두께 (mm)</span><span class="sval" id="covV">0.5 mm</span></div>
+          <input type="range" id="cover" min="0" max="5" step="0.1" value="0.5" oninput="update()">
+        </div>
+        <div class="srow">
+          <div class="shdr"><span class="sname">임무 기간 (년)</span><span class="sval" id="durV">5 yr</span></div>
+          <input type="range" id="dur" min="0.5" max="15" step="0.5" value="5" oninput="update()">
+        </div>
+        <div class="srow" style="margin-bottom:0">
+          <div class="shdr"><span class="sname">페로브스카이트 자기회복 계수</span><span class="sval" id="healV">0.30</span></div>
+          <input type="range" id="heal" min="0" max="0.8" step="0.05" value="0.30" oninput="update()">
+          <div style="font-size:11px;color:var(--dim);margin-top:3px">0 = 회복 없음 / 0.8 = 최대 이온이동 회복 (Lang+2020)</div>
         </div>
       </div>
     </div>
 
-    <!-- Right: verdict + layer stack -->
-    <div>
-      <div class="panel">
-        <div class="ph"><div class="phdot" style="background:var(--ok)"></div><div class="phtxt">방사선 내성 종합 판정</div></div>
-        <div class="verdict-box">
-          <div class="vring" id="vring">✓</div>
-          <div class="vtitle" id="vtitle">우수</div>
-          <div class="vsub" id="vsub">계산 중...</div>
-          <div class="vdiv">
-            <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;margin-bottom:10px;text-transform:uppercase">권장 조치</div>
-            <div id="vactions"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">층별 방사선 손상 (정성)</div></div>
-        <div class="pb">
-          <div class="stack" id="layer-stack"></div>
-          <div style="font-size:12px;color:var(--dim);margin-top:8px">막대 길이 = 상대적 방사선 손상도. 양성자+전자 복합 환경 기준.</div>
-        </div>
+    <!-- 층별 손상 시각화 -->
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">현재 구조 층별 방사선 손상 (정성)</div></div>
+      <div class="pb">
+        <div class="stack-vis" id="stackVis"></div>
+        <div style="font-size:11px;color:var(--dim);margin-top:6px">막대 = 상대적 손상도. "레이어 구조 편집" 탭에서 층 추가/삭제/순서 변경 가능.</div>
       </div>
     </div>
   </div>
 
-  <!-- Metrics -->
-  <div class="g4">
-    <div class="mc"><div class="mcl">잔존 효율 (EOL)</div><div class="mcv" id="m-eol">—</div><div class="mcu">% of PCE₀</div></div>
-    <div class="mc"><div class="mcl">잔존 Pmax (EOL)</div><div class="mcv" id="m-pmax">—</div><div class="mcu">W/m²</div></div>
-    <div class="mc"><div class="mcl">총 양성자 플럭스</div><div class="mcv" id="m-flux">—</div><div class="mcu">p⁺/cm²</div></div>
-    <div class="mc"><div class="mcl">등가 1 MeV 전자 플럭스</div><div class="mcv" id="m-eqfl">—</div><div class="mcu">e⁻/cm² (Si equiv.)</div></div>
-  </div>
+  <!-- 오른쪽: 판정 + 지표 -->
+  <div>
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--ok)"></div><div class="phtxt">방사선 내성 종합 판정</div></div>
+      <div style="text-align:center;padding:18px 14px">
+        <div class="vring" id="vring">✓</div>
+        <div class="grade-badge" id="gradeBadge" style="margin-bottom:10px">A</div>
+        <div class="vtitle" id="vtitle">우수</div>
+        <div class="vsub" id="vsub">—</div>
 
-  <div class="mnote">
-    <strong>모델 기준:</strong> NRL 방법론 기반 Pmax 열화 예측 (Tada+1982). 양성자 NIEL 비: 페로브스카이트 0.72×Si, CIGS 1.2×Si (Jun+2003). 자기회복 보정: Lang et al. (2020) Joule. GEO 양성자+전자 복합 환경 (AE8/AP8 모델). 커버 유리 감쇠: MULASSIS 검증 지수 모델.
+        <!-- Grade 기준 설명 -->
+        <div style="background:var(--bg2);border-radius:6px;padding:10px 14px;text-align:left;margin:10px 0;font-size:12px;line-height:1.8">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.06em;margin-bottom:6px;text-transform:uppercase">Grade 판정 기준</div>
+          <div id="gradeExplain">—</div>
+        </div>
+
+        <div class="vdiv" id="vdiv" style="text-align:left"></div>
+      </div>
+    </div>
+
+    <div class="g4" style="margin-bottom:12px">
+      <div class="mc"><div class="mcl">EOL Pmax 잔존</div><div class="mcv" id="m-eol">—</div><div class="mcu">% of Pmax₀</div></div>
+      <div class="mc"><div class="mcl">EOL Pmax</div><div class="mcv" id="m-pmax">—</div><div class="mcu">W/m²</div></div>
+      <div class="mc"><div class="mcl">총 양성자 플럭스</div><div class="mcv" id="m-flux">—</div><div class="mcu">p⁺/cm²</div></div>
+      <div class="mc"><div class="mcl">Si 등가 전자 플럭스</div><div class="mcv" id="m-eqfl">—</div><div class="mcu">e⁻/cm²</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">Pmax 열화 곡선</div></div>
+      <div class="pb">
+        <div class="chart-wrap"><canvas id="eolChart"></canvas></div>
+      </div>
+    </div>
   </div>
 </div>
+<div class="mnote">
+  <strong>모델:</strong> NRL 방법론 Pmax 열화 (Tada+1982). 자기회복 보정 (Lang+2020 Joule). GEO 양성자+전자 복합 환경 (AE8/AP8). 커버유리 감쇠: 지수 모델. 궤도 방사선 비율: Dyer et al. (2003), ECSS-E-ST-10-04.
+</div>
+</div>
 
-<!-- ══ TAB 2: LAYER ══ -->
-<div id="tab-layer" class="tab-panel">
-  <div class="g2">
+<!-- ══ TAB 2: LAYER EDITOR ══ -->
+<div id="tab-layers" class="tab-panel">
+<div class="g2" style="align-items:start">
+
+  <div>
     <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--perv)"></div><div class="phtxt">탠덤 구조 단면 (층별 손상)</div></div>
+      <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">탠덤 구조 레이어 편집기</div></div>
       <div class="pb">
-        <div id="layer-detail"></div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">깊이별 NIEL 프로파일</div></div>
-      <div class="pb">
-        <div class="chart-wrap-tall"><canvas id="niel-depth-chart" role="img" aria-label="깊이별 NIEL 손상 프로파일"></canvas></div>
-        <div class="mnote" style="margin-top:8px">
-          <strong>해석:</strong> 고에너지 양성자(≥10 MeV)는 전 층을 관통하며 균일하게 손상. 저에너지 양성자(≤1 MeV)는 표면층(페로브스카이트)에서 정지하며 집중 손상 유발. SRIM 시뮬레이션 기반 근사 프로파일.
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+          ⇅ 드래그로 순서 변경 &nbsp;|&nbsp; ＋ 층 추가 &nbsp;|&nbsp; ✕ 층 삭제<br>
+          <span style="font-size:12px">층은 <b>위 = 광 입사면(표면)</b>, 아래 = 후면전극 순서입니다.</span>
         </div>
+        <div id="layerEditor"></div>
+        <button class="add-layer-btn" onclick="addLayer()">＋ 새 층 추가</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">소재 물성 데이터베이스 (선택 참조)</div></div>
+      <div class="pb" style="padding:0">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:var(--accent)">
+            <th style="padding:7px 10px;text-align:left;color:#fff;font-family:var(--mono);font-size:11px">소재</th>
+            <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px">Z_eff</th>
+            <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px">ρ (g/cm³)</th>
+            <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px">Eg (eV)</th>
+            <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px;text-align:left">역할</th>
+          </tr></thead>
+          <tbody id="matDbTable"></tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <div class="panel">
-    <div class="ph"><div class="phdot" style="background:var(--cigs)"></div><div class="phtxt">서브셀별 파라미터 열화 예측</div></div>
-    <div class="pb" style="padding:0">
-      <table class="ctbl" id="subcell-table">
-        <thead><tr>
-          <th>파라미터</th>
-          <th>초기값 (BOL)</th>
-          <th>페로브스카이트 셀 (EOL)</th>
-          <th>하부셀 (EOL)</th>
-          <th>탠덤 전체 (EOL)</th>
-        </tr></thead>
-        <tbody id="subcell-tbody"></tbody>
-      </table>
+  <div>
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">구조 단면 미리보기 (광 입사 방향 ↓)</div></div>
+      <div class="pb" id="structPreview"></div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">층별 CSDA 사정거리 vs 이온에너지</div></div>
+      <div class="pb">
+        <div class="chart-wrap"><canvas id="rangeChart"></canvas></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">각 층의 두께와 밀도 기반 사정거리를 Fe 이온 기준으로 표시. 막대가 층 두께보다 짧으면 해당 층에서 이온 정지.</div>
+      </div>
     </div>
   </div>
+</div>
 </div>
 
 <!-- ══ TAB 3: EOL ══ -->
 <div id="tab-eol" class="tab-panel">
-  <div class="g2" style="margin-bottom:14px">
-    <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">Pmax 열화 곡선 (시간별)</div></div>
-      <div class="pb">
-        <div class="chart-wrap-tall"><canvas id="eol-chart" role="img" aria-label="임무 기간별 Pmax 잔존율 곡선"></canvas></div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">커버 유리 두께별 EOL Pmax</div></div>
-      <div class="pb">
-        <div class="chart-wrap-tall"><canvas id="cover-chart" role="img" aria-label="커버 유리 두께에 따른 EOL Pmax 변화"></canvas></div>
-      </div>
-    </div>
-  </div>
-
+<div class="g2" style="align-items:start">
   <div class="panel">
-    <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">연도별 Pmax 잔존율 상세</div></div>
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">임무 연도별 Pmax 잔존율</div></div>
     <div class="pb" style="padding:0">
-      <table class="ctbl" id="eol-table">
-        <thead><tr>
-          <th>임무 연도</th>
-          <th>누적 플럭스 (p⁺/cm²)</th>
-          <th>열화율 (Cx)</th>
-          <th>자기회복 보정</th>
-          <th>Pmax 잔존 (%)</th>
-          <th>Pmax (W/m²)</th>
-          <th>판정</th>
+      <table style="width:100%;border-collapse:collapse;font-size:13px" id="eolTable">
+        <thead><tr style="background:var(--accent)">
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px;text-align:left">연도</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">누적 플럭스</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">열화율 Cx</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">회복 보정</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">Pmax 잔존</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">Pmax (W/m²)</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">Grade</th>
         </tr></thead>
-        <tbody id="eol-tbody"></tbody>
+        <tbody id="eolTbody"></tbody>
       </table>
     </div>
   </div>
 
-  <div class="mnote">
-    <strong>열화 모델:</strong> Pmax(Φ) = Pmax₀ · [1 − Cx · log₁₀(Φ/Φ₀)] · (1 + H_rec) — Cx: 소재별 손상계수 (페로브스카이트 Cx≈0.015, CIGS Cx≈0.06), Φ₀: 기준 플럭스 1×10¹⁰ p⁺/cm². 자기회복(H_rec)은 페로브스카이트 층에만 적용.
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="panel">
+      <div class="ph"><div class="phdot"></div><div class="phtxt">커버 유리 두께 최적화</div></div>
+      <div class="pb">
+        <div class="chart-wrap"><canvas id="coverChart"></canvas></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">두꺼운 커버유리는 저에너지 양성자를 효과적으로 차단하지만 무게 증가. 최적 두께는 EOL Pmax 기울기가 완만해지는 변곡점.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">초기 효율 설정</div></div>
+      <div class="pb">
+        <div class="g2" style="gap:10px">
+          <div class="field">
+            <label>초기 PCE₀ (%)</label>
+            <input type="number" id="pce0" value="26.3" min="5" max="40" step="0.1" oninput="update()">
+          </div>
+          <div class="field">
+            <label>초기 Pmax₀ (W/m², AM0)</label>
+            <input type="number" id="pmax0" value="356" min="50" max="600" step="1" oninput="update()">
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+</div>
 
-<!-- ══ TAB 4: COMPARE ══ -->
-<div id="tab-compare" class="tab-panel">
+<!-- ══ TAB 4: ORBIT ══ -->
+<div id="tab-orbit" class="tab-panel">
+<div class="g2" style="align-items:start">
   <div class="panel">
-    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">우주 태양전지 기술 비교</div></div>
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">궤도별 방사선 환경 상세</div></div>
     <div class="pb" style="padding:0">
-      <table class="ctbl">
-        <thead><tr>
-          <th>기술</th>
-          <th>초기 효율</th>
-          <th>비출력 (W/kg)</th>
-          <th>방사선 내성</th>
-          <th>자기회복</th>
-          <th>비용</th>
-          <th>우주 TRL</th>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="background:var(--accent)">
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px;text-align:left">궤도</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">고도</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">양성자 %</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">전자 %</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">GCR %</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">SPE %</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px">연간 플럭스</th>
+          <th style="padding:8px 10px;color:#fff;font-family:var(--mono);font-size:11px;text-align:left">특이사항</th>
         </tr></thead>
         <tbody>
-          <tr style="background:rgba(124,58,237,.05)">
-            <td><strong style="color:var(--perv)">Perv/CIGS 탠덤</strong></td>
-            <td>26–31%</td><td>~1500</td>
-            <td><span style="color:var(--ok);font-weight:700">★★★★☆</span><br><span style="font-size:11px;color:var(--muted)">85% @ 2×10¹² p⁺/cm²</span></td>
-            <td><span class="heal-badge">있음</span></td>
-            <td style="color:var(--ok)">낮음</td><td>TRL 4–5</td>
-          </tr>
-          <tr style="background:rgba(13,138,94,.05)">
-            <td><strong style="color:var(--cigs)">CIGS 단일</strong></td>
-            <td>20–23%</td><td>~1000</td>
-            <td><span style="color:var(--warn);font-weight:700">★★★☆☆</span><br><span style="font-size:11px;color:var(--muted)">재결합 증가 취약</span></td>
-            <td>없음</td>
-            <td style="color:var(--ok)">낮음</td><td>TRL 5–6</td>
-          </tr>
-          <tr>
-            <td><strong>Perv/Si 탠덤</strong></td>
-            <td>29–34%</td><td>~800</td>
-            <td><span style="color:var(--bad);font-weight:700">★★☆☆☆</span><br><span style="font-size:11px;color:var(--muted)">Si 셀 심각 열화 (1%로 감소)</span></td>
-            <td><span class="heal-badge">부분</span></td>
-            <td style="color:var(--warn)">중간</td><td>TRL 4</td>
-          </tr>
-          <tr>
-            <td><strong>GaAs 3중접합</strong></td>
-            <td>28–32%</td><td>~400</td>
-            <td><span style="color:var(--ok);font-weight:700">★★★★★</span><br><span style="font-size:11px;color:var(--muted)">우주 표준 (검증 완료)</span></td>
-            <td>없음</td>
-            <td style="color:var(--bad)">매우 높음</td><td>TRL 9</td>
-          </tr>
-          <tr style="background:rgba(26,82,200,.05)">
-            <td><strong>올-페로브 탠덤</strong></td>
-            <td>24–30%</td><td>~2000+</td>
-            <td><span style="color:var(--warn);font-weight:700">★★★☆☆</span><br><span style="font-size:11px;color:var(--muted)">연구 단계, 데이터 부족</span></td>
-            <td><span class="heal-badge">강함</span></td>
-            <td style="color:var(--ok)">낮음</td><td>TRL 2–3</td>
-          </tr>
+          <tr><td style="padding:8px 10px">LEO 저경사</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">400km</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#1a52c8">55%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#0d8a5e">30%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#8b2fc9">10%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#b86e00">5%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">5×10⁹</td><td style="padding:8px 10px;font-size:12px">지자기 차폐 최대, SAA 통과</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 10px">LEO 극궤도</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">800km</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#1a52c8">60%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#0d8a5e">25%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#8b2fc9">10%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#b86e00">5%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">3×10¹⁰</td><td style="padding:8px 10px;font-size:12px">남극/북극 극관 노출, 양성자 증가</td></tr>
+          <tr><td style="padding:8px 10px">MEO(GPS)</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">20,200km</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#1a52c8">30%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#0d8a5e">55%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#8b2fc9">10%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#b86e00">5%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">5×10¹¹</td><td style="padding:8px 10px;font-size:12px"><b style="color:var(--bad)">가장 가혹</b> — 반앨런대 내부</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 10px">GEO</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">36,000km</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#1a52c8">25%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#0d8a5e">35%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#8b2fc9">30%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#b86e00">10%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">2×10¹⁰</td><td style="padding:8px 10px;font-size:12px">GCR 지배, 통신위성 주류 궤도</td></tr>
+          <tr><td style="padding:8px 10px">심우주</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">> 1 AU</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#1a52c8">15%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#0d8a5e">10%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#8b2fc9">60%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px;color:#b86e00">15%</td><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">8×10¹⁰</td><td style="padding:8px 10px;font-size:12px">GCR 극대, 지자기 차폐 없음, SPE 위험</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <div class="g2" style="margin-top:14px">
+  <div style="display:flex;flex-direction:column;gap:12px">
     <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--perv)"></div><div class="phtxt">페로브스카이트 자기회복 메커니즘</div></div>
-      <div class="pb">
-        <div style="font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:10px;letter-spacing:.06em">방사선 손상 → 회복 사이클</div>
-        <div style="background:var(--bg2);border-radius:6px;padding:12px;font-size:14px;line-height:1.8;color:var(--text)">
-          1. 고에너지 입자 조사 → Pb-I 결합 파괴, 할라이드 공공(vacancy) 생성<br>
-          2. 이온 이동(ion migration) 활성화 → 결함 위치 재배열<br>
-          3. 광조사(AM0) 또는 열처리(~100°C) → 결함 자기치유 (Frenkel pair 재결합)<br>
-          4. PCE 부분 회복 — Lang et al.(2020): 30~80% 회복 관측
-        </div>
-        <div class="ref-box">
-          출처: Lang et al. (2020) Joule; Kirmani et al. (2024) Nature Commun.
-        </div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--cigs)"></div><div class="phtxt">CIGS vs Si 하부셀 방사선 비교</div></div>
-      <div class="pb">
-        <div style="font-size:14px;line-height:1.8;color:var(--text)">
-          <div style="margin-bottom:10px"><strong style="color:var(--cigs)">CIGS 하부셀 ✓</strong>
-            <div style="color:var(--muted);font-size:13px">다결정 박막 구조 → 입계가 방사선 유발 결함의 재결합 중심 역할 억제. 68 MeV 양성자 2×10¹² p⁺/cm² 조사 후 Voc 소폭 감소에 그침.</div>
-          </div>
-          <div><strong style="color:var(--bad)">Si 하부셀 ✗</strong>
-            <div style="color:var(--muted);font-size:13px">단결정 Si-HJ → 방사선 유발 재결합 중심 급증. 동일 조건에서 효율이 초기의 1%까지 급락. Perv/Si 탠덤의 결정적 약점.</div>
-          </div>
-        </div>
-        <div class="ref-box">
-          출처: Lang et al. (2020) Cell/Joule; Yoon et al. (2024) Adv. Energy Mater.
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ TAB 5: REF ══ -->
-<div id="tab-ref" class="tab-panel">
-  <div class="g2">
-    <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">핵심 참고 문헌</div></div>
+      <div class="ph"><div class="phdot" style="background:var(--perv)"></div><div class="phtxt">방사선 종류별 태양전지 영향</div></div>
       <div class="pb" style="padding:0">
-        <table class="ctbl">
-          <thead><tr><th>저자 / 년도</th><th>내용</th><th>데이터</th></tr></thead>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:var(--bg3)">
+            <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">입자</th>
+            <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent)">에너지 범위</th>
+            <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent)">주요 손상</th>
+            <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent);text-align:left">태양전지 영향</th>
+          </tr></thead>
           <tbody>
-            <tr><td style="font-family:var(--mono);font-size:12px">Lang+ (2020)<br>Cell/Joule</td>
-                <td>Perv/CIGS 68MeV 양성자 시험<br><span style="font-size:12px;color:var(--muted)">in operando 측정</span></td>
-                <td style="font-family:var(--mono);font-size:12px;color:var(--ok)">85% 잔존 @ 2×10¹²</td></tr>
-            <tr><td style="font-family:var(--mono);font-size:12px">Nguyen+ (2023)<br>Adv.Energy&Sust.</td>
-                <td>페로브스카이트 양성자 시뮬레이션<br><span style="font-size:12px;color:var(--muted)">NRL 방법론 적용</span></td>
-                <td style="font-family:var(--mono);font-size:12px;color:var(--warn)">Cx ≈ 0.015 (FAMAPb)</td></tr>
-            <tr><td style="font-family:var(--mono);font-size:12px">Kirmani+ (2024)<br>Nature Commun.</td>
-                <td>이중 조사 자기회복 메커니즘<br><span style="font-size:12px;color:var(--muted)">에너지 의존 회복율</span></td>
-                <td style="font-family:var(--mono);font-size:12px;color:var(--perv)">회복율 30–80%</td></tr>
-            <tr><td style="font-family:var(--mono);font-size:12px">Yoon+ (2024)<br>Adv. Energy Mater.</td>
-                <td>LEO 위성 Perv 탠덤 리뷰<br><span style="font-size:12px;color:var(--muted)">AE8/AP8 환경 적용</span></td>
-                <td style="font-family:var(--mono);font-size:12px">NIEL 비교표</td></tr>
-            <tr><td style="font-family:var(--mono);font-size:12px">OOV-Cube (2024)<br>ESA 실증 위성</td>
-                <td>Perv/CIGS 실제 궤도 검증<br><span style="font-size:12px;color:var(--muted)">2024.07 발사, 작동 확인</span></td>
-                <td style="font-family:var(--mono);font-size:12px;color:var(--ok)">초기 결과 긍정적</td></tr>
-            <tr><td style="font-family:var(--mono);font-size:12px">Jun+ (2003)<br>IEEE TNS</td>
-                <td>GaN/CIGS/InP NIEL 파라미터<br><span style="font-size:12px;color:var(--muted)">SR 처리 기준값</span></td>
-                <td style="font-family:var(--mono);font-size:12px">NIEL 데이터베이스</td></tr>
+            <tr><td style="padding:7px 10px;font-weight:500;color:#1a52c8">양성자</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">0.1~300 MeV</td><td style="padding:7px 10px;font-size:12px">NIEL + TID</td><td style="padding:7px 10px;font-size:12px">격자 변위 → 캐리어 수명 감소 → Jsc·Voc 동시 열화. 가장 큰 Pmax 손실 원인.</td></tr>
+            <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:500;color:#0d8a5e">전자</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">0.1~10 MeV</td><td style="padding:7px 10px;font-size:12px">NIEL (경미)</td><td style="padding:7px 10px;font-size:12px">양성자보다 NIEL 낮음. 커버유리로 효과적 차단. FF 소폭 저하.</td></tr>
+            <tr><td style="padding:7px 10px;font-weight:500;color:#8b2fc9">GCR 중이온</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">수백 MeV/u</td><td style="padding:7px 10px;font-size:12px">SEE + TID</td><td style="padding:7px 10px;font-size:12px">고LET 이온 — 접합 내 순간 전류 생성(SET). 차폐로 방어 어려움.</td></tr>
+            <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:500;color:#b86e00">SPE 양성자</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">수 MeV~GeV</td><td style="padding:7px 10px;font-size:12px">순간 대량 NIEL</td><td style="padding:7px 10px;font-size:12px">태양 폭발 수일 내 평상시 수년치 손상 누적 가능. 임무 최대 위협 중 하나.</td></tr>
+            <tr><td style="padding:7px 10px;font-weight:500;color:#b52020">감마선 / X선</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">keV~MeV</td><td style="padding:7px 10px;font-size:12px">TID</td><td style="padding:7px 10px;font-size:12px">전리 손상 → 페로브스카이트 층 결함 생성. 자기회복 메커니즘으로 부분 보상 가능.</td></tr>
           </tbody>
         </table>
       </div>
     </div>
+
     <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">모델 수식 정리</div></div>
+      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">Grade 판정 기준 상세</div></div>
       <div class="pb">
-        <div style="font-family:var(--mono);font-size:13px;color:var(--accent);margin-bottom:6px">NRL 방법론 기반 Pmax 열화</div>
-        <div class="ref-box" style="font-family:var(--mono);font-size:13px;line-height:2">
-          Pmax(Φ) = Pmax₀ · [1 − Cx · log₁₀(Φ/Φ₀)]<br>
-          Cx (페로브스카이트): 0.010–0.020<br>
-          Cx (CIGS):          0.040–0.080<br>
-          Cx (Si-HJ):         0.150–0.250<br>
-          Cx (GaAs 3J):       0.025–0.040<br>
-          Φ₀ = 1×10¹⁰ p⁺/cm² (기준 플럭스)
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:rgba(13,138,94,.08);border:1px solid rgba(13,138,94,.3);border-radius:6px;padding:10px 12px">
+            <div class="grade-badge grade-A" style="font-size:16px;padding:4px 12px;margin-bottom:8px">Grade A</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.7"><b>EOL Pmax ≥ 80%</b><br>임무 종료 시점에도 초기 출력의 80% 이상 유지. 추가 설계 변경 없이 임무 수행 가능. ECSS 통신위성 표준 권장 수준.</div>
+          </div>
+          <div style="background:rgba(26,82,200,.06);border:1px solid rgba(26,82,200,.3);border-radius:6px;padding:10px 12px">
+            <div class="grade-badge grade-B" style="font-size:16px;padding:4px 12px;margin-bottom:8px">Grade B</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.7"><b>EOL Pmax 65–80%</b><br>전력 마진 감소. 패널 면적 확대 또는 커버유리 두께 최적화 후 사용 가능. 저전력 임무에 적합.</div>
+          </div>
+          <div style="background:rgba(184,110,0,.07);border:1px solid rgba(184,110,0,.3);border-radius:6px;padding:10px 12px">
+            <div class="grade-badge grade-C" style="font-size:16px;padding:4px 12px;margin-bottom:8px">Grade C</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.7"><b>EOL Pmax 50–65%</b><br>전력 시스템 재설계 필요. 임무 기간 단축 또는 배터리 용량 증대 요구. 단기 임무에만 권장.</div>
+          </div>
+          <div style="background:rgba(181,32,32,.07);border:1px solid rgba(181,32,32,.3);border-radius:6px;padding:10px 12px">
+            <div class="grade-badge grade-D" style="font-size:16px;padding:4px 12px;margin-bottom:8px">Grade D</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.7"><b>EOL Pmax &lt; 50%</b><br>임무 전력 요구 충족 불가. 소재 교체(Perv/Si → Perv/CIGS 등) 또는 궤도 변경 필수.</div>
+          </div>
         </div>
-        <div style="font-family:var(--mono);font-size:13px;color:var(--accent);margin:14px 0 6px">자기회복 보정</div>
-        <div class="ref-box" style="font-family:var(--mono);font-size:13px;line-height:2">
-          Pmax_eff = Pmax(Φ) · (1 + H_rec · f_perv)<br>
-          H_rec: 회복 계수 (0–0.8)<br>
-          f_perv: 페로브스카이트 출력 기여율<br>
-          탠덤 2T 기준 f_perv ≈ 0.55
-        </div>
-        <div style="font-family:var(--mono);font-size:13px;color:var(--accent);margin:14px 0 6px">궤도 등가 플럭스 (AE8/AP8)</div>
-        <div class="ref-box" style="font-family:var(--mono);font-size:13px;line-height:2">
-          LEO:  5×10⁹  p⁺/cm²/yr (0.5mm 커버)<br>
-          GEO:  2×10¹⁰ p⁺/cm²/yr<br>
-          MEO:  5×10¹¹ p⁺/cm²/yr (가장 가혹)<br>
-          심우주: 8×10¹⁰ p⁺/cm²/yr (GCR 지배)
-        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.7">기준 출처: ECSS-E-HB-10-12A §7.4 (우주 전력 시스템 방사선 마진); NASA-HDBK-4002 (태양전지 EOL 설계); Tada et al. (1982) NASA JPL 방사선 핸드북.</div>
       </div>
     </div>
   </div>
 </div>
+</div>
+
+<!-- ══ TAB 5: GUIDE ══ -->
+<div id="tab-guide" class="tab-panel">
+<div style="max-width:860px">
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">왜 이 시뮬레이션이 필요한가</div></div>
+    <div class="pb">
+      <div class="info-box">
+        페로브스카이트/CIGS 탠덤 태양전지는 <b>2024년 현재 실험실 효율 33%를 돌파</b>하며 우주 전력 시스템의 차세대 후보로 급부상했습니다. ESA는 2024년 7월 OOV-Cube 위성에 탑재하여 실제 궤도 검증을 시작했습니다. 그러나 우주 환경에서의 방사선 내성 데이터는 기존 GaAs 3중접합 대비 현저히 부족합니다.
+      </div>
+      <div style="font-size:14px;color:var(--text);line-height:1.8;margin-top:12px">
+        이 시뮬레이션은 다음 세 가지 질문에 답합니다.<br><br>
+        <b>① "이 탠덤 구조가 목표 궤도에서 임무 기간 동안 살아남을 수 있는가?"</b><br>
+        NRL 방법론 기반 Pmax 열화 모델로 EOL 출력을 예측합니다.<br><br>
+        <b>② "어느 층이 가장 취약하고 어떻게 개선할 수 있는가?"</b><br>
+        레이어 편집기로 구조를 변경하고 각 층의 방사선 손상 비중을 실시간으로 비교합니다.<br><br>
+        <b>③ "커버유리를 얼마나 두껍게 해야 최적인가?"</b><br>
+        커버유리 두께-EOL Pmax 곡선으로 무게 대비 효과의 변곡점을 찾습니다.
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">각 평가 항목이 중요한 이유</div></div>
+    <div class="pb">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--accent2);margin-bottom:5px">① 탠덤 구조 선택 — 왜 CIGS가 Si보다 유리한가</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.7">CIGS의 방사선 내성이 Si-HJ보다 월등한 이유는 다결정 박막 구조에 있습니다. 단결정 Si는 방사선 유발 결함이 소수 캐리어 수명을 급격히 줄이지만, CIGS의 다결정 입계는 재결합 중심 역할이 억제됩니다. Lang et al.(2020)은 Perv/CIGS가 68 MeV 양성자 2×10¹² p⁺/cm² 조사 후에도 초기 효율 85% 이상을 유지함을 실험으로 확인했습니다.</div>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--accent2);margin-bottom:5px">② 자기회복 계수 — 왜 페로브스카이트만 가능한가</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.7">페로브스카이트는 이온이동(Ion Migration) 특성으로 방사선 손상 결함을 스스로 재배열합니다. 조사 후 광 또는 열 처리 시 Frenkel 쌍이 재결합하며 PCE가 30~80% 회복됩니다(Kirmani+2024). GaAs, Si, CIGS에는 이 메커니즘이 없습니다. 우주에서 태양광 조사가 자동 회복 에너지를 공급하므로 실제 운용 조건이 지상 시험보다 유리합니다.</div>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--accent2);margin-bottom:5px">③ 커버유리 두께 — 왜 최적값이 존재하는가</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.7">커버유리는 저에너지 양성자와 전자를 효과적으로 차단하지만, 고에너지 GCR 중이온은 어떤 두께에서도 통과합니다. 5mm 이상에서는 추가 보호 효과가 거의 없는 반면 무게 페널티가 큽니다. 또한 2차 입자(Bremsstrahlung) 생성으로 오히려 손상이 증가할 수 있습니다. 최적값은 보통 1~3mm Al 등가 두께입니다.</div>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--accent2);margin-bottom:5px">④ 궤도 선택 — 왜 MEO가 가장 가혹한가</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.7">MEO(GPS 궤도)는 내/외 반앨런대 사이를 통과합니다. 내부 반앨런대의 고에너지 양성자(수십~수백 MeV)와 외부 반앨런대의 고에너지 전자(수 MeV)가 동시에 집중됩니다. GEO의 약 25배 강도. 태양전지 임무 설계에서 MEO 통과는 반드시 단기간으로 제한해야 합니다.</div>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--accent2);margin-bottom:5px">⑤ 레이어 구조 편집기 — 왜 층별 설계가 중요한가</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.7">탠덤 태양전지의 방사선 손상은 층에 따라 전혀 다른 메커니즘으로 발생합니다. 페로브스카이트 흡수층은 자기회복 가능한 결함 생성, CIGS 흡수층은 격자 변위에 의한 캐리어 수명 감소, 재결합 접합(NiOₓ/AZO)은 계면 트랩 증가, 후면전극(Mo)은 결정성 변화가 주요 손상입니다. 층별 소재·두께를 최적화하면 동일 임무에서 EOL Pmax를 5~15% 개선할 수 있습니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">주요 참고 문헌 및 모델 근거</div></div>
+    <div class="pb" style="padding:0">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="background:var(--bg3)">
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">문헌</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent);text-align:left">내용</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">Lang et al. (2020) Joule</td><td style="padding:8px 10px;font-size:13px">Perv/CIGS 68MeV 양성자 시험 — 85% 잔존 @ 2×10¹² p⁺/cm²</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">Kirmani et al. (2024) Nat. Commun.</td><td style="padding:8px 10px;font-size:13px">페로브스카이트 자기회복 메커니즘 — 이온이동 기반 결함 재배열</td></tr>
+          <tr><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">Tada et al. (1982) NASA JPL</td><td style="padding:8px 10px;font-size:13px">NRL 방법론 — Pmax(Φ) = Pmax₀·[1−Cx·log₁₀(Φ/Φ₀)]</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">Jun et al. (2003) IEEE TNS</td><td style="padding:8px 10px;font-size:13px">소재별 NIEL 비율 (GaN 0.33×, SiC 0.51×, GaAs 1.99×)</td></tr>
+          <tr><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">Dyer et al. (2003) IEEE TNS</td><td style="padding:8px 10px;font-size:13px">궤도별 방사선 환경 비율 — AE8/AP8 모델 기반</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">ECSS-E-HB-10-12A (2010)</td><td style="padding:8px 10px;font-size:13px">우주 부품 방사선 내성 핸드북 — Grade 판정 기준 준용</td></tr>
+          <tr><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">OOV-Cube ESA (2024)</td><td style="padding:8px 10px;font-size:13px">Perv/CIGS 실제 궤도 검증 위성 — 결과 긍정적 (초기 보고)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · Solar-Rad v1.0</span>
-  <span class="ft">모델: NRL/Tada+1982 · Lang+2020 · Nguyen+2023 · Jun+2003 · AE8/AP8</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · Solar-Rad v2.0</span>
+  <span class="ft">NRL/Tada+1982 · Lang+2020 · Jun+2003 · AE8/AP8 · ECSS-E-HB-10-12A</span>
 </footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-// ── 탠덤 기술 데이터 ──
-const TANDEMS = {
-  perv_cigs: {
-    name:'Perv/CIGS 탠덤', topName:'페로브스카이트', botName:'CIGS',
-    cx_top:0.015, cx_bot:0.060, cx_total:0.035,
-    layers:[
-      {name:'커버 유리',    thick:'0.5–3mm', material:'세리아 도핑 유리', color:'#e2e8f0', textC:'#3a5070', damageBase:0.05},
-      {name:'투명 전극 (ITO)', thick:'~200nm', material:'In₂O₃:Sn', color:'#bfdbfe', textC:'#1e3a8a', damageBase:0.08},
-      {name:'페로브스카이트', thick:'~500nm', material:'CsFAMAPb(IBr)₃', color:'#ede9fe', textC:'#5b21b6', damageBase:0.20, heal:true},
-      {name:'재결합 접합',  thick:'~50nm',  material:'NiOₓ / AZO', color:'#fef3c7', textC:'#78350f', damageBase:0.35},
-      {name:'CIGS 흡수층', thick:'~2μm',   material:'Cu(In,Ga)Se₂', color:'#d1fae5', textC:'#064e3b', damageBase:0.45},
-      {name:'Mo 후면전극', thick:'~1μm',   material:'Mo', color:'#e2e8f0', textC:'#374151', damageBase:0.10},
-    ]
-  },
-  perv_si: {
-    name:'Perv/Si-HJ 탠덤', topName:'페로브스카이트', botName:'Si-HJ',
-    cx_top:0.015, cx_bot:0.200, cx_total:0.120,
-    layers:[
-      {name:'커버 유리',    thick:'0.5–3mm', material:'세리아 도핑 유리', color:'#e2e8f0', textC:'#3a5070', damageBase:0.05},
-      {name:'투명 전극',   thick:'~200nm', material:'ITO', color:'#bfdbfe', textC:'#1e3a8a', damageBase:0.08},
-      {name:'페로브스카이트', thick:'~500nm', material:'CsFAMAPb(IBr)₃', color:'#ede9fe', textC:'#5b21b6', damageBase:0.20, heal:true},
-      {name:'터널 접합',   thick:'~30nm',  material:'nc-Si:H', color:'#fef3c7', textC:'#78350f', damageBase:0.30},
-      {name:'Si 흡수층 (HJ)', thick:'~180μm', material:'c-Si (n형)', color:'#fee2e2', textC:'#7f1d1d', damageBase:0.90},
-      {name:'Si 후면전극', thick:'~200nm', material:'ITO/Ag', color:'#e2e8f0', textC:'#374151', damageBase:0.15},
-    ]
-  },
-  perv_perv: {
-    name:'올-페로브 탠덤', topName:'와이드갭 Perv', botName:'내로우갭 Perv',
-    cx_top:0.012, cx_bot:0.018, cx_total:0.015,
-    layers:[
-      {name:'커버 유리',    thick:'0.5–3mm', material:'세리아 도핑 유리', color:'#e2e8f0', textC:'#3a5070', damageBase:0.05},
-      {name:'ITO 전극',   thick:'~150nm', material:'ITO', color:'#bfdbfe', textC:'#1e3a8a', damageBase:0.08},
-      {name:'WG 페로브 (1.8eV)', thick:'~350nm', material:'CsPb(I,Br)₃', color:'#ede9fe', textC:'#5b21b6', damageBase:0.15, heal:true},
-      {name:'재결합층',    thick:'~30nm',  material:'AZO/Au', color:'#fef3c7', textC:'#78350f', damageBase:0.25},
-      {name:'NG 페로브 (1.2eV)', thick:'~700nm', material:'FASnPb(IBr)₃', color:'#d1fae5', textC:'#064e3b', damageBase:0.22, heal:true},
-      {name:'ITO 후면전극', thick:'~150nm', material:'ITO', color:'#e2e8f0', textC:'#374151', damageBase:0.08},
-    ]
-  },
-  cigs_only: {
-    name:'CIGS 단일접합', topName:'CIGS', botName:'—',
-    cx_top:0.060, cx_bot:0.060, cx_total:0.060,
-    layers:[
-      {name:'커버 유리',   thick:'1–3mm',  material:'세리아 도핑 유리', color:'#e2e8f0', textC:'#3a5070', damageBase:0.05},
-      {name:'ZnO 전극',   thick:'~500nm', material:'Al:ZnO', color:'#bfdbfe', textC:'#1e3a8a', damageBase:0.10},
-      {name:'CdS 버퍼',   thick:'~50nm',  material:'CdS', color:'#fef3c7', textC:'#78350f', damageBase:0.20},
-      {name:'CIGS 흡수층', thick:'~2μm',   material:'Cu(In,Ga)Se₂', color:'#d1fae5', textC:'#064e3b', damageBase:0.50},
-      {name:'Mo 후면전극', thick:'~1μm',   material:'Mo', color:'#e2e8f0', textC:'#374151', damageBase:0.10},
-    ]
-  },
-  gaas_3j: {
-    name:'GaAs 3중접합 (III-V)', topName:'GaInP', botName:'Ge',
-    cx_top:0.030, cx_bot:0.030, cx_total:0.030,
-    layers:[
-      {name:'커버 유리',   thick:'0.1–0.5mm', material:'세리아 유리', color:'#e2e8f0', textC:'#3a5070', damageBase:0.03},
-      {name:'GaInP 상부',  thick:'~0.7μm', material:'Ga₀.₅₁In₀.₄₉P', color:'#bfdbfe', textC:'#1e3a8a', damageBase:0.20},
-      {name:'GaAs 중부',   thick:'~3μm',   material:'GaAs', color:'#d1fae5', textC:'#064e3b', damageBase:0.25},
-      {name:'터널접합',    thick:'~30nm',  material:'AlGaAs TJ', color:'#fef3c7', textC:'#78350f', damageBase:0.10},
-      {name:'Ge 하부',    thick:'~175μm', material:'Ge (단결정)', color:'#fee2e2', textC:'#7f1d1d', damageBase:0.30},
-    ]
-  }
+// ════════════════════════════════
+// 소재 데이터베이스
+// ════════════════════════════════
+const MAT_DB = {
+  // 커버 유리
+  ceria_glass: {name:'세리아 도핑 유리',    Z:10,  rho:2.53, Eg:'-',  cx:0.005, niel:0.80, role:'커버유리',      color:'#e2e8f0', textC:'#334155', heal:false},
+  // 투명전극
+  ito:         {name:'ITO (In₂O₃:Sn)',     Z:38,  rho:7.14, Eg:3.5,  cx:0.012, niel:1.50, role:'투명전극',      color:'#bfdbfe', textC:'#1e3a8a', heal:false},
+  azo:         {name:'AZO (Al:ZnO)',        Z:22,  rho:5.60, Eg:3.3,  cx:0.010, niel:1.20, role:'투명전극',      color:'#bae6fd', textC:'#0c4a6e', heal:false},
+  fto:         {name:'FTO (F:SnO₂)',        Z:30,  rho:6.99, Eg:3.8,  cx:0.011, niel:1.40, role:'투명전극',      color:'#dbeafe', textC:'#1e3a8a', heal:false},
+  // 흡수층
+  perv_fama:   {name:'FAMAPbI₃ (페로브스카이트)',Z:42,rho:4.05,Eg:1.55,cx:0.015,niel:0.72, role:'흡수층(상부)',  color:'#ede9fe', textC:'#5b21b6', heal:true},
+  perv_cspb:   {name:'CsPbI₂Br (전무기 Perv)', Z:44, rho:4.20, Eg:1.92, cx:0.012, niel:0.72, role:'흡수층(상부)',  color:'#f3e8ff', textC:'#6d28d9', heal:true},
+  cigs:        {name:'Cu(In,Ga)Se₂ (CIGS)', Z:29,  rho:5.75, Eg:1.15, cx:0.060, niel:1.99, role:'흡수층(하부)',  color:'#d1fae5', textC:'#064e3b', heal:false},
+  gaas:        {name:'GaAs',                Z:32,  rho:5.32, Eg:1.42, cx:0.030, niel:1.99, role:'흡수층',        color:'#ccfbf1', textC:'#134e4a', heal:false},
+  si_abs:      {name:'c-Si (단결정)',        Z:14,  rho:2.33, Eg:1.12, cx:0.200, niel:1.00, role:'흡수층(하부)',  color:'#fee2e2', textC:'#7f1d1d', heal:false},
+  // 버퍼/계면층
+  cds:         {name:'CdS 버퍼층',           Z:30,  rho:4.82, Eg:2.42, cx:0.015, niel:1.60, role:'버퍼층',        color:'#fef9c3', textC:'#713f12', heal:false},
+  niox:        {name:'NiOₓ 홀 수송층',       Z:22,  rho:6.67, Eg:3.6,  cx:0.020, niel:1.10, role:'재결합 접합', color:'#fef3c7', textC:'#78350f', heal:false},
+  spiro:       {name:'Spiro-OMeTAD HTL',    Z:8,   rho:1.20, Eg:3.0,  cx:0.025, niel:0.50, role:'홀 수송층',    color:'#fde68a', textC:'#92400e', heal:false},
+  tio2:        {name:'TiO₂ 전자 수송층',     Z:18,  rho:4.23, Eg:3.2,  cx:0.018, niel:1.00, role:'전자 수송층',  color:'#e0f2fe', textC:'#0c4a6e', heal:false},
+  // 후면전극
+  mo:          {name:'Mo 후면전극',           Z:42,  rho:10.28,Eg:'-',  cx:0.008, niel:2.50, role:'후면전극',      color:'#f1f5f9', textC:'#334155', heal:false},
+  ag:          {name:'Ag 후면전극',           Z:47,  rho:10.49,Eg:'-',  cx:0.008, niel:2.80, role:'후면전극',      color:'#f8fafc', textC:'#475569', heal:false},
+  au:          {name:'Au 후면전극',           Z:79,  rho:19.30,Eg:'-',  cx:0.008, niel:3.50, role:'후면전극',      color:'#fef9c3', textC:'#713f12', heal:false},
+  al_el:       {name:'Al 후면전극',           Z:13,  rho:2.70, Eg:'-',  cx:0.007, niel:0.90, role:'후면전극',      color:'#f1f5f9', textC:'#64748b', heal:false},
+  ito_back:    {name:'ITO 후면전극',          Z:38,  rho:7.14, Eg:'-',  cx:0.010, niel:1.50, role:'후면전극',      color:'#dbeafe', textC:'#1e3a8a', heal:false},
 };
 
-const ORBIT_FLUX_YR = { leo:5e9, leo_pol:2e10, meo:5e11, geo:2e10, deep:8e10 };
-const SOLAR_MOD     = { min:1.0, max:0.5 };
-const COVER_ATTEN   = t => Math.exp(-t / 1.2); // 1.2mm half-value for low-E proton
-const COMP_Cx = { famapb:0.015, cspb:0.012, cs_fama:0.013 };
+// ════════════════════════════════
+// 기본 레이어 구조 (Perv/CIGS)
+// ════════════════════════════════
+let layers = [
+  {id:1, matKey:'ceria_glass', thick:0.5,  Z:null, rho:null},
+  {id:2, matKey:'ito',         thick:0.15, Z:null, rho:null},
+  {id:3, matKey:'perv_fama',   thick:0.5,  Z:null, rho:null},
+  {id:4, matKey:'niox',        thick:0.05, Z:null, rho:null},
+  {id:5, matKey:'cigs',        thick:2.0,  Z:null, rho:null},
+  {id:6, matKey:'mo',          thick:1.0,  Z:null, rho:null},
+];
+let nextId = 7;
 
-let eolChart, coverChart, neilDepthChart;
+// 궤도 데이터
+const ORBITS = {
+  leo:     {name:'LEO 저경사 400km', fluxYr:5e9,  solar_mod:{min:1,max:0.8}, rad:{p:55,e:30,gcr:10,spe:5},  note:'지자기 차폐 최대. SAA 통과 시 순간 플럭스 급증. 저에너지 양성자 비율 높아 커버유리 효과적.'},
+  leo_pol: {name:'LEO 극궤도 800km',  fluxYr:3e10, solar_mod:{min:1,max:0.8}, rad:{p:60,e:25,gcr:10,spe:5},  note:'극관 통과 시 GCR 차폐 없음. 양성자 비율 LEO보다 높음. 오로라 활동 기간 전자 플럭스 급증.'},
+  meo:     {name:'MEO GPS 20,200km',  fluxYr:5e11, solar_mod:{min:1,max:0.7}, rad:{p:30,e:55,gcr:10,spe:5},  note:'반앨런대 내부. 가장 가혹한 환경. 외부 반앨런대 MeV급 전자가 지배. MEO 통과는 단기 제한 필수.'},
+  geo:     {name:'GEO 정지궤도 36Mm', fluxYr:2e10, solar_mod:{min:1,max:0.7}, rad:{p:25,e:35,gcr:30,spe:10}, note:'GCR 비율 높음. 통신위성 주류. 태양 입자 이벤트(SPE) 시 수일 내 연간 평균치 초과 가능.'},
+  deep:    {name:'심우주/행성간',      fluxYr:8e10, solar_mod:{min:1,max:0.6}, rad:{p:15,e:10,gcr:60,spe:15}, note:'지자기 차폐 전무. GCR이 주된 손상 요인. 고에너지 중이온(Fe, Ni)이 SEE 및 격자 손상 유발.'},
+};
+const RAD_COLORS = {p:'#1a52c8', e:'#0d8a5e', gcr:'#8b2fc9', spe:'#b86e00'};
+const RAD_LABELS = {p:'양성자', e:'전자', gcr:'GCR 중이온', spe:'SPE 양성자'};
 
-function switchTab(id, el) {
+let eolChart_=null, coverChart_=null, rangeChart_=null;
+
+function sw(id,el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  el.classList.add('active');
-  if (id==='eol') drawEolCharts();
-  if (id==='layer') drawLayerCharts();
+  document.getElementById('tab-'+id).classList.add('active'); el.classList.add('active');
+  if(id==='layers'){buildLayerEditor(); drawRangeChart();}
+  if(id==='eol'){drawEolCharts();}
 }
 
-function supE(e){const s={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};return String(e).split('').map(c=>s[c]||c).join('')}
-function fmtSci(v){if(!v||v<1e-3)return v.toFixed(3);const e=Math.floor(Math.log10(v));return (v/Math.pow(10,e)).toFixed(2)+'×10'+supE(e)}
+function fmtSci(v,d=3){
+  if(!v||v===0) return '0';
+  if(v>=0.01&&v<1e4) return v.toPrecision(d);
+  const e=Math.floor(Math.log10(Math.abs(v)));
+  const sup={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+  return (v/10**e).toFixed(2)+'×10'+String(e).split('').map(c=>sup[c]||c).join('');
+}
+
+// ── 열화 계산 ──
+function getCxEff(){
+  const fluxWeight = layers.reduce((s,l)=>{
+    const m = MAT_DB[l.matKey]; if(!m) return s;
+    return s + m.cx * Math.max(l.thick, 0.01);
+  },0) / Math.max(layers.reduce((s,l)=>s+Math.max(l.thick,0.01),0),1);
+  return Math.max(0.005, fluxWeight);
+}
 
 function pmaxDeg(phi, cx, phi0=1e10){
   if(phi<=phi0) return 1;
-  return Math.max(0, 1 - cx * Math.log10(phi / phi0));
+  return Math.max(0,1-cx*Math.log10(phi/phi0));
 }
 
 function update(){
-  const tanKey = document.getElementById('tandem').value;
-  const comp   = document.getElementById('composition').value;
-  const pce0   = parseFloat(document.getElementById('pce0').value) || 26.3;
-  const pmax0  = parseFloat(document.getElementById('pmax0').value) || 356;
   const orbKey = document.getElementById('orbit').value;
   const solar  = document.getElementById('solar').value;
   const cover  = parseFloat(document.getElementById('cover').value);
-  const dur    = parseFloat(document.getElementById('duration').value);
+  const dur    = parseFloat(document.getElementById('dur').value);
   const heal   = parseFloat(document.getElementById('heal').value);
+  const pmax0  = parseFloat(document.getElementById('pmax0')?.value)||356;
 
-  document.getElementById('covv').textContent = cover.toFixed(1)+' mm';
-  document.getElementById('durv').textContent = dur.toFixed(1)+' yr';
-  document.getElementById('healv').textContent = heal.toFixed(2);
+  document.getElementById('covV').textContent = cover.toFixed(1)+' mm';
+  document.getElementById('durV').textContent = dur.toFixed(1)+' yr';
+  document.getElementById('healV').textContent = heal.toFixed(2);
 
-  const tan = TANDEMS[tanKey];
-  const cx  = COMP_Cx[comp] !== undefined ? COMP_Cx[comp] : tan.cx_total;
-  const cx_eff = (tanKey === 'perv_cigs' || tanKey === 'perv_perv') ? cx * 0.5 + tan.cx_bot * 0.5 : tan.cx_total;
+  const orb = ORBITS[orbKey];
+  const smod = orb.solar_mod[solar];
+  const atten = Math.exp(-cover/1.2);
+  const fluxYr = orb.fluxYr * smod * atten;
+  const totalFlux = fluxYr * dur;
+  const cx = getCxEff();
 
-  const fluxPerYr = ORBIT_FLUX_YR[orbKey] * SOLAR_MOD[solar] * COVER_ATTEN(cover);
-  const totalFlux = fluxPerYr * dur;
+  // 자기회복: 페로브스카이트 층 비중 계산
+  const pervThick = layers.filter(l=>MAT_DB[l.matKey]?.heal).reduce((s,l)=>s+l.thick,0);
+  const totalThick = Math.max(layers.reduce((s,l)=>s+l.thick,0),1);
+  const fPerv = Math.min(0.7, pervThick/totalThick);
+  const healCorr = heal * fPerv;
 
-  const deg    = pmaxDeg(totalFlux, cx_eff);
-  const healCorr = heal * 0.55; // f_perv ≈ 0.55
-  const eolPct = Math.min(100, deg * (1 + healCorr) * 100);
-  const eolPmax = pmax0 * eolPct / 100;
-  const eqFlux  = totalFlux * 3; // Si equiv (rough)
+  const deg = pmaxDeg(totalFlux, cx);
+  const eolPct = Math.min(100, deg*(1+healCorr)*100);
+  const eolPmax = pmax0*eolPct/100;
+  const eqFlux = totalFlux*3;
 
-  document.getElementById('m-eol').textContent  = eolPct.toFixed(1)+'%';
+  document.getElementById('m-eol').textContent = eolPct.toFixed(1)+'%';
   document.getElementById('m-pmax').textContent = eolPmax.toFixed(0);
   document.getElementById('m-flux').textContent = fmtSci(totalFlux);
   document.getElementById('m-eqfl').textContent = fmtSci(eqFlux);
 
-  // Verdict
+  // 궤도 방사선 비율 바
+  const rad = orb.rad;
+  const barDiv = document.getElementById('orb-bar');
+  barDiv.innerHTML = Object.entries(rad).map(([k,v])=>
+    `<div class="orb-seg" style="width:${v}%;background:${RAD_COLORS[k]}" title="${RAD_LABELS[k]} ${v}%"></div>`
+  ).join('');
+  document.getElementById('orb-legend').innerHTML = Object.entries(rad).map(([k,v])=>
+    `<div class="orb-leg"><div class="orb-dot" style="background:${RAD_COLORS[k]}"></div>${RAD_LABELS[k]} ${v}%</div>`
+  ).join('');
+  document.getElementById('orb-note').textContent = orb.note;
+
+  // Grade 판정
+  const grade = eolPct>=80?'A':eolPct>=65?'B':eolPct>=50?'C':'D';
+  const gradeColors = {A:'var(--ok)',B:'var(--accent)',C:'var(--warn)',D:'var(--bad)'};
+  const gradeClasses = {A:'grade-A',B:'grade-B',C:'grade-C',D:'grade-D'};
+  const gradeNames = {A:'우수',B:'양호',C:'주의',D:'부적합'};
+  const gradeRings = {A:'✓',B:'○',C:'!',D:'✕'};
+  const gradeRingStyles = {
+    A:`border-color:var(--ok);color:var(--ok);background:var(--ok-bg)`,
+    B:`border-color:var(--accent);color:var(--accent);background:rgba(26,82,200,.09)`,
+    C:`border-color:var(--warn);color:var(--warn);background:var(--warn-bg)`,
+    D:`border-color:var(--bad);color:var(--bad);background:var(--bad-bg)`,
+  };
+
   const vring = document.getElementById('vring');
-  const vtitle = document.getElementById('vtitle');
-  const vsub   = document.getElementById('vsub');
-  const vact   = document.getElementById('vactions');
+  vring.style.cssText = gradeRingStyles[grade]+';width:64px;height:64px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px;font-family:var(--mono);font-weight:700;transition:all .4s';
+  vring.textContent = gradeRings[grade];
 
-  let icon, title, col, bg, bd, acts;
-  if(eolPct >= 80){
-    icon='✓'; title='우수한 방사선 내성'; col='var(--ok)'; bg='var(--ok-bg)'; bd='var(--ok-bd)';
-    acts=[
-      `EOL Pmax ${eolPmax.toFixed(0)} W/m² — ${dur}년 임무 후 초기 대비 ${eolPct.toFixed(1)}% 유지. 커버 유리 ${cover.toFixed(1)}mm 조건 적합.`,
-      '페로브스카이트 자기회복 효과 반영 시 실제 성능은 더 양호할 수 있음. 궤도 실증(OOV-Cube, 2024) 데이터와 비교 권장.',
-      'HELIAS Lab. 68MeV 양성자 시험으로 Cx 실측값 확보 시 예측 정밀도 향상 가능.'
-    ];
-  } else if(eolPct >= 60){
-    icon='!'; title='주의 — 성능 저하 예상'; col='var(--warn)'; bg='var(--warn-bg)'; bd='var(--warn-bd)';
-    acts=[
-      `EOL Pmax ${eolPmax.toFixed(0)} W/m²로 초기 대비 ${(100-eolPct).toFixed(0)}% 손실. 전력 예산 재검토 필요.`,
-      `커버 유리 ${cover.toFixed(1)}mm → ${Math.min(cover+1, 5).toFixed(1)}mm 증가 시 저에너지 양성자 감쇠 효과 검토.`,
-      '임무 기간 단축 또는 태양전지 패널 면적 확대(EOL 출력 보상) 방안 검토 권장.'
-    ];
-  } else {
-    icon='✕'; title='부적합 — 재설계 필요'; col='var(--bad)'; bg='var(--bad-bg)'; bd='var(--bad-bd)';
-    acts=[
-      `EOL Pmax ${eolPmax.toFixed(0)} W/m² — 초기 대비 ${(100-eolPct).toFixed(0)}% 손실. 임무 전력 요구 충족 불가.`,
-      tanKey==='perv_si' ? 'Perv/Si 탠덤 → Perv/CIGS 탠덤으로 교체 강력 권장 (CIGS 방사선 내성 ≫ Si-HJ).' : '커버 유리 두께 최대화 및 궤도 재검토 필요.',
-      '방사선 강화 소자 선택 또는 GaAs 3중접합 (우주 검증 완료) 대체 검토.'
-    ];
-  }
+  const gb = document.getElementById('gradeBadge');
+  gb.className = 'grade-badge '+gradeClasses[grade];
+  gb.textContent = 'Grade '+grade;
 
-  vring.style.cssText = `border-color:${col};color:${col};background:${bg};width:70px;height:70px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px;font-family:var(--mono);font-weight:700;transition:all .4s`;
-  vring.textContent = icon;
-  vtitle.textContent = title; vtitle.style.color = col;
-  vsub.textContent = `${tan.name} · ${dur}년 · ${orbKey.toUpperCase()} · 커버 ${cover.toFixed(1)}mm`;
-  vact.innerHTML = acts.map((a,i)=>`<div class="act"><div class="actn" style="background:${bg};color:${col}">${i+1}</div><span class="actt">${a}</span></div>`).join('');
+  document.getElementById('vtitle').textContent = gradeNames[grade];
+  document.getElementById('vtitle').style.color = gradeColors[grade];
+  document.getElementById('vsub').textContent =
+    `${orb.name} · ${dur}년 · 커버 ${cover}mm · EOL ${eolPct.toFixed(1)}%`;
 
-  // Layer stack
-  const stack = document.getElementById('layer-stack');
-  const fluxRatio = Math.min(totalFlux / 2e12, 1);
-  stack.innerHTML = tan.layers.map(l => {
-    const dmg = Math.min(l.damageBase * fluxRatio * 3, 0.99);
-    const dmgPct = (dmg * 100).toFixed(0);
-    const healTag = l.heal ? `<span class="heal-badge" style="margin-left:6px">자기회복</span>` : '';
-    return `<div class="layer" style="background:${l.color}">
-      <div>
-        <div class="layer-name" style="color:${l.textC}">${l.name}${healTag}</div>
-        <div class="layer-sub" style="color:${l.textC}">${l.thick} · ${l.material}</div>
-        <div class="layer-bar" style="width:${dmgPct}%;background:${l.textC};opacity:.5;max-width:200px"></div>
-      </div>
-      <div class="layer-val" style="color:${l.textC}">손상 ~${dmgPct}%</div>
-    </div>`;
-  }).join('');
+  // Grade 이유 설명
+  const gradeExplain = document.getElementById('gradeExplain');
+  const cx_eff = cx.toFixed(4);
+  gradeExplain.innerHTML =
+    `<b>왜 Grade ${grade}인가?</b><br>` +
+    `현재 레이어 구조의 유효 손상계수 Cx = <b>${cx_eff}</b><br>` +
+    `누적 플럭스 ${fmtSci(totalFlux)} p⁺/cm² 에서 Pmax 잔존 = <b>${eolPct.toFixed(1)}%</b><br>` +
+    (fPerv>0 ? `페로브스카이트 층 비중 ${(fPerv*100).toFixed(0)}% × 자기회복 계수 ${heal.toFixed(2)} → +${(healCorr*100).toFixed(1)}% 보정<br>` : '') +
+    `<span style="color:${gradeColors[grade]}">${
+      grade==='A'?'→ ECSS 통신위성 표준(EOL ≥ 80%) 만족':
+      grade==='B'?'→ 패널 면적 확대 시 임무 수행 가능 (EOL 65–80%)':
+      grade==='C'?'→ 임무 기간 단축 또는 전력 시스템 재설계 필요 (EOL 50–65%)':
+      '→ EOL < 50%: 소재 교체 또는 궤도 변경 필수'
+    }</span>`;
 
-  // Subcell table
-  const Jsc0=16.5, Voc0=1.84, FF0=0.80;
-  const deg_top = pmaxDeg(totalFlux, COMP_Cx[comp]) * (1 + heal*0.8);
-  const deg_bot = pmaxDeg(totalFlux, tan.cx_bot);
-  const deg_all = Math.min(deg_top, deg_bot) * (1+healCorr);
-  const tbody = document.getElementById('subcell-tbody');
-  if(tbody) tbody.innerHTML = [
-    ['PCE (%)',    pce0.toFixed(1),          (pce0*deg_top).toFixed(1),          (pce0*deg_bot).toFixed(1),          (pce0*deg_all).toFixed(1)],
-    ['Pmax (W/m²)',pmax0.toFixed(0),         (pmax0*deg_top).toFixed(0),         (pmax0*deg_bot).toFixed(0),         eolPmax.toFixed(0)],
-    ['Jsc (mA/cm²)',Jsc0.toFixed(1),         (Jsc0*(0.95+0.05*deg_top)).toFixed(1),(Jsc0*deg_bot*0.9+Jsc0*0.1).toFixed(1),(Jsc0*deg_all*0.9+Jsc0*0.1).toFixed(1)],
-    ['Voc (V)',    Voc0.toFixed(2),          (Voc0*(0.92+0.08*deg_top)).toFixed(2),(Voc0*deg_bot).toFixed(2),          (Voc0*deg_all).toFixed(2)],
-    ['FF',        FF0.toFixed(2),            (FF0*(0.96+0.04*deg_top)).toFixed(2),(FF0*deg_bot).toFixed(2),           (FF0*deg_all).toFixed(2)],
-  ].map(([param,...vals])=>`<tr><td style="font-weight:500">${param}</td>${vals.map((v,i)=>`<td style="font-family:var(--mono);${i===3?`font-weight:700;color:${eolPct>=80?'var(--ok)':eolPct>=60?'var(--warn)':'var(--bad)'}`:''}">${v}</td>`).join('')}</tr>`).join('');
+  // 권장 조치
+  const acts = grade==='A'
+    ? ['CREME96/SPENVIS로 정밀 LET 스펙트럼 기반 검증 권장','태양 입자 이벤트(SPE) 최악 시나리오 추가 검토','지상 68MeV 양성자 시험으로 Cx 실측값 확보 권장']
+    : grade==='B'
+    ? [`커버유리 ${cover}mm → ${Math.min(cover+1,5).toFixed(1)}mm 증가 후 재계산`,'패널 면적 10–20% 확대로 EOL 전력 보상 설계 검토','자기회복 계수 개선을 위한 페로브스카이트 층 두께 최적화']
+    : grade==='C'
+    ? [`임무 기간 ${dur}년 → ${(dur*0.7).toFixed(1)}년으로 단축 검토`,'Perv/Si 구조라면 Perv/CIGS로 교체 (EOL 20–30%p 개선 예상)','커버유리 최대 두께(5mm) 적용 후 재계산']
+    : [`현재 구조로는 임무 목표 충족 불가 — 소재 교체 필수`,'Perv/CIGS → CIGS Cx 최소화 또는 GaAs 3중접합(Cx≈0.03) 검토','궤도 변경: MEO → GEO 또는 LEO로 방사선 환경 완화 검토'];
 
-  drawEolCharts();
+  const acBg = {A:'var(--ok-bg)',B:'rgba(26,82,200,.09)',C:'var(--warn-bg)',D:'var(--bad-bg)'};
+  const acTxt = {A:'var(--ok)',B:'var(--accent)',C:'var(--warn)',D:'var(--bad)'};
+  document.getElementById('vdiv').innerHTML =
+    `<div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;margin-bottom:8px;text-transform:uppercase">권장 조치</div>`+
+    acts.map((a,i)=>`<div class="act"><div class="actn" style="background:${acBg[grade]};color:${acTxt[grade]}">${i+1}</div><span class="actt">${a}</span></div>`).join('');
+
+  // 층별 손상 시각화
+  buildStackVis(totalFlux);
+
+  // EOL 차트 (assess 탭)
+  drawAssessEolChart(fluxYr, cx, healCorr, pmax0, dur);
 }
 
-function drawEolCharts(){
-  const tanKey = document.getElementById('tandem').value;
-  const comp   = document.getElementById('composition').value;
-  const pmax0  = parseFloat(document.getElementById('pmax0').value) || 356;
-  const orbKey = document.getElementById('orbit').value;
-  const solar  = document.getElementById('solar').value;
-  const cover  = parseFloat(document.getElementById('cover').value);
-  const dur    = parseFloat(document.getElementById('duration').value);
-  const heal   = parseFloat(document.getElementById('heal').value);
+function buildStackVis(totalFlux){
+  const fluxR = Math.min(totalFlux/2e12,1);
+  document.getElementById('stackVis').innerHTML = layers.map(l=>{
+    const m = MAT_DB[l.matKey]; if(!m) return '';
+    const dmg = Math.min(m.cx * fluxR * 40, 0.98);
+    const pct = (dmg*100).toFixed(0);
+    return `<div class="sv-row" style="background:${m.color}">
+      <div>
+        <div class="sv-name" style="color:${m.textC}">${m.name} ${m.heal?'<span style="font-size:10px;background:rgba(124,58,237,.15);color:#7c3aed;padding:1px 6px;border-radius:3px;font-family:var(--mono)">자기회복</span>':''}</div>
+        <div class="sv-sub" style="color:${m.textC}">${l.thick} μm · Cx=${m.cx} · Z=${m.Z}</div>
+        <div class="sv-bar" style="width:${pct}%;background:${m.textC};opacity:.45;max-width:200px"></div>
+      </div>
+      <div class="sv-dmg" style="color:${m.textC}">손상 ~${pct}%</div>
+    </div>`;
+  }).join('');
+}
 
-  const tan = TANDEMS[tanKey];
-  const cx_eff = (COMP_Cx[comp]||tan.cx_total)*0.5 + tan.cx_bot*0.5;
-  const fluxPerYr = ORBIT_FLUX_YR[orbKey] * SOLAR_MOD[solar] * COVER_ATTEN(cover);
-  const healCorr = heal * 0.55;
-
-  // EOL time series
-  const years=[], pmaxArr=[];
-  const eolTbody = document.getElementById('eol-tbody');
-  if(eolTbody) eolTbody.innerHTML='';
-  for(let y=0; y<=Math.max(dur,10); y+=0.5){
-    const phi = fluxPerYr * y;
-    const deg = pmaxDeg(phi, cx_eff) * (1+healCorr);
-    const pct = Math.min(100, deg*100);
-    years.push(y);
-    pmaxArr.push({x:y, y:pmax0*pct/100});
-    if(y % 1 === 0 && eolTbody && y > 0){
-      const verdict = pct>=80?'✓ 양호':pct>=60?'! 주의':'✕ 위험';
-      const vColor  = pct>=80?'var(--ok)':pct>=60?'var(--warn)':'var(--bad)';
-      eolTbody.innerHTML += `<tr>
-        <td style="font-family:var(--mono)">${y}년</td>
-        <td style="font-family:var(--mono)">${fmtSci(fluxPerYr*y)}</td>
-        <td style="font-family:var(--mono)">${cx_eff.toFixed(3)}</td>
-        <td style="font-family:var(--mono)">${(healCorr*100).toFixed(0)}%</td>
-        <td style="font-family:var(--mono);font-weight:700">${pct.toFixed(1)}%</td>
-        <td style="font-family:var(--mono)">${(pmax0*pct/100).toFixed(0)}</td>
-        <td style="color:${vColor};font-weight:500">${verdict}</td>
-      </tr>`;
-    }
+function drawAssessEolChart(fluxYr, cx, healCorr, pmax0, dur){
+  const pts=[];
+  for(let y=0;y<=Math.max(dur,10);y+=0.5){
+    const phi=fluxYr*y;
+    const p=Math.min(100,pmaxDeg(phi,cx)*(1+healCorr)*100);
+    pts.push({x:y,y:pmax0*p/100});
   }
-
-  const eolEl = document.getElementById('eol-chart');
-  if(!eolEl) return;
-  if(eolChart){ eolChart.data.datasets[0].data=pmaxArr; eolChart.update('none'); }
-  else {
-    eolChart = new Chart(eolEl,{type:'line',data:{datasets:[{label:'Pmax',data:pmaxArr,parsing:false,borderColor:'#1a52c8',borderWidth:2,pointRadius:0,tension:.3,fill:true,backgroundColor:'rgba(26,82,200,.07)'}]},
+  const el=document.getElementById('eolChart');
+  if(!el) return;
+  if(eolChart_){eolChart_.data.datasets[0].data=pts;eolChart_.update('none');}
+  else{
+    eolChart_=new Chart(el,{type:'line',data:{datasets:[{label:'Pmax',data:pts,parsing:false,borderColor:'#1a52c8',borderWidth:2,pointRadius:0,tension:.3,fill:true,backgroundColor:'rgba(26,82,200,.07)'}]},
       options:{responsive:true,maintainAspectRatio:false,animation:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Pmax = ${c.parsed.y.toFixed(0)} W/m²`}}},
         scales:{x:{type:'linear',title:{display:true,text:'임무 기간 (년)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
                 y:{title:{display:true,text:'Pmax (W/m²)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}}}}});
   }
+}
 
-  // Cover thickness chart
-  const coverEl = document.getElementById('cover-chart');
-  if(!coverEl) return;
-  const coverData=[];
-  for(let t=0;t<=5;t+=0.1){
-    const phi2 = ORBIT_FLUX_YR[orbKey]*SOLAR_MOD[solar]*COVER_ATTEN(t)*dur;
-    const deg2 = pmaxDeg(phi2,cx_eff)*(1+healCorr);
-    coverData.push({x:t, y:pmax0*Math.min(1,deg2)});
+// ════════════════════════════════
+// Layer Editor
+// ════════════════════════════════
+function buildLayerEditor(){
+  const container = document.getElementById('layerEditor');
+  container.innerHTML = layers.map((l,i)=>{
+    const m = MAT_DB[l.matKey]||{};
+    const Zval = l.Z!==null ? l.Z : (m.Z||'');
+    const rhoVal = l.rho!==null ? l.rho : (m.rho||'');
+    return `<div class="layer-row" id="lr-${l.id}" draggable="true"
+      ondragstart="dragStart(${l.id})" ondragover="dragOver(event,${l.id})" ondrop="drop(event,${l.id})" ondragend="dragEnd()">
+      <div class="layer-header">
+        <span class="layer-handle" title="드래그하여 순서 변경">⋮⋮</span>
+        <div class="layer-color-dot" style="background:${m.color||'#eee'};border:1px solid rgba(0,0,0,.1)"></div>
+        <span class="layer-name-txt">${i+1}. ${m.name||l.matKey} <span style="font-size:11px;font-family:var(--mono);color:var(--muted)">(${m.role||''})</span></span>
+        <div class="layer-btns">
+          <button class="lbtn" onclick="moveLayer(${l.id},-1)" title="위로">↑</button>
+          <button class="lbtn" onclick="moveLayer(${l.id},1)" title="아래로">↓</button>
+          <button class="lbtn danger" onclick="removeLayer(${l.id})" title="삭제">✕</button>
+        </div>
+      </div>
+      <div class="layer-fields">
+        <div>
+          <label>소재 선택</label>
+          <select onchange="onMatChange(${l.id},this.value)">
+            ${Object.entries(MAT_DB).map(([k,v])=>`<option value="${k}" ${k===l.matKey?'selected':''}>${v.name}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label>두께 (μm)</label>
+          <input type="number" value="${l.thick}" min="0.001" step="0.01" onchange="updateLayerField(${l.id},'thick',this.value)">
+        </div>
+        <div>
+          <label>원자번호 Z_eff</label>
+          <input type="number" value="${Zval}" min="1" max="100" step="0.1" placeholder="자동(${m.Z||'?'})" onchange="updateLayerField(${l.id},'Z',this.value)">
+        </div>
+        <div>
+          <label>밀도 ρ (g/cm³)</label>
+          <input type="number" value="${rhoVal}" min="0.1" max="25" step="0.01" placeholder="자동(${m.rho||'?'})" onchange="updateLayerField(${l.id},'rho',this.value)">
+        </div>
+        <div>
+          <label>손상계수 Cx</label>
+          <input type="number" value="${m.cx||''}" min="0.001" max="0.5" step="0.001" readonly style="background:var(--bg3);color:var(--muted)">
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  buildMatDb();
+  buildStructPreview();
+  update();
+}
+
+function buildMatDb(){
+  document.getElementById('matDbTable').innerHTML = Object.entries(MAT_DB).map(([k,m],i)=>`
+    <tr style="background:${i%2===0?'var(--bg2)':'var(--bg1)'}">
+      <td style="padding:6px 10px;font-size:13px"><b style="color:${m.textC||'#334155'}">${m.name}</b></td>
+      <td style="padding:6px 10px;font-family:var(--mono);font-size:12px;text-align:center">${m.Z}</td>
+      <td style="padding:6px 10px;font-family:var(--mono);font-size:12px;text-align:center">${m.rho}</td>
+      <td style="padding:6px 10px;font-family:var(--mono);font-size:12px;text-align:center">${m.Eg}</td>
+      <td style="padding:6px 10px;font-size:12px;color:var(--muted)">${m.role}</td>
+    </tr>`).join('');
+}
+
+function buildStructPreview(){
+  const total = layers.reduce((s,l)=>s+l.thick,0)||1;
+  const minH = 18, maxH = 80;
+  document.getElementById('structPreview').innerHTML =
+    `<div style="font-size:12px;color:var(--muted);margin-bottom:8px;text-align:center">↓ 광 입사 방향 — 총 두께 ${total.toFixed(2)} μm</div>`+
+    `<div style="border-radius:8px;overflow:hidden;border:1px solid var(--border)">`+
+    layers.map(l=>{
+      const m=MAT_DB[l.matKey]||{};
+      const h=Math.max(minH,Math.min(maxH,l.thick/total*400));
+      return `<div style="background:${m.color||'#eee'};padding:0 12px;height:${h}px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.06)">
+        <span style="font-size:12px;font-weight:500;color:${m.textC||'#334155'}">${m.name||l.matKey}</span>
+        <span style="font-family:var(--mono);font-size:11px;color:${m.textC||'#334155'};opacity:.7">${l.thick} μm</span>
+      </div>`;
+    }).join('')+`</div>`;
+}
+
+// Layer CRUD
+function addLayer(){
+  layers.push({id:nextId++, matKey:'ito', thick:0.1, Z:null, rho:null});
+  buildLayerEditor();
+}
+function removeLayer(id){
+  if(layers.length<=1){alert('최소 1개 층이 필요합니다.');return;}
+  layers=layers.filter(l=>l.id!==id);
+  buildLayerEditor();
+}
+function moveLayer(id,dir){
+  const i=layers.findIndex(l=>l.id===id);
+  const j=i+dir;
+  if(j<0||j>=layers.length) return;
+  [layers[i],layers[j]]=[layers[j],layers[i]];
+  buildLayerEditor();
+}
+function onMatChange(id,matKey){
+  const l=layers.find(l=>l.id===id);
+  if(l){l.matKey=matKey;l.Z=null;l.rho=null;}
+  buildLayerEditor();
+}
+function updateLayerField(id,field,val){
+  const l=layers.find(l=>l.id===id);
+  if(l){l[field]=parseFloat(val)||0;}
+  buildStructPreview();
+  update();
+}
+
+// Drag & Drop
+let dragId=null;
+function dragStart(id){dragId=id; document.getElementById('lr-'+id).classList.add('dragging');}
+function dragOver(e,id){e.preventDefault();}
+function drop(e,id){
+  e.preventDefault();
+  if(dragId===id) return;
+  const fi=layers.findIndex(l=>l.id===dragId), ti=layers.findIndex(l=>l.id===id);
+  const [moved]=layers.splice(fi,1); layers.splice(ti,0,moved);
+  buildLayerEditor();
+}
+function dragEnd(){dragId=null; document.querySelectorAll('.layer-row').forEach(r=>r.classList.remove('dragging'));}
+
+// Range chart
+function drawRangeChart(){
+  const el=document.getElementById('rangeChart'); if(!el) return;
+  // Fe 이온 @ 100 MeV 기준 대략적 사정거리
+  const labels=[], thickArr=[], rangeArr=[];
+  layers.forEach(l=>{
+    const m=MAT_DB[l.matKey]||{}; const rho=l.rho||m.rho||3;
+    const range_approx = 1800/rho; // 100 MeV Fe 이온 Al 환산 사정거리 근사 [μm]
+    labels.push(m.name||l.matKey);
+    thickArr.push(l.thick);
+    rangeArr.push(Math.min(range_approx,500));
+  });
+  if(rangeChart_){
+    rangeChart_.data.labels=labels;
+    rangeChart_.data.datasets[0].data=thickArr;
+    rangeChart_.data.datasets[1].data=rangeArr;
+    rangeChart_.update('none');
+  } else {
+    rangeChart_=new Chart(el,{type:'bar',data:{labels,datasets:[
+      {label:'층 두께 (μm)',data:thickArr,backgroundColor:'rgba(26,82,200,.6)',borderRadius:3},
+      {label:'Fe 이온 사정거리 근사 (μm)',data:rangeArr,backgroundColor:'rgba(184,110,0,.5)',borderRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,animation:false,indexAxis:'y',
+      plugins:{legend:{display:true,labels:{font:{size:12},color:'#3a5070'}}},
+      scales:{x:{title:{display:true,text:'μm',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
+              y:{ticks:{color:'#3a5070',font:{size:11}}}}}});
   }
-  if(coverChart){ coverChart.data.datasets[0].data=coverData; coverChart.update('none'); }
-  else {
-    coverChart = new Chart(coverEl,{type:'line',data:{datasets:[{label:'EOL Pmax',data:coverData,parsing:false,borderColor:'#b86e00',borderWidth:2,pointRadius:0,tension:.3,fill:true,backgroundColor:'rgba(184,110,0,.07)'}]},
+}
+
+// ════════════════════════════════
+// EOL 탭 차트
+// ════════════════════════════════
+function drawEolCharts(){
+  const orbKey=document.getElementById('orbit').value;
+  const solar=document.getElementById('solar').value;
+  const cover=parseFloat(document.getElementById('cover').value);
+  const dur=parseFloat(document.getElementById('dur').value);
+  const heal=parseFloat(document.getElementById('heal').value);
+  const pmax0=parseFloat(document.getElementById('pmax0')?.value)||356;
+
+  const orb=ORBITS[orbKey];
+  const smod=orb.solar_mod[solar];
+  const atten=Math.exp(-cover/1.2);
+  const fluxYr=orb.fluxYr*smod*atten;
+  const cx=getCxEff();
+  const pervThick=layers.filter(l=>MAT_DB[l.matKey]?.heal).reduce((s,l)=>s+l.thick,0);
+  const totalThick=Math.max(layers.reduce((s,l)=>s+l.thick,0),1);
+  const fPerv=Math.min(0.7,pervThick/totalThick);
+  const healCorr=heal*fPerv;
+
+  // EOL table
+  const tbody=document.getElementById('eolTbody');
+  if(tbody){
+    tbody.innerHTML='';
+    for(let y=1;y<=15;y++){
+      const phi=fluxYr*y;
+      const pct=Math.min(100,pmaxDeg(phi,cx)*(1+healCorr)*100);
+      const g=pct>=80?'A':pct>=65?'B':pct>=50?'C':'D';
+      const gc={A:'var(--ok)',B:'var(--accent)',C:'var(--warn)',D:'var(--bad)'};
+      const isCur=Math.abs(y-dur)<0.6;
+      tbody.innerHTML+=`<tr style="background:${isCur?'rgba(26,82,200,.07)':''}">
+        <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;${isCur?'font-weight:700':''}">${y}년${isCur?' ◄':''}</td>
+        <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;text-align:center">${fmtSci(phi)}</td>
+        <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;text-align:center">${cx.toFixed(4)}</td>
+        <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;text-align:center">+${(healCorr*100).toFixed(1)}%</td>
+        <td style="padding:7px 10px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;color:${gc[g]}">${pct.toFixed(1)}%</td>
+        <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;text-align:center">${(pmax0*pct/100).toFixed(0)}</td>
+        <td style="padding:7px 10px;text-align:center"><span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${gc[g]}">Grade ${g}</span></td>
+      </tr>`;
+    }
+  }
+
+  // Cover chart
+  const coverPts=[];
+  for(let t=0;t<=5;t+=0.1){
+    const a2=Math.exp(-t/1.2);
+    const fy2=orb.fluxYr*smod*a2;
+    const p2=Math.min(100,pmaxDeg(fy2*dur,cx)*(1+healCorr)*100);
+    coverPts.push({x:t,y:pmax0*p2/100});
+  }
+  const cel=document.getElementById('coverChart');
+  if(!cel) return;
+  if(coverChart_){coverChart_.data.datasets[0].data=coverPts;coverChart_.update('none');}
+  else{
+    coverChart_=new Chart(cel,{type:'line',data:{datasets:[{label:'EOL Pmax',data:coverPts,parsing:false,borderColor:'#b86e00',borderWidth:2,pointRadius:0,tension:.3,fill:true,backgroundColor:'rgba(184,110,0,.07)'}]},
       options:{responsive:true,maintainAspectRatio:false,animation:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`EOL Pmax = ${c.parsed.y.toFixed(0)} W/m²`}}},
-        scales:{x:{type:'linear',min:0,max:5,title:{display:true,text:'커버 유리 두께 (mm)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
+        scales:{x:{type:'linear',min:0,max:5,title:{display:true,text:'커버유리 두께 (mm)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
                 y:{title:{display:true,text:'EOL Pmax (W/m²)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}}}}});
   }
 }
 
-function drawLayerCharts(){
-  const el = document.getElementById('niel-depth-chart');
-  if(!el) return;
-  const tanKey = document.getElementById('tandem').value;
-  const tan = TANDEMS[tanKey];
-  const datasets=[
-    {label:'10 MeV 양성자',data:[],borderColor:'#b52020',borderWidth:2,pointRadius:0,tension:.4,fill:false},
-    {label:'68 MeV 양성자',data:[],borderColor:'#1a52c8',borderWidth:2,pointRadius:0,tension:.4,fill:false},
-    {label:'1 MeV 전자',   data:[],borderColor:'#0d8a5e',borderWidth:2,pointRadius:0,tension:.4,fill:false,borderDash:[4,3]},
-  ];
-  for(let d=0;d<=20;d+=0.2){
-    const n10  = 2.0*Math.exp(-d/1.5)*(1+0.3*Math.sin(d*2));
-    const n68  = 0.8*(1+0.1*Math.sin(d*0.5))*Math.exp(-d/40);
-    const ne1  = 0.3*Math.exp(-d/8)*(1+0.15*Math.cos(d*3));
-    datasets[0].data.push({x:d,y:n10});
-    datasets[1].data.push({x:d,y:n68});
-    datasets[2].data.push({x:d,y:ne1});
-  }
-
-  // Layer detail
-  const detail = document.getElementById('layer-detail');
-  if(detail){
-    detail.innerHTML = tan.layers.map((l,i)=>{
-      const thick_nm = parseFloat(l.thick)*1e3 || 500;
-      return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <div style="width:16px;height:${Math.min(Math.max(16,Math.log10(thick_nm+1)*12),60)}px;border-radius:3px;background:${l.color};border:1px solid rgba(0,0,0,.1);flex-shrink:0"></div>
-        <div>
-          <div style="font-size:14px;font-weight:500;color:${l.textC}">${l.name} ${l.heal?'<span class="heal-badge">자기회복</span>':''}</div>
-          <div style="font-family:var(--mono);font-size:12px;color:var(--muted)">${l.thick} · ${l.material}</div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  if(neilDepthChart){ neilDepthChart.data.datasets=datasets; neilDepthChart.update('none'); return; }
-  neilDepthChart = new Chart(el,{type:'line',data:{datasets},
-    options:{responsive:true,maintainAspectRatio:false,animation:false,
-      plugins:{legend:{display:true,labels:{font:{size:12},color:'#3a5070'}}},
-      scales:{x:{type:'linear',min:0,max:20,title:{display:true,text:'깊이 (μm)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
-              y:{type:'logarithmic',title:{display:true,text:'NIEL 손상 (상대값)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toFixed(1)}}}}});
-}
-
+// ── 초기화 ──
 update();
 </script>
 </body>

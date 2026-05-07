@@ -265,6 +265,25 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 <div class="mnote">
   <strong>모델:</strong> NRL 방법론 Pmax 열화 (Tada+1982). 자기회복 보정 (Lang+2020 Joule). GEO 양성자+전자 복합 환경 (AE8/AP8). 커버유리 감쇠: 지수 모델. 궤도 방사선 비율: Dyer et al. (2003), ECSS-E-ST-10-04.
 </div>
+<div style="background:rgba(181,32,32,.07);border:1px solid rgba(181,32,32,.3);border-radius:6px;padding:12px 16px;margin-top:10px;line-height:1.8;font-size:13px">
+  <div style="font-family:var(--mono);font-size:11px;color:#b52020;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">⚠️ 데이터 신뢰도 안내 — 반드시 숙지하십시오</div>
+  <div style="color:var(--text)">
+    <b>실험으로 직접 확인된 수치 (★★★★★)</b><br>
+    · Perv/CIGS 85% 잔존 @ 68 MeV / 2×10¹² p⁺/cm² — Lang et al. (2020) Joule, in operando 직접 측정<br>
+    · Perv/Si 효율 1%로 급락 (동일 조건) — 같은 논문의 직접 측정값<br>
+    · GaAs 3중접합 Cx≈0.03 — NASA JPL 장기 데이터베이스 기반<br><br>
+    <b>방향성은 맞으나 수치에 주의 필요 (★★★☆☆)</b><br>
+    · 페로브스카이트 Cx=0.015 — Nguyen et al. (2023) 시뮬레이션에서 간접 추정. 조성·에너지·두께에 따라 크게 달라질 수 있음<br>
+    · CIGS Cx=0.06 — Lang+2020 역산 추정값. 최신 연구(Cs 처리 CIGS, 2024)에서 내성이 더 우수할 수 있음을 시사<br>
+    · 자기회복 계수 H_rec 기본값 0.30 — Lang+2020에서 관찰된 현상 기반이나 정량값은 추정<br><br>
+    <b>실험 데이터 부재 — 저자 추정값 (★☆☆☆☆)</b><br>
+    · 투명전극(ITO/AZO/FTO), 수송층(NiOₓ·Spiro·TiO₂), 후면전극(Mo/Ag/Au) Cx — 태양전지 맥락의 우주방사선 실험 데이터 희소. 추정값임<br>
+    · 궤도별 방사선 비율(%) — AE8/AP8 모델 기반 단순화 수치<br><br>
+    <b style="color:#b52020">이 시뮬레이터는 예비 스크리닝 전용입니다.</b>
+    비행 소자 선정 및 실제 임무 설계에는 반드시 68 MeV 양성자 빔 시험(JESD57 준용)으로 실측 Cx를 취득하고 파라미터를 갱신하십시오.
+    기존 Si·III-V 반도체용 시험 프로토콜은 페로브스카이트에 그대로 적용되지 않습니다 (Kirmani et al. 2022 합의 논문).
+  </div>
+</div>
 </div>
 
 <!-- ══ TAB 2: LAYER EDITOR ══ -->

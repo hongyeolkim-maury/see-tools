@@ -167,6 +167,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
   <div class="tab" onclick="sw('orbit',this)">궤도 환경 상세</div>
   <div class="tab" onclick="sw('guide',this)">평가 항목 해설</div>
   <div class="tab" onclick="sw('aiaa',this)">AIAA S-111A 시험 조건</div>
+  <div class="tab" onclick="sw('testplan',this)">시험 계획 보조</div>
 </div>
 
 <!-- ══ TAB 1: ASSESS ══ -->
@@ -466,73 +467,395 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 
 <!-- ══ TAB 5: GUIDE ══ -->
 <div id="tab-guide" class="tab-panel">
-<div style="max-width:860px">
+<div style="max-width:980px">
+
+  <!-- ① 도구 목적 -->
   <div class="panel">
-    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">왜 이 시뮬레이션이 필요한가</div></div>
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">이 도구의 목적과 사용 범위</div></div>
     <div class="pb">
       <div class="info-box">
-        페로브스카이트/CIGS 탠덤 태양전지는 <b>2024년 현재 실험실 효율 33%를 돌파</b>하며 우주 전력 시스템의 차세대 후보로 급부상했습니다. ESA는 2024년 7월 OOV-Cube 위성에 탑재하여 실제 궤도 검증을 시작했습니다. 그러나 우주 환경에서의 방사선 내성 데이터는 기존 GaAs 3중접합 대비 현저히 부족합니다.
+        페로브스카이트/CIGS 탠덤 태양전지는 <b>2024년 실험실 효율 33% 돌파</b>와 함께 우주 전력 시스템의 차세대 후보로 급부상했습니다. ESA는 2024년 7월 OOV-Cube 위성에 탑재하여 궤도 검증을 시작했으나, 우주 방사선 내성 데이터는 기존 GaAs 3중접합 대비 현저히 부족합니다. 이 도구는 NRL Tada(1982) 모델 기반의 <b>정성적 경향 분석 및 실험 계획 보조</b> 목적으로 설계되었습니다.
       </div>
-      <div style="font-size:14px;color:var(--text);line-height:1.8;margin-top:12px">
-        이 시뮬레이션은 다음 세 가지 질문에 답합니다.<br><br>
-        <b>① "이 탠덤 구조가 목표 궤도에서 임무 기간 동안 살아남을 수 있는가?"</b><br>
-        NRL 방법론 기반 Pmax 열화 모델로 EOL 출력을 예측합니다.<br><br>
-        <b>② "어느 층이 가장 취약하고 어떻게 개선할 수 있는가?"</b><br>
-        레이어 편집기로 구조를 변경하고 각 층의 방사선 손상 비중을 실시간으로 비교합니다.<br><br>
-        <b>③ "커버유리를 얼마나 두껍게 해야 최적인가?"</b><br>
-        커버유리 두께-EOL Pmax 곡선으로 무게 대비 효과의 변곡점을 찾습니다.
+      <div class="warn-box" style="margin-top:8px">
+        <b>신뢰 범위 명시:</b> 출력되는 Pmax 절댓값은 입력된 Cx·Φ₀의 정확도에 전적으로 의존합니다. 페로브스카이트·CIGS의 Cx는 실험으로 측정된 값이 아닌 문헌 추정값이므로, 절댓값보다 <b>상대적 경향과 설계 방향</b> 파악에 활용하십시오. GaAs/Si/Ge 기반 셀에는 NRL Handbook 데이터 기반의 더 신뢰성 있는 계산이 가능합니다(시험 계획 보조 탭 참조).
+      </div>
+      <div style="font-size:13px;line-height:1.9;margin-top:12px">
+        <b>각 탭의 역할:</b><br>
+        <span style="font-family:var(--mono);color:var(--accent);font-size:11px">방사선 내성 평가</span> — 궤도·임무기간·커버유리 조건에서 EOL Pmax를 계산하고 ECSS Grade 판정<br>
+        <span style="font-family:var(--mono);color:var(--accent);font-size:11px">레이어 구조 편집</span> — 소재·두께를 변경하여 Cx_eff 변화와 층별 손상 기여도 실시간 비교<br>
+        <span style="font-family:var(--mono);color:var(--accent);font-size:11px">EOL 출력 예측</span> — 커버유리 두께별 EOL Pmax 곡선 및 임무기간별 추이<br>
+        <span style="font-family:var(--mono);color:var(--accent);font-size:11px">궤도 환경 상세</span> — AE8/AP8 기반 궤도별 연간 fluence 및 입자 스펙트럼<br>
+        <span style="font-family:var(--mono);color:var(--accent);font-size:11px">AIAA S-111A</span> — 표준 시험 조건(bare cell) 및 커버유리 차폐 효과 비교<br>
+        <span style="font-family:var(--mono);color:var(--accent);font-size:11px">시험 계획 보조</span> — Cx·Φ₀ 입력으로 AIAA 40% 열화 달성 fluence 역산 및 포인트 생성
       </div>
     </div>
   </div>
 
+  <!-- ② NRL 모델 상세 -->
   <div class="panel">
-    <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">각 평가 항목이 중요한 이유</div></div>
+    <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">NRL Tada 모델 — 수식·변수·측정 방법 완전 해설</div></div>
     <div class="pb">
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div>
-          <div style="font-size:14px;font-weight:500;color:var(--accent2);margin-bottom:5px">① 탠덤 구조 선택 — 왜 CIGS가 Si보다 유리한가</div>
-          <div style="font-size:13px;color:var(--text);line-height:1.7">CIGS의 방사선 내성이 Si-HJ보다 월등한 이유는 다결정 박막 구조에 있습니다. 단결정 Si는 방사선 유발 결함이 소수 캐리어 수명을 급격히 줄이지만, CIGS의 다결정 입계는 재결합 중심 역할이 억제됩니다. Lang et al.(2020)은 Perv/CIGS가 68 MeV 양성자 2×10¹² p⁺/cm² 조사 후에도 초기 효율 85% 이상을 유지함을 실험으로 확인했습니다.</div>
+
+      <div style="font-size:15px;font-weight:700;color:var(--accent);font-family:var(--mono);text-align:center;padding:12px;background:var(--bg2);border-radius:6px;margin-bottom:14px;letter-spacing:.04em">
+        Pmax(Φ) = Pmax₀ · max[ 0,  1 − Cx · log₁₀(Φ / Φ₀) ]
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+
+        <div style="border:1px solid var(--border);border-radius:7px;overflow:hidden">
+          <div style="background:var(--bg3);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.07em">Pmax₀ — 초기 최대 출력</div>
+          <div style="padding:10px 12px;font-size:13px;line-height:1.8">
+            <b>정의:</b> 방사선 조사 전 BOL(Beginning of Life) 상태의 최대 출력 전력 [W 또는 mW/cm²].<br>
+            <b>측정:</b> AM0(1,367 W/m²) 조건 하에서 I-V 커브 측정. Pmax = Vmp × Jmp.<br>
+            <b>표준:</b> ASTM E490, ISO 15387 (우주 태양전지 I-V 측정 표준)<br>
+            <b>주의:</b> 온도 계수 보정 필수. Tc=28°C (GEO 기준) 또는 실제 궤도 온도 적용.
+          </div>
         </div>
-        <div>
-          <div style="font-size:14px;font-weight:500;color:var(--accent2);margin-bottom:5px">② 자기회복 계수 — 왜 페로브스카이트만 가능한가</div>
-          <div style="font-size:13px;color:var(--text);line-height:1.7">페로브스카이트는 이온이동(Ion Migration) 특성으로 방사선 손상 결함을 스스로 재배열합니다. 조사 후 광 또는 열 처리 시 Frenkel 쌍이 재결합하며 PCE가 30~80% 회복됩니다(Kirmani+2024). GaAs, Si, CIGS에는 이 메커니즘이 없습니다. 우주에서 태양광 조사가 자동 회복 에너지를 공급하므로 실제 운용 조건이 지상 시험보다 유리합니다.</div>
+
+        <div style="border:1px solid var(--border);border-radius:7px;overflow:hidden">
+          <div style="background:var(--bg3);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.07em">Φ — 누적 입자 fluence</div>
+          <div style="padding:10px 12px;font-size:13px;line-height:1.8">
+            <b>정의:</b> 단위 면적당 누적 입사 입자 수 [입자/cm²].<br>
+            <b>계산:</b> Φ = ∫₀ᵀ φ(t) dt, 여기서 φ는 flux [입자/cm²/s]<br>
+            <b>궤도 모델:</b> AE8(전자), AP8(양성자), CREME96, SPENVIS-4(ESA), OMERE<br>
+            <b>커버유리 보정:</b> Φ_cell = Φ_space × T(E, t_cov), 에너지별 투과율 T 적용<br>
+            <b>단위 주의:</b> 모델에 따라 fluence가 1MeV 등가 전자 fluence로 환산 필요 (→ Φ₁ₑ)
+          </div>
         </div>
-        <div>
-          <div style="font-size:14px;font-weight:500;color:var(--accent2);margin-bottom:5px">③ 커버유리 두께 — 왜 최적값이 존재하는가</div>
-          <div style="font-size:13px;color:var(--text);line-height:1.7">커버유리는 저에너지 양성자와 전자를 효과적으로 차단하지만, 고에너지 GCR 중이온은 어떤 두께에서도 통과합니다. 5mm 이상에서는 추가 보호 효과가 거의 없는 반면 무게 페널티가 큽니다. 또한 2차 입자(Bremsstrahlung) 생성으로 오히려 손상이 증가할 수 있습니다. 최적값은 보통 1~3mm Al 등가 두께입니다.</div>
+
+        <div style="border:1px solid var(--border);border-radius:7px;overflow:hidden">
+          <div style="background:var(--bg3);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2);letter-spacing:.07em">Cx — 손상계수 (Damage Coefficient)</div>
+          <div style="padding:10px 12px;font-size:13px;line-height:1.8">
+            <b>정의:</b> 단위 log-fluence 당 Pmax 감소율. 무차원.<br>
+            <b>물리적 의미:</b> 소재의 격자 결함 생성 민감도 + 결함이 전기적 성능에 미치는 영향의 합산<br>
+            <b>측정 방법:</b><br>
+            &nbsp;&nbsp;① 여러 fluence 포인트에서 Pmax 측정<br>
+            &nbsp;&nbsp;② Pmax/Pmax₀ vs. log₁₀(Φ) 그래프 선형 피팅<br>
+            &nbsp;&nbsp;③ 기울기 = −Cx (선형 구간 내)<br>
+            <b>에너지 의존성:</b> NIEL(E)에 비례. 고에너지 양성자일수록 NIEL 감소 → Cx 감소<br>
+            <b>소재별 범위:</b> c-Si ~0.15–0.25, GaAs ~0.02–0.15, Ge ~0.08–0.14, CIGS 미확립
+          </div>
         </div>
-        <div>
-          <div style="font-size:14px;font-weight:500;color:var(--accent2);margin-bottom:5px">④ 궤도 선택 — 왜 MEO가 가장 가혹한가</div>
-          <div style="font-size:13px;color:var(--text);line-height:1.7">MEO(GPS 궤도)는 내/외 반앨런대 사이를 통과합니다. 내부 반앨런대의 고에너지 양성자(수십~수백 MeV)와 외부 반앨런대의 고에너지 전자(수 MeV)가 동시에 집중됩니다. GEO의 약 25배 강도. 태양전지 임무 설계에서 MEO 통과는 반드시 단기간으로 제한해야 합니다.</div>
+
+        <div style="border:1px solid var(--border);border-radius:7px;overflow:hidden">
+          <div style="background:var(--bg3);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2);letter-spacing:.07em">Φ₀ — 임계 fluence (Threshold)</div>
+          <div style="padding:10px 12px;font-size:13px;line-height:1.8">
+            <b>정의:</b> 측정 가능한 Pmax 열화가 시작되는 fluence. [입자/cm²]<br>
+            <b>물리적 의미:</b> 이 값 이하에서는 결함 밀도가 소수 캐리어 수명에 영향을 주지 않는 임계점<br>
+            <b>측정 방법:</b><br>
+            &nbsp;&nbsp;① 저 fluence 영역(~1–5% 열화)의 첫 측정 포인트에서 외삽<br>
+            &nbsp;&nbsp;② 선형 피팅 직선의 x절편 = log₁₀(Φ₀)<br>
+            &nbsp;&nbsp;③ 또는 DLTS(Deep Level Transient Spectroscopy)로 결함 밀도 임계점 측정<br>
+            <b>소재별 범위:</b> GaAs ~10¹³–10¹⁴ e/cm²(1MeV), Si ~10¹²–10¹³, CIGS 미확립
+          </div>
         </div>
-        <div>
-          <div style="font-size:14px;font-weight:500;color:var(--accent2);margin-bottom:5px">⑤ 레이어 구조 편집기 — 왜 층별 설계가 중요한가</div>
-          <div style="font-size:13px;color:var(--text);line-height:1.7">탠덤 태양전지의 방사선 손상은 층에 따라 전혀 다른 메커니즘으로 발생합니다. 페로브스카이트 흡수층은 자기회복 가능한 결함 생성, CIGS 흡수층은 격자 변위에 의한 캐리어 수명 감소, 재결합 접합(NiOₓ/AZO)은 계면 트랩 증가, 후면전극(Mo)은 결정성 변화가 주요 손상입니다. 층별 소재·두께를 최적화하면 동일 임무에서 EOL Pmax를 5~15% 개선할 수 있습니다.</div>
+
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:14px">
+        <div style="background:var(--bg3);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--ok);letter-spacing:.07em">Cx_eff (본 도구) — 다층 구조에 대한 유효 손상계수</div>
+        <div style="padding:10px 12px;font-size:13px;line-height:1.8">
+          <b>정의:</b> Cx_eff = Σ(Cxᵢ × tᵢ) / Σtᵢ &nbsp; (두께 가중 평균)<br>
+          <b>근거:</b> NRL Tada 모델은 단일 소재 소자 기준으로 정의됨. 다층 탠덤에 직접 적용 시 각 층의 부피 기여도에 비례하여 유효 계수를 근사하는 것이 현실적인 방법임 (Anspaugh 1996, Appendix D 접근법 준용).<br>
+          <b>한계:</b> 직렬 연결된 서브셀의 전류 매칭 조건(current matching)은 반영되지 않음. 실제로는 가장 열화된 서브셀이 전체 전류를 제한하므로 이 근사는 낙관적일 수 있음.<br>
+          <b>개선 방향:</b> 서브셀별 Jsc·Voc 열화를 독립 계산 후 전류 매칭 조건으로 합산하는 방법이 더 정확하나, 서브셀별 Cx 데이터가 필요함.
         </div>
       </div>
+
+      <div style="border:1px solid var(--border);border-radius:7px;overflow:hidden">
+        <div style="background:var(--bg3);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--warn);letter-spacing:.07em">NIEL — 비이온화 에너지 손실 (Non-Ionizing Energy Loss)</div>
+        <div style="padding:10px 12px;font-size:13px;line-height:1.8">
+          <b>정의:</b> 입자가 단위 거리 이동 시 격자 변위(displacement damage)에 사용하는 에너지 [MeV·cm²/g]<br>
+          <b>물리:</b> 총 에너지 손실(dE/dx) = 이온화 손실(LET) + 비이온화 손실(NIEL). 태양전지 손상은 NIEL이 주도.<br>
+          <b>계산 방법:</b><br>
+          &nbsp;&nbsp;① TRIM/SRIM 코드로 각 입자·에너지·소재 조합의 NIEL 계산<br>
+          &nbsp;&nbsp;② SR NIEL 데이터베이스 (Summers et al., Naval Research Lab) 참조<br>
+          &nbsp;&nbsp;③ SCREAM 코드 (ESA) 또는 MULASSIS (GEANT4 기반)<br>
+          <b>1MeV 전자 등가 fluence 환산:</b> Φ₁ₑ = Φ × [NIEL(E,particle) / NIEL(1MeV, e⁻)]<br>
+          <b>본 도구의 niel 필드:</b> Si=1.00 기준 상대값. Jun et al.(2003) IEEE TNS 데이터 기반.
+        </div>
+      </div>
+
     </div>
   </div>
 
+  <!-- ③ 소재 데이터베이스 해설 -->
   <div class="panel">
-    <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">주요 참고 문헌 및 모델 근거</div></div>
+    <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">소재 데이터베이스 — 각 파라미터의 의미와 출처</div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <div style="padding:10px 14px;font-size:13px;line-height:1.8;border-bottom:1px solid var(--border)">
+        레이어 구조 편집기에서 선택 가능한 모든 소재의 물성·방사선 파라미터를 아래에 정리합니다. <b>Cx 값은 문헌 추정값이며 직접 측정된 것이 아닙니다.</b> Z는 평균 원자번호, ρ는 밀도, Eg는 밴드갭, niel은 Si=1.00 기준 NIEL 상대값입니다.
+      </div>
+
+      <!-- 파라미터 범례 -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-bottom:1px solid var(--border)">
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--accent);background:var(--bg3);font-weight:700">파라미터</div>
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--accent);background:var(--bg3);font-weight:700">단위</div>
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--accent);background:var(--bg3);font-weight:700">물리적 의미</div>
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--accent);background:var(--bg3);font-weight:700">측정 방법</div>
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--accent);background:var(--bg3);font-weight:700">방사선 관련성</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0">
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:12px;font-weight:700">Z (원자번호)</div>
+        <div style="padding:7px 10px;font-size:12px;color:var(--muted)">무차원</div>
+        <div style="padding:7px 10px;font-size:12px">핵 전하수. 복합 소재는 질량 가중 평균.</div>
+        <div style="padding:7px 10px;font-size:12px">원소 조성 분석 (EDS, XRF)</div>
+        <div style="padding:7px 10px;font-size:12px">Z↑ → 핵 반응 단면적↑, 차폐 효과↑ (중이온 차단)</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:var(--bg2)">
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:12px;font-weight:700">ρ (밀도)</div>
+        <div style="padding:7px 10px;font-size:12px;color:var(--muted)">g/cm³</div>
+        <div style="padding:7px 10px;font-size:12px">단위 부피당 질량. 입자 사정거리와 직결.</div>
+        <div style="padding:7px 10px;font-size:12px">XRD, 피크노메터, 부력법</div>
+        <div style="padding:7px 10px;font-size:12px">ρ↑ → 입자 사정거리↓ → 차폐 효과↑ (같은 두께)</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0">
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:12px;font-weight:700">Eg (밴드갭)</div>
+        <div style="padding:7px 10px;font-size:12px;color:var(--muted)">eV</div>
+        <div style="padding:7px 10px;font-size:12px">광흡수 상한 파장 결정. 탠덤 전류 매칭 기준.</div>
+        <div style="padding:7px 10px;font-size:12px">EQE, 타우크 플롯, SE(분광타원법)</div>
+        <div style="padding:7px 10px;font-size:12px">Eg↑ → 방사선 내성 경향↑ (결함 이온화 에너지↑)</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:var(--bg2)">
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:12px;font-weight:700">Cx (손상계수)</div>
+        <div style="padding:7px 10px;font-size:12px;color:var(--muted)">무차원</div>
+        <div style="padding:7px 10px;font-size:12px">log-fluence 당 Pmax 감소율. NRL 모델 핵심.</div>
+        <div style="padding:7px 10px;font-size:12px">방사선 조사 후 I-V 측정, log 피팅</div>
+        <div style="padding:7px 10px;font-size:12px">Cx↑ → 방사선 취약. AIAA 시험의 목적은 이 값 측정.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0">
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:12px;font-weight:700">niel (NIEL 상대값)</div>
+        <div style="padding:7px 10px;font-size:12px;color:var(--muted)">Si=1.00 기준</div>
+        <div style="padding:7px 10px;font-size:12px">Si 대비 격자 변위 손상 크기. Jun(2003) 기반.</div>
+        <div style="padding:7px 10px;font-size:12px">TRIM/SRIM 계산 또는 SR-NIEL DB</div>
+        <div style="padding:7px 10px;font-size:12px">niel↑ → 단위 fluence당 격자 손상↑ → Cx↑ 경향</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:var(--bg2)">
+        <div style="padding:7px 10px;font-family:var(--mono);font-size:12px;font-weight:700">heal (자기회복)</div>
+        <div style="padding:7px 10px;font-size:12px;color:var(--muted)">boolean</div>
+        <div style="padding:7px 10px;font-size:12px">광/열 처리에 의한 Pmax 부분 회복 가능 여부.</div>
+        <div style="padding:7px 10px;font-size:12px">조사 후 어닐링 사이클 + I-V 반복 측정</div>
+        <div style="padding:7px 10px;font-size:12px">현재 페로브스카이트만 true. 회복률 30–80% (Kirmani 2024)</div>
+      </div>
+
+      <!-- 소재별 상세 -->
+      <div style="padding:12px 14px 4px;font-family:var(--mono);font-size:11px;color:var(--muted);border-top:1px solid var(--border);margin-top:4px;letter-spacing:.06em">소재별 Cx·NIEL 값 상세 및 주석</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
         <thead><tr style="background:var(--bg3)">
-          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">문헌</th>
-          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent);text-align:left">내용</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:10px;text-align:left;color:var(--accent)">소재</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--accent)">역할</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--accent)">Cx</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--accent)">NIEL(rel.)</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--accent);text-align:left">Cx 출처·주석</th>
         </tr></thead>
         <tbody>
-          <tr><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">Lang et al. (2020) Joule</td><td style="padding:8px 10px;font-size:13px">Perv/CIGS 68MeV 양성자 시험 — 85% 잔존 @ 2×10¹² p⁺/cm²</td></tr>
-          <tr style="background:var(--bg2)"><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">Kirmani et al. (2024) Nat. Commun.</td><td style="padding:8px 10px;font-size:13px">페로브스카이트 자기회복 메커니즘 — 이온이동 기반 결함 재배열</td></tr>
-          <tr><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">Tada et al. (1982) NASA JPL</td><td style="padding:8px 10px;font-size:13px">NRL 방법론 — Pmax(Φ) = Pmax₀·[1−Cx·log₁₀(Φ/Φ₀)]</td></tr>
-          <tr style="background:var(--bg2)"><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">Jun et al. (2003) IEEE TNS</td><td style="padding:8px 10px;font-size:13px">소재별 NIEL 비율 (GaN 0.33×, SiC 0.51×, GaAs 1.99×)</td></tr>
-          <tr><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">Dyer et al. (2003) IEEE TNS</td><td style="padding:8px 10px;font-size:13px">궤도별 방사선 환경 비율 — AE8/AP8 모델 기반</td></tr>
-          <tr style="background:var(--bg2)"><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">ECSS-E-HB-10-12A (2010)</td><td style="padding:8px 10px;font-size:13px">우주 부품 방사선 내성 핸드북 — Grade 판정 기준 준용</td></tr>
-          <tr><td style="padding:8px 10px;font-family:var(--mono);font-size:12px">OOV-Cube ESA (2024)</td><td style="padding:8px 10px;font-size:13px">Perv/CIGS 실제 궤도 검증 위성 — 결과 긍정적 (초기 보고)</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">세리아 유리</td><td style="padding:7px 10px;color:var(--muted)">커버유리</td><td style="padding:7px 10px;font-family:var(--mono)">0.005</td><td style="padding:7px 10px;font-family:var(--mono)">0.80</td><td style="padding:7px 10px">세리아(CeO₂) 도핑으로 UV 차단 + 방사선 색 중심 억제. Cx는 벌크 유리 기준 추정값. 실제 소자 성능에 대한 Cx 측정값 없음. Dempsey(2017) borosilicate glass 참조.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">ITO</td><td style="padding:7px 10px;color:var(--muted)">투명전극</td><td style="padding:7px 10px;font-family:var(--mono)">0.012</td><td style="padding:7px 10px;font-family:var(--mono)">1.50</td><td style="padding:7px 10px">Indium Tin Oxide. 방사선에 의한 비저항 증가가 주 손상. Cx는 전도성 산화물 데이터 미비로 ITO 박막 비저항 열화 실험 추정. Stratakis(2013) 참조.</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">FAMAPbI₃</td><td style="padding:7px 10px;color:var(--muted)">흡수층(상부)</td><td style="padding:7px 10px;font-family:var(--mono)">0.015</td><td style="padding:7px 10px;font-family:var(--mono)">0.72</td><td style="padding:7px 10px">FA₀.₈₃MA₀.₁₇PbI₃ 기반. Cx=0.015는 Lang(2020) Perv/CIGS 전체 소자 데이터에서 페로브스카이트 서브셀 기여분 추정. <b>독립 측정값 없음.</b> heal=true: 어닐링 30분@60°C에서 회복 확인 (Kirmani 2024). NIEL=0.72는 Pb 함량 기반 TRIM 추정.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">CsPbI₂Br</td><td style="padding:7px 10px;color:var(--muted)">흡수층(상부)</td><td style="padding:7px 10px;font-family:var(--mono)">0.012</td><td style="padding:7px 10px;font-family:var(--mono)">0.72</td><td style="padding:7px 10px">전무기 페로브스카이트. Cs 기반으로 열적 안정성 우수. Cx는 FAMAPbI₃ 대비 더 낮게 추정 (더 강한 결합). Huang(2021) Joule, proton 조사 실험 참조. heal=true 유지.</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">CIGS</td><td style="padding:7px 10px;color:var(--muted)">흡수층(하부)</td><td style="padding:7px 10px;font-family:var(--mono)">0.060</td><td style="padding:7px 10px;font-family:var(--mono)">1.99</td><td style="padding:7px 10px">Cu(In,Ga)Se₂. <b>가장 신뢰도 높은 Cx</b>. Lang(2020) 68MeV 양성자 실험 데이터로 역산 시 Φ₀=1e10 가정에서 Cx≈0.060. Boden(2008) 10MeV 양성자 데이터와 정합. NIEL=1.99는 Jun(2003) GaAs와 동등 수준(원소 조성 유사).</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">GaAs</td><td style="padding:7px 10px;color:var(--muted)">흡수층</td><td style="padding:7px 10px;font-family:var(--mono)">0.030</td><td style="padding:7px 10px;font-family:var(--mono)">1.99</td><td style="padding:7px 10px">단결정 기준. Anspaugh(1996) NRL Handbook에 가장 많은 데이터. 단 본 도구의 Cx=0.030은 넓은 에너지 범위 평균 추정치. 실제 1MeV e⁻ 기준 Cx~0.10–0.15. <b>시험 계획 탭의 참고값을 우선 사용.</b></td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">c-Si</td><td style="padding:7px 10px;color:var(--muted)">흡수층(하부)</td><td style="padding:7px 10px;font-family:var(--mono)">0.200</td><td style="padding:7px 10px;font-family:var(--mono)">1.00</td><td style="padding:7px 10px">단결정 Si. 방사선에 가장 취약한 소재. Tada(1982), Anspaugh(1996) 모두 Cx~0.15–0.25 범위. 1MeV 전자 기준 Φ₀~1×10¹³ e/cm². <b>본 도구에서 가장 신뢰도 높은 값.</b></td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">NiOₓ</td><td style="padding:7px 10px;color:var(--muted)">재결합 접합</td><td style="padding:7px 10px;font-family:var(--mono)">0.020</td><td style="padding:7px 10px;font-family:var(--mono)">1.10</td><td style="padding:7px 10px">p형 산화물. 방사선에 의한 계면 트랩 생성이 주 손상 경로. Cx는 유사 산화물(NiO, WO₃) 데이터 추정. 독립 측정값 없음.</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">Mo 후면전극</td><td style="padding:7px 10px;color:var(--muted)">후면전극</td><td style="padding:7px 10px;font-family:var(--mono)">0.008</td><td style="padding:7px 10px;font-family:var(--mono)">2.50</td><td style="padding:7px 10px">금속 전극류는 방사선에 매우 강함. 격자 결함이 전도성에 거의 영향 없음. Cx≈0.008은 금속 전극류 공통 추정값. NIEL=2.50은 Mo 원자번호(42) 기반 TRIM 계산값.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">Spiro-OMeTAD</td><td style="padding:7px 10px;color:var(--muted)">홀 수송층</td><td style="padding:7px 10px;font-family:var(--mono)">0.025</td><td style="padding:7px 10px;font-family:var(--mono)">0.50</td><td style="padding:7px 10px">유기 홀 수송층. 방사선에 의한 분자 결합 파괴(chain scission)가 주 손상. NIEL은 낮지만 이온화 손실(TID)에 취약. Cx는 유기 반도체 방사선 열화 추정값.</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">TiO₂ ETL</td><td style="padding:7px 10px;color:var(--muted)">전자 수송층</td><td style="padding:7px 10px;font-family:var(--mono)">0.018</td><td style="padding:7px 10px;font-family:var(--mono)">1.00</td><td style="padding:7px 10px">전자 수송 산화물. 방사선 유발 산소 공공(oxygen vacancy) 생성이 주 손상. Cx는 산화물 반도체 추정값.</td></tr>
         </tbody>
       </table>
     </div>
   </div>
+
+  <!-- ④ 궤도 환경 해설 -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--ok)"></div><div class="phtxt">궤도 환경 파라미터 — 측정·계산 방법 및 모델</div></div>
+    <div class="pb">
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <div style="border-left:3px solid var(--ok);padding-left:12px">
+          <div style="font-size:13px;font-weight:700;color:var(--ok);margin-bottom:4px">연간 양성자 Fluence (fluxYr) — 궤도별 기준값</div>
+          <div style="font-size:13px;line-height:1.8">
+            <b>출처:</b> NASA AE8/AP8 모델, ESA SPENVIS, OMERE(ONERA)<br>
+            <b>계산 방법:</b> 궤도 고도·경사각을 입력하면 SPENVIS가 일별 fluence 출력 → 연간 적산<br>
+            <b>본 도구의 기준값 (10 MeV 등가 양성자, 태양 최소기 기준):</b><br>
+            &nbsp;&nbsp;LEO (500km, 28°): 5×10⁹ p/cm²/yr — 반앨런대 바깥, 상대적으로 낮음<br>
+            &nbsp;&nbsp;LEO 극궤도 (700km, 90°): 3×10¹⁰ p/cm²/yr — SAA 통과 빈도 증가<br>
+            &nbsp;&nbsp;MEO (20,000km): 5×10¹¹ p/cm²/yr — 내부 반앨런대. 가장 가혹<br>
+            &nbsp;&nbsp;GEO (36,000km): 2×10¹⁰ p/cm²/yr — 태양풍 양성자 주도<br>
+            &nbsp;&nbsp;Deep Space: 8×10¹⁰ p/cm²/yr — GCR 기여 증가, 태양 보호 감소<br>
+            <b>주의:</b> 태양 활동 극대기(Solar Max)에는 양성자 flux가 2–5배 증가할 수 있음.
+          </div>
+        </div>
+
+        <div style="border-left:3px solid var(--warn);padding-left:12px">
+          <div style="font-size:13px;font-weight:700;color:var(--warn);margin-bottom:4px">커버유리 차폐 감쇠 — 지수 감쇠 근사</div>
+          <div style="font-size:13px;line-height:1.8">
+            <b>모델:</b> Φ_cell = Φ_space × exp(−t / λ), λ = 평균 자유 경로 (에너지·소재 의존)<br>
+            <b>본 도구:</b> λ = 1.2 mm (세리아 유리, 평균 에너지 양성자 기준 단순화)<br>
+            <b>실제 계산:</b> SHIELDOSE-2(NASA), MULASSIS(GEANT4), SPENVIS Shieldose 모듈로 에너지 스펙트럼 전체에 대해 계산. 단일 지수 감쇠는 근사값.<br>
+            <b>한계:</b> 저에너지 양성자(<수십 MeV)에는 Bragg peak가 발생하여 단순 지수 모델 오차 증가. 실제 시험은 AIAA S-111A unshielded 조건 사용.
+          </div>
+        </div>
+
+        <div style="border-left:3px solid var(--accent);padding-left:12px">
+          <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px">태양 활동 계수 (smod) 및 임무 기간</div>
+          <div style="font-size:13px;line-height:1.8">
+            <b>태양 최소기(Solar Min):</b> smod=1.0. GCR flux 최대, 태양풍 양성자 최소. 방사선 환경 보수적 조건.<br>
+            <b>태양 최대기(Solar Max):</b> smod=0.7–0.8. 태양풍 차폐가 GCR을 감소시키지만, SPE(Solar Proton Event) 발생 가능성 증가.<br>
+            <b>임무 기간 보정:</b> 총 fluence = fluxYr × smod × exp(−t_cov/λ) × T[yr]<br>
+            <b>11년 태양 주기:</b> 임무 기간이 5년 이상이면 평균 smod≈0.85 사용 권장.
+          </div>
+        </div>
+
+        <div style="border-left:3px solid var(--bad);padding-left:12px">
+          <div style="font-size:13px;font-weight:700;color:var(--bad);margin-bottom:4px">반앨런대 (Van Allen Belt) — 왜 MEO가 가장 가혹한가</div>
+          <div style="font-size:13px;line-height:1.8">
+            <b>내부 반앨런대 (L=1.2–2.5):</b> 1–100 MeV 고에너지 양성자 밀집. 2,000–12,000 km 고도.<br>
+            <b>외부 반앨런대 (L=3–9):</b> 0.1–10 MeV 고에너지 전자 밀집. 12,000–50,000 km 고도.<br>
+            <b>MEO 궤도:</b> 두 띠 사이를 상시 통과 → 전자+양성자 동시 고플럭스 노출. GPS(20,200 km)는 외부 반앨런대 내부.<br>
+            <b>GEO 궤도:</b> 외부 반앨런대 외곽 (L≈6.6). 전자 노출이 주도.<br>
+            <b>LEO SAA (남대서양 이상대):</b> 내부 반앨런대가 남아메리카 동쪽에서 지표면 방향으로 하강. 극궤도 위성이 하루 수회 통과.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑤ ECSS Grade 판정 기준 -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">ECSS Grade 판정 기준 — 방사선 내성 평가 탭 결과 해석</div></div>
+    <div class="pb" style="padding:0">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="background:var(--bg3)">
+          <th style="padding:8px 12px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">등급</th>
+          <th style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent)">EOL Pmax 잔존율</th>
+          <th style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent);text-align:left">판정 기준 및 해석</th>
+          <th style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent);text-align:left">권장 조치</th>
+        </tr></thead>
+        <tbody>
+          <tr style="background:#f0fdf4">
+            <td style="padding:9px 12px;font-weight:700;color:var(--ok);font-family:var(--mono)">Grade A ★★★</td>
+            <td style="padding:9px 12px;font-family:var(--mono);font-weight:700;text-align:center;color:var(--ok)">≥ 90%</td>
+            <td style="padding:9px 12px">방사선 내성 우수. 임무 전력 마진 충분. ECSS-E-HB-10-12A 기준 합격.</td>
+            <td style="padding:9px 12px">설계 확정 가능. 커버유리 최적화로 무게 절감 검토.</td>
+          </tr>
+          <tr style="background:#fefce8">
+            <td style="padding:9px 12px;font-weight:700;color:#a16207;font-family:var(--mono)">Grade B ★★</td>
+            <td style="padding:9px 12px;font-family:var(--mono);font-weight:700;text-align:center;color:#a16207">80–90%</td>
+            <td style="padding:9px 12px">방사선 내성 양호. 전력 마진 검토 필요. 대부분의 LEO/GEO 임무 허용 범위.</td>
+            <td style="padding:9px 12px">전력 버짓 재검토. 커버유리 두께 증가 또는 레이어 구조 개선 검토.</td>
+          </tr>
+          <tr style="background:#fff7ed">
+            <td style="padding:9px 12px;font-weight:700;color:var(--warn);font-family:var(--mono)">Grade C ★</td>
+            <td style="padding:9px 12px;font-family:var(--mono);font-weight:700;text-align:center;color:var(--warn)">60–80%</td>
+            <td style="padding:9px 12px">방사선 내성 한계. 임무 기간 단축 또는 전력 마진 20–40% 필요. 재설계 권장.</td>
+            <td style="padding:9px 12px">레이어 구조 재설계. 커버유리 두께 증가. 보다 내성 강한 소재로 교체 검토.</td>
+          </tr>
+          <tr style="background:#fef2f2">
+            <td style="padding:9px 12px;font-weight:700;color:var(--bad);font-family:var(--mono)">Grade D ✗</td>
+            <td style="padding:9px 12px;font-family:var(--mono);font-weight:700;text-align:center;color:var(--bad)">&lt; 60%</td>
+            <td style="padding:9px 12px">방사선 내성 불충분. 임무 전력 요구 충족 불가. ECSS 기준 불합격.</td>
+            <td style="padding:9px 12px">소재 전환 필수. 궤도 변경 또는 임무 기간 대폭 단축. GaAs 3J 대체 검토.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="padding:10px 14px;font-size:12px;color:var(--muted)">
+        출처: ECSS-E-HB-10-12A (2010) "Techniques for radiation effects mitigation in ASICs and FPGAs" §6.3 준용. 태양전지 전용 Grade 기준은 ECSS-E-ST-20-08C (2012) "Photovoltaic assemblies and components" 참조.
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 자기회복 메커니즘 -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:#7c3aed"></div><div class="phtxt">페로브스카이트 자기회복 — 메커니즘과 측정 방법</div></div>
+    <div class="pb">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:8px">손상 메커니즘</div>
+          <div style="font-size:13px;line-height:1.9">
+            방사선 조사 시 페로브스카이트(ABX₃)에서:<br>
+            <b>① Frenkel 쌍 생성:</b> 격자 원자가 간극 위치로 이동 (특히 할라이드 X⁻ 이온)<br>
+            <b>② 이온이동 가속:</b> 방사선이 이온이동 활성화 에너지를 낮춤<br>
+            <b>③ 결과:</b> 비방사성 재결합 중심 증가 → Voc·FF 감소 → Pmax 감소<br><br>
+            <b>자기회복 경로:</b><br>
+            <b>① 열 회복:</b> Frenkel 쌍 재결합. T > 40°C에서 가속.<br>
+            <b>② 광 회복:</b> 광생성 캐리어가 결함 포획 에너지 공급.<br>
+            <b>③ 이온 재배열:</b> 전기장 하에서 X⁻ 이온이 격자 위치 복귀.
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:8px">측정 방법</div>
+          <div style="font-size:13px;line-height:1.9">
+            <b>조사 후 즉시:</b> I-V 측정 (Pmax₁)<br>
+            <b>어닐링 조건:</b> 60°C × 24hr 또는 1 Sun 조사 × 6hr<br>
+            <b>어닐링 후:</b> I-V 측정 (Pmax₂)<br>
+            <b>회복률 = (Pmax₂ − Pmax₁) / (Pmax₀ − Pmax₁)</b><br><br>
+            <b>참고 데이터 (Kirmani 2024):</b><br>
+            1 MeV 양성자 10¹² p/cm² 조사 후<br>
+            즉시 Pmax: −30~50% 감소<br>
+            24hr@60°C 어닐링 후: 손실분의 60~80% 회복<br>
+            우주 운용 조건(태양광+온도): 연속 부분 회복 예상<br><br>
+            <b>본 도구의 heal 보정:</b> 현재는 heal 여부만 표시하며 Pmax 계산에 정량적으로 반영되지 않음 (회복률의 불확실성이 크기 때문).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 참고 문헌 전체 -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">참고 문헌 및 데이터베이스 — 완전 목록</div></div>
+    <div class="pb" style="padding:0">
+
+      <div style="padding:8px 14px;font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--bg3);letter-spacing:.06em">A. 핵심 모델 문헌</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <tbody>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2);width:38%">Tada, H.Y. et al. (1982)</td><td style="padding:8px 12px;line-height:1.7"><i>Solar Cell Radiation Handbook</i>, 3rd ed., JPL Publication 82-69, NASA/Jet Propulsion Laboratory. NRL 방법론의 원전. Pmax(Φ) = Pmax₀·[1−Cx·log(Φ/Φ₀)] 수식 정의. GaAs, Si, Ge Cx·Φ₀ 실측 데이터 수록.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">Anspaugh, B.E. (1996)</td><td style="padding:8px 12px;line-height:1.7"><i>GaAs Solar Cell Radiation Handbook</i>, JPL Publication 96-9. GaAs 1MeV e⁻/양성자별 Cx·Φ₀ 실측값 수록. 시험 계획 탭 레퍼런스 소재의 1차 출처.</td></tr>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">Jun, I. et al. (2003)</td><td style="padding:8px 12px;line-height:1.7">Jun, I., Kim, M.H., Xapsos, M.A., "Proton nonionizing energy loss (NIEL) for device applications," <i>IEEE Trans. Nucl. Sci.</i> 50(6), 1924–1928. Si=1.00 기준 소재별 NIEL 상대값 데이터베이스. 본 도구의 niel 필드 출처.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">Summers, G.P. et al. (1993)</td><td style="padding:8px 12px;line-height:1.7">Summers, G.P., Burke, E.A., Shapiro, P., Messenger, S.R., Walters, R.J., "Damage correlations in semiconductors exposed to gamma, electron and proton radiations," <i>IEEE Trans. Nucl. Sci.</i> 40(6), 1372. NIEL 이론 기반 Cx 예측 방법론 수립.</td></tr>
+        </tbody>
+      </table>
+
+      <div style="padding:8px 14px;font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--bg3);letter-spacing:.06em;border-top:1px solid var(--border)">B. 페로브스카이트·CIGS 방사선 실험 문헌</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <tbody>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2);width:38%">Lang, F. et al. (2020)</td><td style="padding:8px 12px;line-height:1.7">Lang, F., Nickel, N.H., Bundesmann, J., et al., "Radiation hardness and self-healing of perovskite solar cells," <i>Joule</i> 4(5), 1054–1069. 68 MeV 양성자 2×10¹² p/cm² 조사 후 Perv/CIGS 85% 잔존. 현재 가장 중요한 실험 데이터. Cx 역산의 1차 근거.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">Kirmani, A.R. et al. (2024)</td><td style="padding:8px 12px;line-height:1.7">Kirmani, A.R., et al., "Countdown to perovskite space launch: Guidelines to performing relevant radiation hardness experiments," <i>Nat. Commun.</i> 2024. 페로브스카이트 자기회복 메커니즘(이온이동 기반 Frenkel 쌍 재결합) 정량화. 어닐링 프로토콜 표준화.</td></tr>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">Huang, Z. et al. (2021)</td><td style="padding:8px 12px;line-height:1.7">Huang, Z., et al., "Suppressed ion migration in reduced-dimensional perovskites improves operating stability," <i>Joule</i> 5(11), 2836. 저차원 페로브스카이트의 이온이동 억제 및 방사선 내성 개선. CsPbI₂Br 계열 관련.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">Boden, S.A. et al. (2008)</td><td style="padding:8px 12px;line-height:1.7">Boden, S.A., Rogers, D.J., Sherwood, P., et al., "Radiation testing of CIGS solar cells for small satellite applications," <i>Proc. 7th Int. Energy Convers. Eng. Conf.</i> 10 MeV 양성자 CIGS 조사 데이터. Cx 역산에 활용.</td></tr>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">Walters, R.J. et al. (1995)</td><td style="padding:8px 12px;line-height:1.7">Walters, R.J., Summers, G.P., Messenger, S.R., "Analysis and modeling of the radiation response of multijunction space solar cells," <i>Conf. Record 25th IEEE PVSC</i>, 1031. 다중접합 셀 NRL 모델 적용 방법론.</td></tr>
+        </tbody>
+      </table>
+
+      <div style="padding:8px 14px;font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--bg3);letter-spacing:.06em;border-top:1px solid var(--border)">C. 표준 및 핸드북</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <tbody>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2);width:38%">AIAA S-111A-2014</td><td style="padding:8px 12px;line-height:1.7"><i>Qualification and Quality Requirements for Space Solar Cells</i>. §8.1 전자 방사선, §8.2 양성자 방사선 시험 절차. unshielded bare cell 조건 명시. 본 도구 AIAA 탭의 표준 출처.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">ECSS-E-HB-10-12A (2010)</td><td style="padding:8px 12px;line-height:1.7"><i>Techniques for radiation effects mitigation in ASICs and FPGAs</i>. ESA 우주 부품 방사선 내성 핸드북. Grade 판정 기준 및 방사선 환경 모델링 방법론.</td></tr>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">ECSS-E-ST-20-08C (2012)</td><td style="padding:8px 12px;line-height:1.7"><i>Photovoltaic assemblies and components</i>. 우주 태양전지 모듈 품질·성능 요건. EOL 전력 마진 계산 방법론 포함.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">ISO 15387:2005</td><td style="padding:8px 12px;line-height:1.7"><i>Space systems — Single-junction solar cells</i>. AM0 조건 하 I-V 특성 측정 표준. Pmax₀ 측정의 기준.</td></tr>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">MIL-STD-750-1 (Method 1017)</td><td style="padding:8px 12px;line-height:1.7">반도체 방사선 내성 시험 표준. 중성자·전자·양성자 조사 절차. AIAA S-111A와 병행 참조.</td></tr>
+        </tbody>
+      </table>
+
+      <div style="padding:8px 14px;font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--bg3);letter-spacing:.06em;border-top:1px solid var(--border)">D. 궤도 방사선 환경 데이터베이스 및 도구</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <tbody>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2);width:38%">AE8 / AP8 (NASA)</td><td style="padding:8px 12px;line-height:1.7">내·외부 반앨런대 전자(AE8)·양성자(AP8) 플럭스 모델. 태양 최대·최소기 기준. SPENVIS, OMERE에 내장. 본 도구 fluxYr 기준값의 1차 출처.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">AE9 / AP9 (AFRL, 2013)</td><td style="padding:8px 12px;line-height:1.7">AE8/AP8의 업데이트 버전. 통계적 불확도(퍼센타일) 출력 지원. 설계 마진 분석에 권장. NASA CCMC에서 접근 가능.</td></tr>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">ESA SPENVIS</td><td style="padding:8px 12px;line-height:1.7"><i>Space ENVironment Information System</i> (www.spenvis.oma.be). 궤도 입력 → fluence, LET 스펙트럼, 차폐 효과, TID, NIEL 자동 계산. AE8/AP8/AE9/AP9/CREME96 내장.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">CREME96 / CREME-MC</td><td style="padding:8px 12px;line-height:1.7">Cosmic Ray Effects on Micro-Electronics. GCR 및 SPE 중이온 환경 모델. SEE(Single Event Effect) 분석의 표준 도구.</td></tr>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">SR-NIEL 데이터베이스</td><td style="padding:8px 12px;line-height:1.7">Stopping and Range of ions — NIEL. Chadwick et al. 유지보수. 소재별·입자별·에너지별 NIEL 값 온라인 조회. www.srim.org (SRIM/TRIM 포함).</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">OMERE (ONERA)</td><td style="padding:8px 12px;line-height:1.7">프랑스 ONERA의 우주 방사선 환경 분석 도구. AE8/AP8/AE9/AP9/ISO-15390(GCR) 통합. LEO/GEO/HEO 궤도 분석.</td></tr>
+          <tr><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">MULASSIS / GEANT4</td><td style="padding:8px 12px;line-height:1.7">Monte Carlo 기반 차폐 설계 도구. 에너지 스펙트럼 전체에 대한 정밀 차폐 계산. SHIELDOSE-2(NASA, 단순화 버전)보다 정확.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">OOV-Cube ESA (2024)</td><td style="padding:8px 12px;line-height:1.7">ESA OOV-Cube 큐브샛. 2024년 7월 발사. Perv/CIGS 탠덤을 실제 궤도(ISS 궤도, ~400km)에서 첫 검증. 초기 보고 긍정적. 데이터 공개 예정.</td></tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
 </div>
 </div>
 
@@ -713,6 +1036,209 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 </div>
 <!-- ══ END TAB 6 ══ -->
 
+<!-- ══ TAB 7: TEST PLAN ══ -->
+<div id="tab-testplan" class="tab-panel">
+<div style="max-width:980px">
+
+  <!-- 도구 목적 명시 -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">시험 계획 보조 도구 — 목적 및 사용 방법</div></div>
+    <div class="pb">
+      <div class="info-box">
+        이 도구는 <b>AIAA S-111A §8.2.3.2가 요구하는 "최소 40% Pmax 열화"를 달성하는 fluence 범위</b>를 역산하여 조사 실험 계획을 지원합니다.<br><br>
+        NRL Tada(1982) 모델의 손상계수 <b>Cx</b>와 임계 fluence <b>Φ₀</b>는 소재마다 실험으로 측정해야 합니다. 아래 레퍼런스 소재(GaAs/Si/Ge)의 값은 Anspaugh(1996) NRL Solar Cell Radiation Handbook 및 관련 문헌의 <b>대략적 참고 범위</b>이며, 직접 문헌을 확인 후 사용하십시오. 신규 소재(페로브스카이트, CIGS 등)는 Cx·Φ₀를 직접 입력하여 계획을 수립합니다.
+      </div>
+      <div class="warn-box" style="margin-top:8px">
+        <b>주의:</b> 이 도구의 출력은 입력된 Cx·Φ₀가 정확할 때만 신뢰할 수 있습니다. 레퍼런스 소재의 수치도 조성·제조 조건에 따라 달라질 수 있습니다. 모든 fluence 포인트는 실제 시험 전 전문가 검토가 필요합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 레퍼런스 소재 비교 -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">레퍼런스 소재 — NRL Handbook 기반 (직접 문헌 확인 필요)</div></div>
+    <div class="pb">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+
+        <!-- GaAs -->
+        <div style="border:1.5px solid #1a52c8;border-radius:8px;overflow:hidden">
+          <div style="background:#1a52c820;padding:8px 12px;font-family:var(--mono);font-size:11px;color:#1a52c8;font-weight:700;letter-spacing:.07em">GaAs (3J 기준)</div>
+          <div style="padding:10px 12px;font-size:12px;line-height:1.9">
+            <div style="color:var(--muted);font-size:10px;font-family:var(--mono);margin-bottom:4px">출처: Anspaugh(1996) Table 4 / ECSS</div>
+            <b>1MeV 전자</b><br>
+            Cx ≈ 0.10–0.15 &nbsp;|&nbsp; Φ₀ ≈ 10¹⁴ e/cm²<br>
+            <b>10MeV 양성자</b><br>
+            Cx ≈ 0.04–0.06 &nbsp;|&nbsp; Φ₀ ≈ 10¹¹ p/cm²<br>
+            <div style="margin-top:6px;padding:5px 8px;background:#1a52c810;border-radius:4px;font-size:11px;color:#1a52c8">방사선 내성 우수 · 우주 검증 다수</div>
+          </div>
+        </div>
+
+        <!-- Si -->
+        <div style="border:1.5px solid #0d8a5e;border-radius:8px;overflow:hidden">
+          <div style="background:#0d8a5e20;padding:8px 12px;font-family:var(--mono);font-size:11px;color:#0d8a5e;font-weight:700;letter-spacing:.07em">c-Si (단결정)</div>
+          <div style="padding:10px 12px;font-size:12px;line-height:1.9">
+            <div style="color:var(--muted);font-size:10px;font-family:var(--mono);margin-bottom:4px">출처: Anspaugh(1996) Table 3 / Tada(1982)</div>
+            <b>1MeV 전자</b><br>
+            Cx ≈ 0.15–0.25 &nbsp;|&nbsp; Φ₀ ≈ 10¹³ e/cm²<br>
+            <b>10MeV 양성자</b><br>
+            Cx ≈ 0.15–0.20 &nbsp;|&nbsp; Φ₀ ≈ 10¹⁰ p/cm²<br>
+            <div style="margin-top:6px;padding:5px 8px;background:#0d8a5e10;border-radius:4px;font-size:11px;color:#0d8a5e">손상 민감 · AIAA 범위 내 40% 달성 가능</div>
+          </div>
+        </div>
+
+        <!-- Ge -->
+        <div style="border:1.5px solid #8b2fc9;border-radius:8px;overflow:hidden">
+          <div style="background:#8b2fc920;padding:8px 12px;font-family:var(--mono);font-size:11px;color:#8b2fc9;font-weight:700;letter-spacing:.07em">Ge (하부 서브셀)</div>
+          <div style="padding:10px 12px;font-size:12px;line-height:1.9">
+            <div style="color:var(--muted);font-size:10px;font-family:var(--mono);margin-bottom:4px">출처: Anspaugh(1996) Table 5 / Walters(1995)</div>
+            <b>1MeV 전자</b><br>
+            Cx ≈ 0.08–0.14 &nbsp;|&nbsp; Φ₀ ≈ 10¹³ e/cm²<br>
+            <b>1MeV 양성자</b><br>
+            Cx ≈ 0.10–0.16 &nbsp;|&nbsp; Φ₀ ≈ 10¹⁰ p/cm²<br>
+            <div style="margin-top:6px;padding:5px 8px;background:#8b2fc910;border-radius:4px;font-size:11px;color:#8b2fc9">GaAs 대비 방사선 약함 · 3J 하부셀 병목</div>
+          </div>
+        </div>
+
+      </div>
+      <div class="mnote">위 범위는 문헌 참고값입니다. 실제 Cx·Φ₀는 소자 구조, 도핑, AR 코팅 유무에 따라 달라집니다. <b>Anspaugh B.E., "Solar Cell Radiation Handbook", JPL Pub. 82-69 (1982 / 1996 rev.)</b>를 직접 확인하십시오.</div>
+    </div>
+  </div>
+
+  <!-- 시험 계획 계산기 -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">Fluence 시험 계획 계산기 — Cx·Φ₀ 입력 기반</div></div>
+    <div class="pb">
+
+      <!-- 빠른 불러오기 -->
+      <div style="margin-bottom:14px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">레퍼런스 소재 빠른 불러오기 (참고용 중간값)</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="lbtn" onclick="loadRef('gaas_e')">GaAs 전자</button>
+          <button class="lbtn" onclick="loadRef('gaas_p')">GaAs 양성자</button>
+          <button class="lbtn" onclick="loadRef('si_e')">Si 전자</button>
+          <button class="lbtn" onclick="loadRef('si_p')">Si 양성자</button>
+          <button class="lbtn" onclick="loadRef('ge_e')">Ge 전자</button>
+          <button class="lbtn" onclick="loadRef('ge_p')">Ge 양성자</button>
+          <button class="lbtn" style="background:var(--bg3);color:var(--muted)" onclick="loadRef('custom')">직접 입력 초기화</button>
+        </div>
+      </div>
+
+      <div class="g2" style="gap:12px;margin-bottom:14px">
+        <div>
+          <div class="field">
+            <label>소재명 / 메모</label>
+            <input type="text" id="tp-matname" value="GaAs (참고값)" style="font-family:var(--mono)">
+          </div>
+          <div class="field">
+            <label>입자 종류</label>
+            <select id="tp-particle" onchange="calcTestPlan()">
+              <option value="proton">양성자 (p⁺)</option>
+              <option value="electron">전자 (e⁻)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>입자 에너지 (MeV)</label>
+            <input type="number" id="tp-energy" value="10" min="0.01" max="500" step="0.1" oninput="calcTestPlan()">
+          </div>
+        </div>
+        <div>
+          <div class="field">
+            <label>손상계수 Cx</label>
+            <input type="number" id="tp-cx" value="0.05" min="0.001" max="1.0" step="0.001" oninput="calcTestPlan()">
+          </div>
+          <div class="field">
+            <label>임계 fluence Φ₀ (입자/cm²) — 지수 입력</label>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-family:var(--mono);font-size:13px;color:var(--muted)">10^</span>
+              <input type="number" id="tp-phi0-exp" value="11" min="6" max="18" step="0.5" oninput="calcTestPlan()" style="width:80px">
+              <span id="tp-phi0-display" style="font-family:var(--mono);font-size:12px;color:var(--accent2)">= 1.00×10¹¹</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>목표 최대 열화율 (%)</label>
+            <select id="tp-target-deg" onchange="calcTestPlan()">
+              <option value="0.40" selected>40% (AIAA S-111A 최소 요건)</option>
+              <option value="0.50">50%</option>
+              <option value="0.30">30%</option>
+              <option value="0.20">20%</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>fluence 포인트 수</label>
+            <select id="tp-npoints" onchange="calcTestPlan()">
+              <option value="5" selected>5개 (AIAA 최소)</option>
+              <option value="7">7개</option>
+              <option value="10">10개</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 결과 -->
+      <div id="tp-result-wrapper">
+        <!-- 불가 경고 -->
+        <div id="tp-warn-block" style="display:none">
+          <div class="warn-box" id="tp-warn-msg"></div>
+        </div>
+
+        <!-- 정상 결과 -->
+        <div id="tp-ok-block">
+          <!-- 핵심 수치 -->
+          <div class="g3" style="gap:10px;margin-bottom:12px">
+            <div class="mc"><div class="mcl">시작 fluence (5% 열화)</div><div class="mcv" id="tp-phi-start" style="font-size:13px">—</div></div>
+            <div class="mc"><div class="mcl">종료 fluence (목표 열화)</div><div class="mcv" id="tp-phi-end" style="font-size:13px;color:var(--warn)">—</div></div>
+            <div class="mc"><div class="mcl">AIAA 40% 요건</div><div class="mcv" id="tp-aiaa-pass">—</div></div>
+          </div>
+
+          <!-- fluence 포인트 테이블 -->
+          <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">
+            <thead>
+              <tr style="background:var(--bg3)">
+                <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">단계</th>
+                <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent)">Fluence (입자/cm²)</th>
+                <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent)">예상 Pmax</th>
+                <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent)">예상 열화</th>
+                <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent)">AIAA 판정</th>
+              </tr>
+            </thead>
+            <tbody id="tp-table-body"></tbody>
+          </table>
+
+          <!-- 소재 비교 바 차트 -->
+          <div style="border:1px solid var(--border);border-radius:7px;padding:12px;background:var(--bg2)">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.07em;margin-bottom:10px">레퍼런스 소재 대비 비교 — 동일 입자·에너지 기준 최대 fluence에서의 Pmax</div>
+            <div id="tp-compare-bars"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RDC 곡선 해설 -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">NRL Tada 모델 해설 — Cx·Φ₀의 물리적 의미</div></div>
+    <div class="pb">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13px;line-height:1.8">
+        <div>
+          <div style="font-weight:700;color:var(--accent2);margin-bottom:6px">Pmax(Φ) = Pmax₀ · [1 − Cx · log₁₀(Φ/Φ₀)]</div>
+          <b>Cx (손상계수)</b>: 단위 log-fluence당 Pmax 감소율. 클수록 방사선에 취약. 소재·입자·에너지에 의존하며 <b>반드시 실험으로 피팅</b>해야 합니다.<br><br>
+          <b>Φ₀ (임계 fluence)</b>: 측정 가능한 손상이 시작되는 플럭스. Φ ≤ Φ₀이면 Pmax = 100%. 역시 소재·입자·에너지별로 다릅니다.<br><br>
+          <b>유효 범위</b>: Pmax가 약 50~95% 구간에서 선형(log 스케일). 극단 구간에서는 모델 오차 증가.
+        </div>
+        <div>
+          <b>왜 입자 종류·에너지마다 다른가</b><br>
+          NIEL(Non-Ionizing Energy Loss)이 입자 종류와 에너지에 따라 크게 달라지기 때문입니다. 동일 fluence라도 양성자와 전자의 격자 손상량이 다르며, 저에너지 양성자는 표면층에 집중되고 고에너지 양성자는 벌크를 관통합니다.<br><br>
+          <b>1MeV 등가 전자 fluence (Φ₁ₑ)</b><br>
+          서로 다른 입자·에너지의 손상을 단일 기준으로 환산하는 방법. Φ₁ₑ = Φ × RDC(E). RDC는 소재별 실험으로 결정됩니다.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+<!-- ══ END TAB 7 ══ -->
+
 <footer>
   <span class="ft">HELIAS Laboratory · heliaslab.com · Solar-Rad v2.0</span>
   <span class="ft">NRL/Tada+1982 · Lang+2020 · Jun+2003 · AE8/AP8 · ECSS-E-HB-10-12A · AIAA S-111A-2014</span>
@@ -783,6 +1309,7 @@ function sw(id,el){
   if(id==='layers'){buildLayerEditor(); drawRangeChart();}
   if(id==='eol'){drawEolCharts();}
   if(id==='aiaa'){updateAiaa();}
+  if(id==='testplan'){initTestPlan();}
 }
 
 function fmtSci(v,d=3){
@@ -1318,6 +1845,148 @@ function updateAiaa(){
       <td style="padding:7px 10px;font-size:12px;text-align:center">${critText}</td>
     </tr>`;
   }).join('');
+}
+
+// ════════════════════════════════
+// 시험 계획 보조 도구
+// ════════════════════════════════
+
+// 레퍼런스 소재 중간값 (Anspaugh 1996 기반 참고 범위의 중간값)
+// 직접 문헌 확인 필요 — 정확한 값 아님
+const REF_MATS = {
+  gaas_e: {name:'GaAs (전자 1MeV, 참고)',    particle:'electron', energy:1.0,  cx:0.12,  phi0exp:14, color:'#1a52c8'},
+  gaas_p: {name:'GaAs (양성자 10MeV, 참고)', particle:'proton',   energy:10.0, cx:0.05,  phi0exp:11, color:'#1a52c8'},
+  si_e:   {name:'Si (전자 1MeV, 참고)',       particle:'electron', energy:1.0,  cx:0.20,  phi0exp:13, color:'#0d8a5e'},
+  si_p:   {name:'Si (양성자 10MeV, 참고)',    particle:'proton',   energy:10.0, cx:0.175, phi0exp:10, color:'#0d8a5e'},
+  ge_e:   {name:'Ge (전자 1MeV, 참고)',       particle:'electron', energy:1.0,  cx:0.11,  phi0exp:13, color:'#8b2fc9'},
+  ge_p:   {name:'Ge (양성자 1MeV, 참고)',     particle:'proton',   energy:1.0,  cx:0.13,  phi0exp:10, color:'#8b2fc9'},
+  custom: {name:'신규 소재',                   particle:'proton',   energy:1.0,  cx:0.05,  phi0exp:10, color:'#b86e00'},
+};
+
+function loadRef(key){
+  const r = REF_MATS[key];
+  document.getElementById('tp-matname').value    = r.name;
+  document.getElementById('tp-particle').value   = r.particle;
+  document.getElementById('tp-energy').value     = r.energy;
+  document.getElementById('tp-cx').value         = r.cx;
+  document.getElementById('tp-phi0-exp').value   = r.phi0exp;
+  calcTestPlan();
+}
+
+function fmtSciTP(v){
+  const e = Math.floor(Math.log10(v));
+  const m = v / Math.pow(10, e);
+  const sup = e.toString().split('').map(c=>({'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'}[c]||c)).join('');
+  return `${m.toFixed(2)}×10${sup}`;
+}
+
+function calcTestPlan(){
+  const cx        = parseFloat(document.getElementById('tp-cx').value) || 0.05;
+  const phi0exp   = parseFloat(document.getElementById('tp-phi0-exp').value) || 10;
+  const phi0      = Math.pow(10, phi0exp);
+  const targetDeg = parseFloat(document.getElementById('tp-target-deg').value) || 0.40;
+  const nPoints   = parseInt(document.getElementById('tp-npoints').value) || 5;
+  const particle  = document.getElementById('tp-particle').value;
+  const energy    = parseFloat(document.getElementById('tp-energy').value) || 1.0;
+
+  // phi0 표시 업데이트
+  document.getElementById('tp-phi0-display').textContent = '= ' + fmtSciTP(phi0);
+
+  // AIAA 최대 fluence 한계
+  const aiaaMax = particle === 'electron' ? 1e16 : 1e13;
+
+  // fluence 범위 역산
+  const phi_start = phi0 * Math.pow(10, 0.05 / cx); // ~5% 열화
+  const phi_end   = phi0 * Math.pow(10, targetDeg / cx);
+
+  // 경고: phi_end가 비현실적으로 크거나 phi_start <= phi0
+  const warnBlock = document.getElementById('tp-warn-block');
+  const okBlock   = document.getElementById('tp-ok-block');
+  const warnMsg   = document.getElementById('tp-warn-msg');
+
+  if(phi_end > 1e25){
+    warnBlock.style.display = '';
+    okBlock.style.display = 'none';
+    warnMsg.innerHTML = `<b>계산 불가:</b> 입력된 Cx=${cx}로 ${(targetDeg*100).toFixed(0)}% 열화를 달성하려면 Φ = ${fmtSciTP(phi_end)} 가 필요합니다. 이는 물리적으로 불가능한 수치입니다.<br><br>
+    <b>의미:</b> 이 소재의 Cx가 너무 낮아 현실적인 fluence에서 의미있는 손상이 발생하지 않습니다. Cx 값을 재검토하거나, 이 소재가 해당 입자에 대해 매우 강한 내성을 가짐을 의미할 수 있습니다.<br>
+    <b>조치:</b> Cx를 높이거나(문헌 재확인), 목표 열화율을 낮추거나, 더 높은 NIEL의 입자로 변경하십시오.`;
+    return;
+  }
+
+  warnBlock.style.display = 'none';
+  okBlock.style.display = '';
+
+  // phi_start, phi_end 표시
+  document.getElementById('tp-phi-start').textContent = fmtSciTP(phi_start);
+  document.getElementById('tp-phi-end').textContent   = fmtSciTP(phi_end);
+
+  // AIAA 40% 요건 판정
+  const phi_40pct = phi0 * Math.pow(10, 0.40 / cx);
+  const aiaaPass  = phi_40pct <= aiaaMax;
+  const aiaaEl    = document.getElementById('tp-aiaa-pass');
+  if(aiaaPass){
+    aiaaEl.innerHTML = `<span style="color:var(--ok);font-weight:700">✓ 범위 내</span>`;
+  } else {
+    aiaaEl.innerHTML = `<span style="color:var(--bad);font-weight:700">✗ 범위 초과</span><br><span style="font-size:11px;color:var(--muted)">${fmtSciTP(phi_40pct)} 필요</span>`;
+  }
+
+  // fluence 포인트 생성 (로그 균등 분할)
+  const logStart = Math.log10(phi_start);
+  const logEnd   = Math.log10(phi_end);
+  const logStep  = (logEnd - logStart) / (nPoints - 1);
+
+  const tbody = document.getElementById('tp-table-body');
+  tbody.innerHTML = '';
+  for(let i = 0; i < nPoints; i++){
+    const phi  = Math.pow(10, logStart + i * logStep);
+    const pmax = Math.max(0, 1 - cx * Math.log10(phi / phi0)) * 100;
+    const deg  = 100 - pmax;
+    const isLast = (i === nPoints - 1);
+    const meetAIAA = deg >= 40;
+    const rowBg = isLast ? 'rgba(26,82,200,.06)' : (i%2===0?'':'var(--bg2)');
+    const pmaxColor = pmax < 60 ? 'var(--bad)' : pmax < 80 ? 'var(--warn)' : 'var(--ok)';
+    const judgment = isLast
+      ? (meetAIAA
+          ? '<span style="color:var(--ok);font-weight:700">✓ 40% 달성</span>'
+          : `<span style="color:var(--warn);font-weight:700">△ ${deg.toFixed(0)}% 열화</span>`)
+      : '<span style="color:var(--muted)">—</span>';
+    tbody.innerHTML += `<tr style="background:${rowBg}">
+      <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;${isLast?'font-weight:700':''}">STEP ${i+1}${isLast?' ★':''}</td>
+      <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;${isLast?'font-weight:700':''}">${fmtSciTP(phi)}</td>
+      <td style="padding:7px 10px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;color:${pmaxColor}">${pmax.toFixed(1)}%</td>
+      <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;text-align:center;color:var(--muted)">${deg.toFixed(1)}%</td>
+      <td style="padding:7px 10px;font-size:12px;text-align:center">${judgment}</td>
+    </tr>`;
+  }
+
+  // 비교 바 차트 (레퍼런스 소재 + 현재 입력)
+  const compareEl = document.getElementById('tp-compare-bars');
+  const compareMats = [
+    {label:'GaAs (참고)',  cx:REF_MATS[particle==='electron'?'gaas_e':'gaas_p'].cx,  phi0:Math.pow(10,REF_MATS[particle==='electron'?'gaas_e':'gaas_p'].phi0exp), color:'#1a52c8'},
+    {label:'Si (참고)',    cx:REF_MATS[particle==='electron'?'si_e':'si_p'].cx,        phi0:Math.pow(10,REF_MATS[particle==='electron'?'si_e':'si_p'].phi0exp),   color:'#0d8a5e'},
+    {label:'Ge (참고)',    cx:REF_MATS[particle==='electron'?'ge_e':'ge_p'].cx,        phi0:Math.pow(10,REF_MATS[particle==='electron'?'ge_e':'ge_p'].phi0exp),   color:'#8b2fc9'},
+    {label:document.getElementById('tp-matname').value||'입력 소재', cx, phi0, color:'#b86e00'},
+  ];
+
+  // phi_end 기준 각 소재의 Pmax
+  compareEl.innerHTML = compareMats.map(m=>{
+    const pmaxAtEnd = Math.max(0, 1 - m.cx * Math.log10(Math.max(phi_end, m.phi0*1.001) / m.phi0)) * 100;
+    const barW = Math.max(0, Math.min(100, pmaxAtEnd));
+    const barColor = pmaxAtEnd < 60 ? '#dc2626' : pmaxAtEnd < 80 ? '#b86e00' : m.color;
+    return `<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+        <span style="font-family:var(--mono);color:${m.color};font-weight:700">${m.label}</span>
+        <span style="font-family:var(--mono);font-weight:700;color:${barColor}">${pmaxAtEnd.toFixed(1)}%</span>
+      </div>
+      <div style="background:var(--border);border-radius:3px;height:10px">
+        <div style="background:${barColor};width:${barW}%;height:100%;border-radius:3px;transition:width .4s"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function initTestPlan(){
+  loadRef('gaas_p');
 }
 
 // ── 초기화 ──

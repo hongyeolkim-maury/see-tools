@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HELIAS Lab — STOP v2.0: 이온 저지능 / Bragg Peak 시뮬레이터</title>
+<title>HELIAS Lab — STOP v2.2: 이온 저지능 / Bragg Peak 시뮬레이터</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -52,12 +52,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:20p
 .ph-btn{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid var(--border2);background:var(--bg2);color:var(--accent);cursor:pointer;transition:all .15s}
 .ph-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 .pb{padding:16px}
-.g2{display:grid;grid-template-columns:330px 1fr;gap:14px}
+.g2{display:grid;grid-template-columns:380px 1fr;gap:14px}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .field{margin-bottom:14px}.field:last-child{margin-bottom:0}
 .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
-select,input[type=number],input[type=text]{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:4px;font-family:var(--sans);font-size:14px;outline:none}
+select,input[type=number],input[type=text]{width:100%;min-width:60px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:4px;font-family:var(--sans);font-size:14px;outline:none}
 select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231a3e8f'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;cursor:pointer}
 select:focus,input[type=number]:focus,input[type=text]:focus{border-color:var(--accent)}
 .srow{margin-bottom:12px}.srow:last-child{margin-bottom:0}
@@ -88,19 +88,48 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
 
 /* ── 다중 층 매니저 ── */
 .layer-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.layer-row{display:grid;grid-template-columns:24px 24px 1.6fr 1fr 0.9fr 0.7fr 0.7fr 30px;gap:6px;align-items:center;padding:8px 10px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;transition:all .15s}
+/* ─── layer-row: 항상 2줄 카드 레이아웃 (가독성 우선)
+     1줄: [번호 | 이름 | 물질 select | 삭제]
+     2줄: [두께 μm | 밀도 g/cm³ | I eV] 균등 3분할 */
+.layer-row{
+  display:grid;
+  grid-template-columns:30px 1fr 1.1fr 30px;
+  grid-template-rows:auto auto;
+  gap:8px 8px;
+  align-items:center;
+  padding:10px 12px;
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:6px;
+  transition:all .15s;
+}
 .layer-row.dragging{opacity:.45;background:var(--bg3)}
 .layer-row.drag-over{border-color:var(--accent);box-shadow:0 0 0 2px rgba(26,82,200,.2)}
 .layer-row.dead{background:#fbeaea;border-color:#f5b8b8}
+.layer-row .layer-num{grid-column:1;grid-row:1}
+/* drag handle 숨김 (좁은 layer-row에선 불필요) */
+.layer-row .layer-grip{display:none}
+.layer-row > input[type=text]{grid-column:2;grid-row:1;font-family:var(--sans);font-weight:500;padding:7px 10px;font-size:13px;min-width:0}
+.layer-row > select{grid-column:3;grid-row:1;padding:7px 10px;font-size:13px;min-width:0}
+.layer-row > .layer-del{grid-column:4;grid-row:1}
+.layer-row > input[type=number]{
+  grid-row:2;
+  font-size:13px;
+  padding:7px 10px;
+  font-family:var(--mono);
+  min-width:0;
+}
+.layer-row > input[type=number]:nth-of-type(1){grid-column:1 / span 2}  /* 두께 (넓게) */
+.layer-row > input[type=number]:nth-of-type(2){grid-column:3}            /* 밀도 */
+.layer-row > input[type=number]:nth-of-type(3){grid-column:4}            /* I */
+.layer-row > input[type=number]::placeholder{color:var(--muted);opacity:.6;font-size:11px}
 .layer-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);text-align:center;background:var(--bg1);border-radius:3px;padding:3px 0}
 .layer-grip{cursor:grab;color:var(--dim);font-size:14px;text-align:center;user-select:none}
 .layer-grip:active{cursor:grabbing}
-.layer-row input[type=text],.layer-row input[type=number],.layer-row select{padding:4px 7px;font-size:12px;border-radius:3px}
-.layer-row input[type=text]{font-family:var(--sans);font-weight:500}
-.layer-row input[type=number]{font-family:var(--mono)}
 .layer-del{background:transparent;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:0;line-height:1;transition:color .15s}
 .layer-del:hover{color:var(--bad)}
-.layer-head{display:grid;grid-template-columns:24px 24px 1.6fr 1fr 0.9fr 0.7fr 0.7fr 30px;gap:6px;padding:0 10px 4px;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+/* layer-head: 카드 모드에선 헤더 라벨 의미 없음 (각 input에 placeholder 있음) */
+.layer-head{display:none}
 .add-btn{padding:8px 14px;font-family:var(--mono);font-size:12px;border-radius:4px;border:1px dashed var(--border2);background:transparent;color:var(--accent);cursor:pointer;width:100%;transition:all .15s;letter-spacing:.04em;text-transform:uppercase}
 .add-btn:hover{border-style:solid;background:var(--bg2);border-color:var(--accent)}
 
@@ -117,12 +146,32 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
 
 footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .ft{font-family:var(--mono);font-size:12px;color:var(--dim)}
-@media(max-width:900px){
-  .g2{grid-template-columns:1fr}.g3,.g4{grid-template-columns:1fr 1fr}
-  .layer-row,.layer-head{grid-template-columns:24px 1fr 0.8fr 0.7fr 0.6fr 0.6fr 26px;font-size:11px}
-  .layer-row .layer-grip{display:none}.layer-head>span:first-child{display:none}
+
+/* ─── 좁은 화면 (≤ 1100px): layer-row를 2줄 카드로 재배치
+     이유: .g2 좌측 컬럼이 380px이므로 그 안의 layer-row는 항상 좁음.
+           화면 폭 ≤ 1100px에서는 .g2가 1fr로 바뀌어도 가독성 위해 카드 유지. */
+/* ─── 좁은 화면 (≤ 1100px): .g2를 1열로
+     layer-row는 항상 카드 모드이므로 별도 재정의 불필요 */
+@media(max-width:1100px){
+  .g2{grid-template-columns:1fr}
+  .g3,.g4{grid-template-columns:1fr 1fr}
 }
-@media(max-width:600px){.g3,.g4{grid-template-columns:1fr}}
+
+/* ─── 매우 좁은 화면 (≤ 600px): 폰트/padding 축소, 헤더 정렬 ─── */
+@media(max-width:600px){
+  .g3,.g4{grid-template-columns:1fr}
+  .layer-row{padding:8px 10px;gap:6px 8px}
+  .layer-row > input[type=text],
+  .layer-row > select{font-size:13px;padding:6px 8px;min-width:0}
+  .layer-row > input[type=number]{font-size:12px;padding:6px 8px}
+  /* 헤더 정렬 */
+  header{flex-direction:column;align-items:flex-start;gap:8px}
+  .htags{flex-wrap:wrap}
+  .nav-btn{font-size:11px;padding:4px 9px}
+  .wrap{padding:0 12px 40px}
+  .mode-btn{padding:8px 12px;font-size:11px}
+  .pb{padding:12px}
+}
 </style>
 </head>
 <body>
@@ -131,7 +180,7 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
 <header>
   <div>
     <div class="logo-main">HELIAS<span>·LAB</span></div>
-    <div class="logo-sub">STOP v2.0 — Multi-Layer Bragg Peak Simulator</div>
+    <div class="logo-sub">STOP v2.2 — Multi-Layer Bragg Peak Simulator</div>
   </div>
   <div class="htags">
     <span class="live"></span>
@@ -350,7 +399,7 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
 </div><!-- end mode 2 -->
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v2.0 — Multi-Layer Bragg Peak Simulator</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v2.2 — Multi-Layer Bragg Peak Simulator</span>
   <span class="ft">Bethe-Bloch (1930/33) · ZBL (Ziegler 1985) · LSS (1963) · CSDA · Jun 2003 IEEE TNS 50(6):1924</span>
 </footer>
 
@@ -540,12 +589,33 @@ function Range(E0, Z1, A1, Z2, A2, I, rho){
 //   stopped: bool, range_um, exit_E_MeV, layer_results[]
 // ════════════════════════════════════════════════════════════════════
 
+// ────────────────────────────────────────────────────────────────────
+// [v2.1 RESOLUTION UPGRADE 2026-05]
+// dx 제어 매개변수 — Bragg peak 해상도 향상
+//
+// 변경점:
+//   DX_INIT_UM        0.05 → 0.02   (초기 3× 세밀)
+//   FRAC_HIGH         0.05 → 0.02   (강제 분할 임계 강화)
+//   FRAC_LOW          0.01 → 0.003  (dx 증가 빈도 낮춤)
+//   GROW_RATE         1.5  → 1.3    (부드러운 증가)
+//   신규 LOWE_DX_CAP    : E < ENDREGION_FACTOR·E_floor 영역에서 dx 상한
+//   신규 SUBSTEP_COUNT  : 정지 직전 마지막 step을 N등분해 profile에 추가
+// ────────────────────────────────────────────────────────────────────
 const E_MIN_FRACTION = 0.001;     // E0의 0.1% 이하면 정지로 간주
 const E_MIN_ABS = 0.001;          // MeV 절대 하한
-const DX_INIT_UM = 0.05;          // 초기 step 크기
+const DX_INIT_UM = 0.02;          // 초기 step 크기 (이전 0.05)
 const DX_MIN_UM = 1e-4;           // 최소 step (0.1 nm)
 const DX_MAX_FACTOR = 0.05;       // 한 step에서 층 두께의 5% 이내
-const MAX_STEPS = 2e5;            // 무한 루프 방지
+const MAX_STEPS = 5e5;            // 무한 루프 방지 (해상도 향상으로 ↑)
+// 적응형 분할 임계
+const FRAC_HIGH = 0.02;           // ΔE/E > 2% → dx 절반
+const FRAC_LOW  = 0.003;          // ΔE/E < 0.3% → dx 증가
+const GROW_RATE = 1.3;            // dx 증가 비율
+// 정지 직전 영역 dx 강제 캡
+const ENDREGION_FACTOR = 100;     // E < 100·E_floor 일 때 진입 ("Bragg peak 영역")
+const LOWE_DX_CAP_UM = 0.005;     // 그 영역에서 dx ≤ 5 nm
+// 정지 직전 마지막 dxStep을 sub-step 분할
+const SUBSTEP_COUNT = 8;          // 마지막 정지 step을 8등분
 
 function simulateBragg(ion, E0_MeV, layers){
   const profile = [];
@@ -590,15 +660,24 @@ function simulateBragg(ion, E0_MeV, layers){
       //   분석: MeV·cm²/g × g/cm³ × cm/μm = MeV/cm × cm/μm = MeV/μm
       const dEdx_lin = sMass * rho * 1e-4;
 
+      // [v2.1] 정지 직전 영역 — dx 강제 cap (Bragg peak 정밀 샘플링)
+      //   E가 E_floor의 ENDREGION_FACTOR배 이하로 떨어지면
+      //   peak 영역으로 간주, dx ≤ LOWE_DX_CAP_UM (5 nm) 강제.
+      const inEndRegion = (E < ENDREGION_FACTOR * E_floor);
+      const dxHardCap = inEndRegion
+        ? Math.min(LOWE_DX_CAP_UM, t_um * DX_MAX_FACTOR)
+        : (t_um * DX_MAX_FACTOR);
+      if(dx > dxHardCap) dx = dxHardCap;
+
       // dx 조정 — 한 step의 ΔE/E
       const dE_test = dEdx_lin * dx;
       const fracLoss = dE_test / E;
-      if(fracLoss > 0.05 && dx > DX_MIN_UM * 2){
+      if(fracLoss > FRAC_HIGH && dx > DX_MIN_UM * 2){
         dx = Math.max(DX_MIN_UM, dx / 2);
         continue;  // 같은 위치에서 더 작은 step으로 재시도
       }
-      if(fracLoss < 0.01 && dx < t_um * DX_MAX_FACTOR){
-        dx = Math.min(dx * 1.5, t_um * DX_MAX_FACTOR);
+      if(fracLoss < FRAC_LOW && dx < dxHardCap){
+        dx = Math.min(dx * GROW_RATE, dxHardCap);
       }
 
       // 마지막 step은 층 경계에 정확히 도달
@@ -613,10 +692,49 @@ function simulateBragg(ion, E0_MeV, layers){
 
       // 정지 조건
       if(newE <= E_floor){
-        // 선형 보간으로 정지 위치 추정
-        const frac = E / dEdx_lin;  // 마지막에 멈출 때까지의 거리
-        const xStop = xCum - dxStep + Math.min(dxStep, frac);
-        profile.push({ x: xStop, E: 0, dEdx: dEdx_lin, layer: li });
+        // [v2.1] 정지 직전 sub-step 분할 — peak 정점 정밀 샘플링
+        //   마지막 dxStep 구간에서 에너지가 E → ~0으로 급감.
+        //   이 구간을 SUBSTEP_COUNT 등분해 각 분할점의 (x, E, dE/dx)를
+        //   profile에 추가한다. 이게 Bragg peak를 "뾰족하게" 보이게 만드는 핵심.
+        //
+        //   에너지 보존을 위해, 분할 적분도 CSDA 미니 적분으로 수행:
+        //     E_sub(0) = E (이전 step 시작 에너지)
+        //     E_sub(k+1) = E_sub(k) - S(E_sub(k))·ρ·dx_sub
+        //   목표: E_sub가 E_floor에 가장 가까이 도달하는 위치에서 정지.
+        const x_substep_start = xCum - dxStep;
+        const dx_sub = dxStep / SUBSTEP_COUNT;
+        let E_sub = E;
+        let x_sub = x_substep_start;
+        let lastDEdx = dEdx_lin;
+        let xStop = xCum;  // 기본값: 마지막 위치
+
+        for(let k = 0; k < SUBSTEP_COUNT; k++){
+          if(E_sub <= E_floor){
+            xStop = x_sub;
+            break;
+          }
+          const sMass_sub = Se(E_sub, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho)
+                          + Sn(E_sub, ion.Z, ion.A, tar.Z, tar.A, rho);
+          const dEdx_sub = sMass_sub * rho * 1e-4;
+          lastDEdx = dEdx_sub;
+          // 이번 sub-step의 시작 에너지/위치를 profile에 추가
+          //   (k==0이면 이전 main step에서 이미 push되었을 수도 있으나
+          //    Bragg peak 영역에서는 중복 점이 부드러운 곡선에 도움됨)
+          profile.push({ x: x_sub, E: E_sub, dEdx: dEdx_sub, layer: li });
+          // sub-step 진행
+          const dE_sub_test = dEdx_sub * dx_sub;
+          if(E_sub - dE_sub_test <= E_floor){
+            // 이 sub-step 내에서 정지 — 선형 보간으로 정확한 정지점
+            const frac = E_sub / dEdx_sub;  // E를 모두 잃기까지 이동 거리
+            xStop = x_sub + Math.min(dx_sub, frac);
+            E_sub = 0;
+            break;
+          }
+          E_sub -= dE_sub_test;
+          x_sub += dx_sub;
+        }
+        // 정지점 자체 (dE/dx는 마지막 sub-step 값, E=0)
+        profile.push({ x: xStop, E: 0, dEdx: lastDEdx, layer: li });
         stopped = true;
         layerStopped = true;
         stopLayer = li;
@@ -1008,16 +1126,19 @@ function renderLayers(){
            ondrop="onDrop(event)" ondragend="onDragEnd(event)" ondragleave="onDragLeave(event)">
         <div class="layer-num" style="background:var(--c-l${colorIdx})">${i+1}</div>
         <div class="layer-grip" title="드래그로 순서 변경">⋮⋮</div>
-        <input type="text" value="${l.name}" placeholder="층 이름"
+        <input type="text" value="${l.name}" placeholder="층 이름" title="층 이름"
                onchange="updateLayerField('${l.id}', 'name', this.value)">
-        <select onchange="updateLayerField('${l.id}', 'material', this.value)">
+        <select title="물질 선택" onchange="updateLayerField('${l.id}', 'material', this.value)">
           ${matOpts.replace(`value="${l.material}"`, `value="${l.material}" selected`)}
         </select>
         <input type="number" value="${l.thickness}" min="0.001" step="0.1"
+               placeholder="두께 μm" title="두께 (μm)"
                onchange="updateLayerField('${l.id}', 'thickness', parseFloat(this.value))">
         <input type="number" value="${l.density}" min="0.01" step="0.01"
+               placeholder="밀도 g/cm³" title="밀도 (g/cm³)"
                onchange="updateLayerField('${l.id}', 'density', parseFloat(this.value))">
         <input type="number" value="${l.I}" min="10" step="1"
+               placeholder="I eV" title="평균 여기 에너지 I (eV)"
                onchange="updateLayerField('${l.id}', 'I', parseFloat(this.value))">
         <button class="layer-del" onclick="removeLayer('${l.id}')" title="삭제">×</button>
       </div>`;

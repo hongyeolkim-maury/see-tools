@@ -433,8 +433,8 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
 </div>
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v1.0 — 저작권 없는 공개 물리 이론 독립 구현</span>
-  <span class="ft">Bethe-Bloch (1930/1933) · ZBL (Ziegler 1985) · LSS (1963) · Jun+ (2003) IEEE TNS</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v1.1 (P0-patched 2026-05) — 저작권 없는 공개 물리 이론 독립 구현</span>
+  <span class="ft">Bethe-Bloch (1930/1933) · ZBL (Ziegler 1985) · LSS (1963) · Jun 2003 IEEE TNS 50(6):1924</span>
 </footer>
 </div>
 
@@ -778,9 +778,14 @@ function updateNIEL(){
      <div style="width:${sep.toFixed(0)}%;background:var(--c-se);border-radius:0 4px 4px 0"></div>`;
 
   const warn=(tarKey==='gan'||tarKey==='sic')?'<br>⚠️ '+tar.name+' NIEL 비율은 에너지 의존성이 강합니다. 정밀 계산: sr-niel.org':'';
+  // [P0-PATCH 2026-05] NIEL=Sn 표기 정정. Sn은 저에너지(<10MeV) 근사일 뿐,
+  //   정확한 NIEL은 Lindhard partition function L(T) 포함 적분 필요.
+  //   참조: Jun 2003 IEEE TNS 50(6):1924, Akkerman 2001 J Phys D 34.
   document.getElementById('nielInterp').innerHTML=
     `<b>${tar.name}</b> 소재, <b>${ion.name}</b> @ ${document.getElementById('eVal').value} ${document.getElementById('eUnit').value}<br>
-     NIEL = Sₙ = <b>${fmt(sn)} MeV·cm²/mg</b>  (Si 대비 <b>${(tar.nr||1).toFixed(2)}배</b>)<br>
+     <b>Sₙ ≈ NIEL (저에너지 근사)</b> = <b>${fmt(sn)} MeV·cm²/mg</b>  (Si 대비 <b>${(tar.nr||1).toFixed(2)}배</b>)<br>
+     <span style="font-size:11px;color:var(--muted)">⚠ 정확한 NIEL = ∫(dσ/dT)·L(T)·T dT (Lindhard partition). Sₙ만으로의 근사는 양성자 ≲10 MeV에서만 유효.<br>
+     고에너지 양성자 NIEL은 Jun (2003) IEEE TNS 50(6):1924 또는 SR-NIEL DB 참조 권장.</span><br>
      임무 ${dur}yr × 10^${logFlux} p⁺/cm²/yr → <b>TNID = ${fmt(tnid)} MeV/g</b>${warn}`;
 
   // NIEL 차트
@@ -799,7 +804,7 @@ function updateNIEL(){
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y)} MeV·cm²/mg`}}},
       scales:{
         x:{type:'logarithmic',title:{display:true,text:`에너지 (MeV) — ${ion.name}`,color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
-        y:{type:'logarithmic',title:{display:true,text:'NIEL (MeV·cm²/mg)',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toPrecision(2)}}
+        y:{type:'logarithmic',title:{display:true,text:'Sₙ (≈ NIEL @ low-E)  MeV·cm²/mg',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toPrecision(2)}}
       }}});
   }
 }

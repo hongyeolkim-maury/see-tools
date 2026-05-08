@@ -480,15 +480,15 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
         <table class="ref-tbl">
           <thead><tr><th>소재</th><th>NIEL₀ (×10⁻³)</th><th>Si 대비 비</th><th>주요 응용</th></tr></thead>
           <tbody>
-            <tr><td>Si</td><td>2.16</td><td>1.00</td><td>CMOS, SRAM</td></tr>
-            <tr><td>GaAs</td><td>4.30</td><td>1.99</td><td>RF, 광소자</td></tr>
-            <tr><td>GaN</td><td>0.72</td><td>0.33</td><td>전력, RF HEMT</td></tr>
-            <tr><td>SiC</td><td>1.10</td><td>0.51</td><td>전력 MOSFET</td></tr>
-            <tr><td>Ge</td><td>5.80</td><td>2.69</td><td>SiGe HBT</td></tr>
-            <tr><td>InP</td><td>7.20</td><td>3.33</td><td>광통신</td></tr>
+            <tr><td>Si</td><td>3.30</td><td>1.00</td><td>CMOS, SRAM</td></tr>
+            <tr><td>GaAs</td><td>6.57</td><td>1.99</td><td>RF, 광소자</td></tr>
+            <tr><td>GaN</td><td>1.09</td><td>0.33</td><td>전력, RF HEMT</td></tr>
+            <tr><td>SiC</td><td>1.68</td><td>0.51</td><td>전력 MOSFET</td></tr>
+            <tr><td>Ge</td><td>8.88</td><td>2.69</td><td>SiGe HBT</td></tr>
+            <tr><td>InP</td><td>10.99</td><td>3.33</td><td>광통신</td></tr>
           </tbody>
         </table>
-        <div class="info-p" style="margin-top:8px">단위: MeV·cm²/g @ 10 MeV 양성자. Jun et al. (2003) 기준값.</div>
+        <div class="info-p" style="margin-top:8px">단위: MeV·cm²/g @ <strong>10 MeV 양성자</strong>. Jun et al. (2003) IEEE TNS 50(6):1924 Table I 기준. ⚠ 1MeV 양성자 NIEL은 약 6× 더 큼 (저에너지 Coulomb 산란 지배).</div>
       </div>
     </div>
     <div class="panel">
@@ -512,8 +512,8 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
 </div>
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · NIEL/TID Calculator v1.0</span>
-  <span class="ft">SR모델: Summers+1993 · Jun+2003 · Shieldose-2 · ECSS-E-HB-10-12A</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · NIEL/TID Calculator v1.1 (P0-patched 2026-05)</span>
+  <span class="ft">Jun 2003 IEEE TNS 50(6):1924 · Summers 1993 · SHIELDOSE-2 (Seltzer 1994) · ECSS-E-HB-10-12A</span>
 </footer>
 </div>
 
@@ -531,17 +531,33 @@ function switchTab(id, el) {
 }
 
 // ── Data tables ──
-const NIEL0 = { si:2.16e-3, gaas:4.30e-3, gan:0.72e-3, sic:1.10e-3, ge:5.80e-3, inp:7.20e-3 };
-const NIEL_LIMITS = { si:1e10, gaas:5e9, gan:5e10, sic:2e10, ge:3e9, inp:2e9 }; // p/cm²
+// [P0-PATCH 2026-05] Jun 2003 IEEE TNS 50(6):1924 Table I 기반.
+//   NIEL_Si@10MeV proton = 3.3e-3 MeV·cm²/g (기준점)
+//   기존 2.16e-3은 1MeV 기준값으로, 10MeV와 혼동됨. 10MeV 기준으로 통일.
+const NIEL0 = { si:3.3e-3, gaas:6.6e-3, gan:1.1e-3, sic:1.7e-3, ge:8.9e-3, inp:1.1e-2 };
+const NIEL_LIMITS = { si:1e10, gaas:5e9, gan:5e10, sic:2e10, ge:3e9, inp:2e9 }; // p/cm² (NIEL displacement limit)
 const NIEL_LABELS = { si:'Si', gaas:'GaAs', gan:'GaN', sic:'SiC', ge:'Ge', inp:'InP' };
+
+// [P0-PATCH 2026-05] PART_FACTOR — 1MeV 전자 등가 환산 인자.
+//   ⚠ 본 상수는 *근사값*. 실제 NRL Damage Equivalence는 에너지 함수.
+//   (Messenger 2001 NASA/TP-2001-210997, Baur GaAs Td=21eV)
+//   GaAs 기준: NIEL_p(1MeV)/NIEL_e(1MeV) = 4.967e-2/1.125e-5 ≈ 4416
+//   에너지가 높을수록 비율 감소 (10MeV p ≈ 580× 1MeV e⁻).
+//   본 코드는 임무 평균 양성자 에너지 ~10MeV 가정.
 const PART_FACTOR = { proton:1.0, neutron:0.95, electron:0.05, alpha:3.2 };
 
-const ORBIT_FLUX = { leo:5e8, leo_pol:3e9, meo:2e10, geo:5e9, deep:1e10 }; // p/cm²/yr
+// [P0-PATCH 2026-05] 궤도 플럭스 — AP9 mean (>10MeV protons, 100mil Al).
+//   기존 ORBIT_FLUX는 1~2 자릿수 과소(특히 MEO/GPS).
+//   참조: Ginet 2013 Space Sci Rev 179, NASA/TM-20220011775.
+const ORBIT_FLUX = { leo:1.0e9, leo_pol:1.5e10, meo:5.0e12, geo:2.0e10, deep:8.0e10 }; // p/cm²/yr
 const SOLAR_MOD  = { min:1.0, max:0.5 };
-const SHIELD_LAM = 8; // mm Al half-value for proton flux
+const SHIELD_LAM = 8; // mm Al, 1/e for low-E protons (≤30 MeV)
 
-// TID orbit dose rate (rad/yr @ 0mm shield)
-const TID_RATE0 = { leo:0.1, leo_pol:0.8, meo:50, geo:15, deep:25 }; // krad/yr
+// [P0-PATCH 2026-05] TID 궤도별 dose rate — SHIELDOSE-2 typical @ 100mil Al.
+//   참조: Seltzer 1994 NISTIR 5477, NASA/TM-20220011775 Mission Radiation Modeling.
+//   기존: leo:0.1, leo_pol:0.8, meo:50, geo:15, deep:25
+//   수정: AE9/AP9 + SHIELDOSE-2 기준으로 GEO 8 krad/yr (10년 ~80 krad 권고치 정합).
+const TID_RATE0 = { leo:0.3, leo_pol:2.5, meo:80, geo:8.0, deep:12 }; // krad/yr @ 100mil Al
 const TID_LIMITS = {
   cmos_com:5, cmos_rh:500, bipolar:30, gan_hemt:300, sic_fet:30, flash:3, solar:300
 };

@@ -328,13 +328,6 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
       <div class="pb" id="structPreview"></div>
     </div>
 
-    <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">층별 CSDA 사정거리 vs 이온에너지</div></div>
-      <div class="pb">
-        <div class="chart-wrap"><canvas id="rangeChart"></canvas></div>
-        <div style="font-size:12px;color:var(--muted);margin-top:8px">각 층의 두께와 밀도 기반 사정거리를 Fe 이온 기준으로 표시. 막대가 층 두께보다 짧으면 해당 층에서 이온 정지.</div>
-      </div>
-    </div>
   </div>
 </div>
 </div>
@@ -374,11 +367,11 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
         <div class="g2" style="gap:10px">
           <div class="field">
             <label>초기 PCE₀ (%)</label>
-            <input type="number" id="pce0" value="26.3" min="5" max="40" step="0.1" oninput="update()">
+            <input type="number" id="pce0" value="26.3" min="5" max="40" step="0.1" oninput="syncPmaxFromPce();drawEolCharts()">
           </div>
           <div class="field">
             <label>초기 Pmax₀ (W/m², AM0)</label>
-            <input type="number" id="pmax0" value="356" min="50" max="600" step="1" oninput="update()">
+            <input type="number" id="pmax0" value="356" min="50" max="600" step="1" oninput="syncPceFromPmax();drawEolCharts()">
           </div>
         </div>
       </div>
@@ -1300,13 +1293,13 @@ const ORBITS = {
 const RAD_COLORS = {p:'#1a52c8', e:'#0d8a5e', gcr:'#8b2fc9', spe:'#b86e00'};
 const RAD_LABELS = {p:'양성자', e:'전자', gcr:'GCR 중이온', spe:'SPE 양성자'};
 
-let eolChart_=null, coverChart_=null, rangeChart_=null;
+let eolChart_=null, coverChart_=null;
 
 function sw(id,el){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active'); el.classList.add('active');
-  if(id==='layers'){buildLayerEditor(); drawRangeChart();}
+  if(id==='layers'){buildLayerEditor();}
   if(id==='eol'){drawEolCharts();}
   if(id==='aiaa'){updateAiaa();}
   if(id==='testplan'){initTestPlan();}
@@ -1602,36 +1595,23 @@ function drop(e,id){
 function dragEnd(){dragId=null; document.querySelectorAll('.layer-row').forEach(r=>r.classList.remove('dragging'));}
 
 // Range chart
-function drawRangeChart(){
-  const el=document.getElementById('rangeChart'); if(!el) return;
-  // Fe 이온 @ 100 MeV 기준 대략적 사정거리
-  const labels=[], thickArr=[], rangeArr=[];
-  layers.forEach(l=>{
-    const m=MAT_DB[l.matKey]||{}; const rho=l.rho||m.rho||3;
-    const range_approx = 1800/rho; // 100 MeV Fe 이온 Al 환산 사정거리 근사 [μm]
-    labels.push(m.name||l.matKey);
-    thickArr.push(l.thick);
-    rangeArr.push(Math.min(range_approx,500));
-  });
-  if(rangeChart_){
-    rangeChart_.data.labels=labels;
-    rangeChart_.data.datasets[0].data=thickArr;
-    rangeChart_.data.datasets[1].data=rangeArr;
-    rangeChart_.update('none');
-  } else {
-    rangeChart_=new Chart(el,{type:'bar',data:{labels,datasets:[
-      {label:'층 두께 (μm)',data:thickArr,backgroundColor:'rgba(26,82,200,.6)',borderRadius:3},
-      {label:'Fe 이온 사정거리 근사 (μm)',data:rangeArr,backgroundColor:'rgba(184,110,0,.5)',borderRadius:3},
-    ]},options:{responsive:true,maintainAspectRatio:false,animation:false,indexAxis:'y',
-      plugins:{legend:{display:true,labels:{font:{size:12},color:'#3a5070'}}},
-      scales:{x:{title:{display:true,text:'μm',color:'#3a5070',font:{size:12}},grid:{color:'rgba(0,0,0,.07)'},ticks:{color:'#3a5070',font:{size:11}}},
-              y:{ticks:{color:'#3a5070',font:{size:11}}}}}});
-  }
-}
-
 // ════════════════════════════════
 // EOL 탭 차트
 // ════════════════════════════════
+// PCE ↔ Pmax 연동 (AM0 = 1367 W/m²)
+function syncPmaxFromPce(){
+  const pce = parseFloat(document.getElementById('pce0').value);
+  if(!isNaN(pce)){
+    document.getElementById('pmax0').value = (pce / 100 * 1367).toFixed(0);
+  }
+}
+function syncPceFromPmax(){
+  const pmax = parseFloat(document.getElementById('pmax0').value);
+  if(!isNaN(pmax)){
+    document.getElementById('pce0').value = (pmax / 1367 * 100).toFixed(1);
+  }
+}
+
 function drawEolCharts(){
   const orbKey=document.getElementById('orbit').value;
   const solar=document.getElementById('solar').value;

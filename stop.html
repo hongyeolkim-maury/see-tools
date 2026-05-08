@@ -87,14 +87,16 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .v-bad{background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad-bd)}
 
 /* ── 다중 층 매니저 ── */
-.layer-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-/* ─── layer-row: 항상 2줄 카드 레이아웃 (가독성 우선)
-     1줄: [번호 | 이름 | 물질 select | 삭제]
-     2줄: [두께 μm | 밀도 g/cm³ | I eV] 균등 3분할 */
+.layer-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+/* ─── layer-row: 3행 카드 레이아웃 (가독성 + 라벨 가시성 우선)
+     1행: [번호 | 이름 | 물질 select | 삭제]            (4-컬럼)
+     2행: 파라미터 라벨 (두께 / 밀도 / I)              (3-컬럼 균등)
+     3행: 파라미터 입력칸                                (3-컬럼 균등)
+     ─ 1행과 2/3행은 컬럼 구조가 다르므로 nested grid 대신
+       sub-container(.layer-row-params)로 분리하여 단순화. */
 .layer-row{
   display:grid;
   grid-template-columns:30px 1fr 1.1fr 30px;
-  grid-template-rows:auto auto;
   gap:8px 8px;
   align-items:center;
   padding:10px 12px;
@@ -106,29 +108,45 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .layer-row.dragging{opacity:.45;background:var(--bg3)}
 .layer-row.drag-over{border-color:var(--accent);box-shadow:0 0 0 2px rgba(26,82,200,.2)}
 .layer-row.dead{background:#fbeaea;border-color:#f5b8b8}
-.layer-row .layer-num{grid-column:1;grid-row:1}
 /* drag handle 숨김 (좁은 layer-row에선 불필요) */
 .layer-row .layer-grip{display:none}
-.layer-row > input[type=text]{grid-column:2;grid-row:1;font-family:var(--sans);font-weight:500;padding:7px 10px;font-size:13px;min-width:0}
-.layer-row > select{grid-column:3;grid-row:1;padding:7px 10px;font-size:13px;min-width:0}
-.layer-row > .layer-del{grid-column:4;grid-row:1}
-.layer-row > input[type=number]{
-  grid-row:2;
+.layer-row > .layer-num{grid-column:1}
+.layer-row > input[type=text]{grid-column:2;font-family:var(--sans);font-weight:500;padding:7px 10px;font-size:13px;min-width:0}
+.layer-row > select{grid-column:3;padding:7px 10px;font-size:13px;min-width:0}
+.layer-row > .layer-del{grid-column:4}
+/* params: 라벨 + 입력을 묶는 하위 그리드 (전체 폭 사용) */
+.layer-row > .layer-row-params{
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:4px 8px;
+  margin-top:2px;
+}
+.layer-row-params .lp-label{
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.04em;
+  color:var(--muted);
+  text-transform:uppercase;
+  padding-left:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.layer-row-params input[type=number]{
   font-size:13px;
   padding:7px 10px;
   font-family:var(--mono);
   min-width:0;
+  width:100%;
 }
-.layer-row > input[type=number]:nth-of-type(1){grid-column:1 / span 2}  /* 두께 (넓게) */
-.layer-row > input[type=number]:nth-of-type(2){grid-column:3}            /* 밀도 */
-.layer-row > input[type=number]:nth-of-type(3){grid-column:4}            /* I */
-.layer-row > input[type=number]::placeholder{color:var(--muted);opacity:.6;font-size:11px}
+.layer-row-params input[type=number]::placeholder{color:var(--muted);opacity:.5;font-size:11px}
 .layer-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);text-align:center;background:var(--bg1);border-radius:3px;padding:3px 0}
 .layer-grip{cursor:grab;color:var(--dim);font-size:14px;text-align:center;user-select:none}
 .layer-grip:active{cursor:grabbing}
 .layer-del{background:transparent;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:0;line-height:1;transition:color .15s}
 .layer-del:hover{color:var(--bad)}
-/* layer-head: 카드 모드에선 헤더 라벨 의미 없음 (각 input에 placeholder 있음) */
+/* layer-head: 카드 모드에선 헤더 라벨 의미 없음 (각 input 위에 라벨 표시) */
 .layer-head{display:none}
 .add-btn{padding:8px 14px;font-family:var(--mono);font-size:12px;border-radius:4px;border:1px dashed var(--border2);background:transparent;color:var(--accent);cursor:pointer;width:100%;transition:all .15s;letter-spacing:.04em;text-transform:uppercase}
 .add-btn:hover{border-style:solid;background:var(--bg2);border-color:var(--accent)}
@@ -142,7 +160,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .lsum-card{background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:9px 12px}
 .lsum-name{font-size:12px;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:6px}
 .lsum-color{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-.lsum-vals{font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.5}
+.lsum-vals{font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.5;word-break:keep-all;overflow-wrap:break-word}
+.lsum-vals .nowrap{white-space:nowrap;display:inline-block}
 
 footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .ft{font-family:var(--mono);font-size:12px;color:var(--dim)}
@@ -163,7 +182,8 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
   .layer-row{padding:8px 10px;gap:6px 8px}
   .layer-row > input[type=text],
   .layer-row > select{font-size:13px;padding:6px 8px;min-width:0}
-  .layer-row > input[type=number]{font-size:12px;padding:6px 8px}
+  .layer-row-params input[type=number]{font-size:12px;padding:6px 8px}
+  .layer-row-params .lp-label{font-size:10px}
   /* 헤더 정렬 */
   header{flex-direction:column;align-items:flex-start;gap:8px}
   .htags{flex-wrap:wrap}
@@ -1131,16 +1151,21 @@ function renderLayers(){
         <select title="물질 선택" onchange="updateLayerField('${l.id}', 'material', this.value)">
           ${matOpts.replace(`value="${l.material}"`, `value="${l.material}" selected`)}
         </select>
-        <input type="number" value="${l.thickness}" min="0.001" step="0.1"
-               placeholder="두께 μm" title="두께 (μm)"
-               onchange="updateLayerField('${l.id}', 'thickness', parseFloat(this.value))">
-        <input type="number" value="${l.density}" min="0.01" step="0.01"
-               placeholder="밀도 g/cm³" title="밀도 (g/cm³)"
-               onchange="updateLayerField('${l.id}', 'density', parseFloat(this.value))">
-        <input type="number" value="${l.I}" min="10" step="1"
-               placeholder="I eV" title="평균 여기 에너지 I (eV)"
-               onchange="updateLayerField('${l.id}', 'I', parseFloat(this.value))">
         <button class="layer-del" onclick="removeLayer('${l.id}')" title="삭제">×</button>
+        <div class="layer-row-params">
+          <div class="lp-label" title="층의 물리적 두께 (마이크로미터)">두께 (μm)</div>
+          <div class="lp-label" title="물질의 질량 밀도 (g/cm³)">밀도 (g/cm³)</div>
+          <div class="lp-label" title="평균 여기 에너지 — Bethe-Bloch 공식의 핵심 파라미터 (eV)">평균여기E I (eV)</div>
+          <input type="number" value="${l.thickness}" min="0.001" step="0.1"
+                 placeholder="μm" title="두께 (μm) — 층의 물리적 깊이"
+                 onchange="updateLayerField('${l.id}', 'thickness', parseFloat(this.value))">
+          <input type="number" value="${l.density}" min="0.01" step="0.01"
+                 placeholder="g/cm³" title="밀도 (g/cm³) — Bragg 가법성 기반 보정"
+                 onchange="updateLayerField('${l.id}', 'density', parseFloat(this.value))">
+          <input type="number" value="${l.I}" min="10" step="1"
+                 placeholder="eV" title="Mean Excitation Energy I (eV) — Bethe-Bloch dE/dx 공식 ln(2mₑv²/I) 항"
+                 onchange="updateLayerField('${l.id}', 'I', parseFloat(this.value))">
+        </div>
       </div>`;
   }).join('');
 }
@@ -1243,15 +1268,18 @@ function runDepthSim(){
   const summary = result.layerResults.map((lr, i) => {
     const colorIdx = (i % 8) + 1;
     const dose = lr.dose_MeV_per_g;
+    const lossPct = lr.entryE_MeV > 0 ? (100 * lr.dE_MeV / lr.entryE_MeV).toFixed(1) : '0';
     return `<div class="lsum-card">
       <div class="lsum-name">
         <span class="lsum-color" style="background:var(--c-l${colorIdx})"></span>
         <strong>L${lr.idx + 1}: ${lr.name}</strong>
       </div>
       <div class="lsum-vals">
-        ΔE = ${fmt(lr.dE_MeV, 3)} MeV  (${lr.entryE_MeV > 0 ? (100 * lr.dE_MeV / lr.entryE_MeV).toFixed(1) : '0'}%)<br>
-        흡수 선량 = ${fmt(dose, 3)} MeV·cm²/g per p<br>
-        ${lr.stopped ? '<span style="color:var(--warn)">⚠ 이 층에서 정지</span>' : '진입 ' + fmt(lr.entryE_MeV, 3) + ' → 출구 ' + fmt(lr.exitE_MeV, 3) + ' MeV'}
+        <span class="nowrap">ΔE = ${fmt(lr.dE_MeV, 3)} MeV</span> <span class="nowrap">(${lossPct}%)</span><br>
+        <span class="nowrap">D = ${fmt(dose, 3)} MeV·cm²/g</span><br>
+        ${lr.stopped
+          ? '<span style="color:var(--warn)">⚠ 이 층에서 정지</span>'
+          : '<span class="nowrap">진입 ' + fmt(lr.entryE_MeV, 3) + ' MeV</span> → <span class="nowrap">출구 ' + fmt(lr.exitE_MeV, 3) + ' MeV</span>'}
       </div>
     </div>`;
   }).join('');

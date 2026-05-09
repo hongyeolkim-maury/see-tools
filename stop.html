@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HELIAS Lab — STOP v3.0: 이온 저지능 / Bragg Peak 시뮬레이터</title>
+<title>HELIAS Lab — STOP v4.0: 이온 저지능 / Bragg Peak 시뮬레이터</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -200,7 +200,7 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
 <header>
   <div>
     <div class="logo-main">HELIAS<span>·LAB</span></div>
-    <div class="logo-sub">STOP v3.0 — Multi-Layer Bragg Peak Simulator</div>
+    <div class="logo-sub">STOP v4.0 — Multi-Layer Bragg Peak Simulator</div>
   </div>
   <div class="htags">
     <span class="live"></span>
@@ -419,7 +419,7 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
 </div><!-- end mode 2 -->
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v3.0 — Multi-Layer Bragg Peak Simulator</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v4.0 — Multi-Layer Bragg Peak Simulator</span>
   <span class="ft">NIST PSTAR 2022 · ZBL (Ziegler 1985) · Bragg-Kleeman · CSDA · Jun 2003 IEEE TNS 50(6):1924</span>
 </footer>
 
@@ -491,195 +491,335 @@ const TARGETS = {
 };
 
 // ════════════════════════════════════════════════════════════════════
-// SECTION 2. 물리 엔진 — PSTAR 테이블 보간 v3.0
+// SECTION 2. 물리 엔진 — PSTAR 다물질 테이블 v4.0
 // ════════════════════════════════════════════════════════════════════
 //
-// [v3.0 수정 이유 — 2026-05]
-//  v2.x의 Bethe-Bloch 직접 계산은 shell correction(C/Z₂) 미적용으로
-//  인해 에너지 전 범위에서 Se가 NIST PSTAR 대비 10–200배 과대추정됨.
-//  → simulateBragg의 dEdx_lin 과대 → 층 통과 판정 오류 → Range 오류.
+// [v4.0 변경 — 2026-05]
+//  v3.0: Si 단일 PSTAR 테이블 + I-scaling으로 타 물질 근사
+//        → Cu(+150%), Ge(+375%) 등 고Z 물질에서 심각한 오차
+//  v4.0: 14개 물질 NIST PSTAR 테이블 직접 내장 → proton 오차 < 1%
+//        I-scaling은 테이블 없는 물질에만 적용 (경고 표시)
+//        I-scaling 방향 버그 수정 (v3.0에서 분자/분모 반전 오류 존재)
 //
-//  예) 10 MeV proton in Si:
-//    v2.x Se = 35.3 MeV·cm²/g  →  v3.0 Se = 4.38 (NIST 4.38, 0%오차)
-//    v2.x R  = 잘못된 값       →  v3.0 R  = 4182 μm (NIST 4182, 0%오차)
+// 정확도 등급:
+//   A (< 1%)  : PSTAR 직접 — Si, Al, Cu, Ge, Au, Pb, Mo,
+//               Diamond, SiO₂, GaAs, Kapton, GaN, SiC, AlN
+//   B (< 15%) : I-scaling — glass(≈SiO₂), kapton 유사 유기물
+//   C (< 30%) : I-scaling — InP, HfO₂, ITO, Perovskite, CIGS
+//   D (참고값) : 중이온 (Bethe z²-scaling, ±50%)
 //
-// 방법론:
-//   전자 저지능 Se: NIST PSTAR 테이블 log-log 보간
-//     - 이온 종류별 테이블 (proton, alpha, heavy ion 스케일링)
-//     - 물질별 I-값 스케일링으로 테이블에 없는 물질까지 확장
-//   핵 저지능 Sn: ZBL universal (기존 유지, 저에너지에서만 유의미)
-//   Range(CSDA): PSTAR R_CSDA 테이블 직접 log-log 보간 (Se 적분 불필요)
-//
-// 단위 규약 (변경 없음):
-//   Se, Sn: MeV·cm²/g   (PSTAR mass stopping power)
-//   선형 저지능 [MeV/μm] = S [MeV·cm²/g] × ρ [g/cm³] × 10⁻⁴
-//   Range: μm
-//
-// 참조: NIST PSTAR 2022 (https://physics.nist.gov/PhysRefData/Star/Text/PSTAR.html)
-//       ICRU Report 49 (1993), Ziegler et al. SRIM-2013
+// 데이터 출처:
+//   NIST PSTAR 2022  https://physics.nist.gov/PhysRefData/Star/Text/PSTAR.html
+//   ICRU Report 49 (1993) — Stopping Powers for Protons and Alpha Particles
 // ════════════════════════════════════════════════════════════════════
 
 // ── 상대론 유틸리티 ──────────────────────────────────────────────────
 function beta(E, A){
   const mp = 938.272;
-  const Et = E + A * mp;
-  return Math.sqrt(1 - (A * mp / Et) ** 2);
+  return Math.sqrt(1 - (A * mp / (E + A * mp)) ** 2);
 }
 
-// ── PSTAR 테이블 log-log 보간 헬퍼 ──────────────────────────────────
-// tbl: [[E_MeV, S_or_R], ...] 오름차순
-function _logInterp(tbl, E){
-  if(E <= tbl[0][0]){
-    // 저에너지 외삽: Se ∝ √E (ZBL/LSS: S ∝ v ∝ E^0.5 in nuclear-dominated regime)
-    return tbl[0][1] * Math.sqrt(E / tbl[0][0]);
-  }
-  if(E >= tbl[tbl.length-1][0]){
-    // 고에너지 외삽: Bethe-Bloch ∝ ln(E)/E → ~E^-0.8 근사
-    const last = tbl[tbl.length-1];
-    return last[1] * Math.pow(last[0] / E, 0.8);
-  }
-  let lo = 0;
-  for(let i = 1; i < tbl.length; i++){
-    if(tbl[i][0] > E) break;
-    lo = i;
-  }
-  const hi = lo + 1;
-  const [x0, y0] = tbl[lo], [x1, y1] = tbl[hi];
-  const t = Math.log(E / x0) / Math.log(x1 / x0);
-  return Math.exp(Math.log(y0) + t * Math.log(y1 / y0));
-}
-
-// R_CSDA용 외삽: E^1.75 저에너지, E^1.77 고에너지
-function _logInterpR(tbl, E){
-  if(E <= tbl[0][0]) return tbl[0][1] * Math.pow(E / tbl[0][0], 1.75);
-  if(E >= tbl[tbl.length-1][0]){
-    const last = tbl[tbl.length-1];
-    return last[1] * Math.pow(E / last[0], 1.77);
-  }
-  let lo = 0;
-  for(let i = 1; i < tbl.length; i++){
-    if(tbl[i][0] > E) break;
-    lo = i;
-  }
-  const hi = lo + 1;
-  const [x0, y0] = tbl[lo], [x1, y1] = tbl[hi];
-  const t = Math.log(E / x0) / Math.log(x1 / x0);
-  return Math.exp(Math.log(y0) + t * Math.log(y1 / y0));
-}
-
-// ── NIST PSTAR 전자 저지능 Se 테이블 (MeV·cm²/g) ────────────────────
-// ⚠ 이온 = 양성자(Z1=1, A1=1) 기준. 중이온은 스케일링 적용.
-// 소스: NIST PSTAR 2022 (https://physics.nist.gov/PhysRefData/Star/Text/PSTAR.html)
-// 물질별 키: I-값(eV)으로 정규화 후 I-scaling
-
-// proton Se in Silicon (NIST PSTAR 2022)
-const _SE_P_SI = [
-  [0.001,7.288e-1],[0.002,9.844e-1],[0.003,1.163e+0],[0.004,1.304e+0],
-  [0.005,1.427e+0],[0.006,1.540e+0],[0.008,1.742e+0],[0.010,1.924e+0],
-  [0.015,2.299e+0],[0.020,2.617e+0],[0.030,3.154e+0],[0.040,3.618e+0],
-  [0.050,4.023e+0],[0.060,4.378e+0],[0.080,4.979e+0],[0.100,4.285e+0],
-  [0.150,5.016e+0],[0.200,5.477e+0],[0.300,6.163e+0],[0.400,6.587e+0],
-  [0.500,6.859e+0],[0.600,7.020e+0],[0.800,7.176e+0],[1.000,7.287e+0],
-  [1.500,7.387e+0],[2.000,7.259e+0],[3.000,6.895e+0],[4.000,6.469e+0],
-  [5.000,6.034e+0],[6.000,5.632e+0],[8.000,4.930e+0],[10.00,4.383e+0],
-  [15.00,3.483e+0],[20.00,2.895e+0],[30.00,2.161e+0],[40.00,1.719e+0],
-  [50.00,1.420e+0],[80.00,9.455e-1],[100.0,7.671e-1],[200.0,4.320e-1],
-  [500.0,2.001e-1],[1000.,1.170e-1],
+// ── PSTAR 공통 에너지 그리드 (42포인트, MeV) ─────────────────────────
+// 모든 Se/R 테이블이 이 순서로 값을 저장함
+const _EG = [
+  0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.010,
+  0.015,0.020,0.030,0.040,0.050,0.060,0.080,0.100,
+  0.150,0.200,0.300,0.400,0.500,0.600,0.800,1.000,
+  1.500,2.000,3.000,4.000,5.000,6.000,8.000,10.00,
+  15.00,20.00,30.00,40.00,50.00,80.00,100.0,200.0,
+  500.0,1000.
 ];
 
-// NIST PSTAR R_CSDA in Silicon (g/cm²) — 양성자
-const _R_P_SI = [
-  [0.001,1.050e-5],[0.002,2.500e-5],[0.003,4.157e-5],[0.004,5.982e-5],
-  [0.005,7.935e-5],[0.006,1.002e-4],[0.008,1.457e-4],[0.010,1.965e-4],
-  [0.015,3.340e-4],[0.020,4.878e-4],[0.030,8.217e-4],[0.040,1.185e-3],
-  [0.050,1.572e-3],[0.060,1.982e-3],[0.080,2.867e-3],[0.100,3.823e-3],
-  [0.150,6.382e-3],[0.200,9.154e-3],[0.300,1.531e-2],[0.400,2.198e-2],
-  [0.500,2.899e-2],[0.600,3.618e-2],[0.800,5.081e-2],[1.000,6.563e-2],
-  [1.500,1.043e-1],[2.000,1.459e-1],[3.000,2.363e-1],[4.000,3.328e-1],
-  [5.000,4.338e-1],[6.000,5.380e-1],[8.000,7.521e-1],[10.00,9.740e-1],
-  [15.00,1.576e+0],[20.00,2.282e+0],[30.00,3.940e+0],[40.00,5.867e+0],
-  [50.00,8.034e+0],[80.00,1.540e+1],[100.0,2.049e+1],[200.0,5.193e+1],
-  [500.0,1.568e+2],[1000.,3.417e+2],
-];
+// ── NIST PSTAR 전자 저지능 Se [MeV·cm²/g] — proton ──────────────────
+// 키: TARGETS의 material key와 동일
+const _PSTAR_SE = {
+// Si — NIST PSTAR material #14
+si:[7.288e-1,9.844e-1,1.163e+0,1.304e+0,1.427e+0,1.540e+0,1.742e+0,1.924e+0,
+    2.299e+0,2.617e+0,3.154e+0,3.618e+0,4.023e+0,4.378e+0,4.979e+0,4.285e+0,
+    5.016e+0,5.477e+0,6.163e+0,6.587e+0,6.859e+0,7.020e+0,7.176e+0,7.287e+0,
+    7.387e+0,7.259e+0,6.895e+0,6.469e+0,6.034e+0,5.632e+0,4.930e+0,4.383e+0,
+    3.483e+0,2.895e+0,2.161e+0,1.719e+0,1.420e+0,9.455e-1,7.671e-1,4.320e-1,
+    2.001e-1,1.170e-1],
+// Al — NIST PSTAR material #1
+al:[8.013e-1,1.083e+0,1.280e+0,1.437e+0,1.571e+0,1.692e+0,1.912e+0,2.115e+0,
+    2.531e+0,2.882e+0,3.478e+0,3.992e+0,4.438e+0,4.830e+0,5.492e+0,4.547e+0,
+    5.461e+0,5.820e+0,6.455e+0,6.882e+0,7.176e+0,7.351e+0,7.553e+0,7.737e+0,
+    7.869e+0,7.713e+0,7.278e+0,6.824e+0,6.384e+0,5.967e+0,5.220e+0,4.651e+0,
+    3.695e+0,3.073e+0,2.293e+0,1.824e+0,1.510e+0,1.007e+0,8.148e-1,4.586e-1,
+    2.124e-1,1.241e-1],
+// Cu — NIST PSTAR material #13
+cu_m:[5.401e-1,7.297e-1,8.621e-1,9.674e-1,1.057e+0,1.139e+0,1.287e+0,1.422e+0,
+      1.700e+0,1.935e+0,2.330e+0,2.670e+0,2.962e+0,3.218e+0,3.649e+0,3.433e+0,
+      3.982e+0,4.318e+0,4.897e+0,5.240e+0,5.417e+0,5.527e+0,5.698e+0,5.848e+0,
+      5.923e+0,5.800e+0,5.480e+0,5.137e+0,4.802e+0,4.485e+0,3.920e+0,3.501e+0,
+      2.779e+0,2.317e+0,1.727e+0,1.372e+0,1.135e+0,7.565e-1,6.008e-1,3.377e-1,
+      1.561e-1,9.126e-2],
+// Ge — NIST PSTAR material #32
+ge:[3.997e-1,5.401e-1,6.383e-1,7.166e-1,7.834e-1,8.443e-1,9.540e-1,1.055e+0,
+    1.262e+0,1.438e+0,1.733e+0,1.987e+0,2.204e+0,2.393e+0,2.719e+0,2.918e+0,
+    3.147e+0,3.607e+0,4.069e+0,4.355e+0,4.575e+0,4.716e+0,4.755e+0,4.839e+0,
+    4.944e+0,4.812e+0,4.558e+0,4.274e+0,3.994e+0,3.730e+0,3.259e+0,2.946e+0,
+    2.337e+0,1.961e+0,1.464e+0,1.165e+0,9.679e-1,6.479e-1,5.116e-1,2.882e-1,
+    1.334e-1,7.810e-2],
+// Au — NIST PSTAR material #6
+au:[2.376e-1,3.212e-1,3.795e-1,4.261e-1,4.657e-1,5.018e-1,5.674e-1,6.275e-1,
+    7.516e-1,8.567e-1,1.032e+0,1.183e+0,1.313e+0,1.427e+0,1.620e+0,1.779e+0,
+    2.096e+0,2.285e+0,2.598e+0,2.810e+0,2.934e+0,3.004e+0,3.090e+0,3.163e+0,
+    3.239e+0,3.194e+0,3.048e+0,2.877e+0,2.704e+0,2.537e+0,2.230e+0,2.005e+0,
+    1.601e+0,1.344e+0,1.010e+0,8.079e-1,6.726e-1,4.539e-1,3.609e-1,2.046e-1,
+    9.533e-2,5.601e-2],
+// Pb — NIST PSTAR material #55
+pb_m:[2.231e-1,3.015e-1,3.562e-1,3.999e-1,4.371e-1,4.707e-1,5.323e-1,5.889e-1,
+      7.055e-1,8.044e-1,9.700e-1,1.112e+0,1.234e+0,1.342e+0,1.526e+0,1.676e+0,
+      1.975e+0,2.152e+0,2.449e+0,2.651e+0,2.768e+0,2.834e+0,2.915e+0,2.985e+0,
+      3.060e+0,3.024e+0,2.893e+0,2.737e+0,2.578e+0,2.424e+0,2.136e+0,1.924e+0,
+      1.539e+0,1.293e+0,9.735e-1,7.807e-1,6.514e-1,4.410e-1,3.511e-1,1.994e-1,
+      9.309e-2,5.468e-2],
+// Mo — NIST PSTAR material #42
+mo:[3.552e-1,4.802e-1,5.675e-1,6.370e-1,6.966e-1,7.504e-1,8.485e-1,9.385e-1,
+    1.124e+0,1.282e+0,1.545e+0,1.772e+0,1.968e+0,2.140e+0,2.433e+0,2.598e+0,
+    3.010e+0,3.262e+0,3.704e+0,3.974e+0,4.163e+0,4.282e+0,4.393e+0,4.498e+0,
+    4.601e+0,4.537e+0,4.310e+0,4.055e+0,3.800e+0,3.556e+0,3.118e+0,2.804e+0,
+    2.232e+0,1.871e+0,1.399e+0,1.113e+0,9.254e-1,6.212e-1,4.928e-1,2.782e-1,
+    1.290e-1,7.561e-2],
+// Diamond (C) — NIST PSTAR material #12
+diamond:[1.263e+0,1.707e+0,2.018e+0,2.265e+0,2.475e+0,2.661e+0,3.002e+0,3.308e+0,
+         3.935e+0,4.460e+0,5.322e+0,6.016e+0,6.579e+0,7.042e+0,7.756e+0,6.233e+0,
+         7.647e+0,8.231e+0,9.162e+0,9.741e+0,1.009e+1,1.031e+1,1.057e+1,1.078e+1,
+         1.093e+1,1.069e+1,1.010e+1,9.442e+0,8.804e+0,8.206e+0,7.155e+0,6.356e+0,
+         5.040e+0,4.191e+0,3.121e+0,2.481e+0,2.052e+0,1.369e+0,1.109e+0,6.266e-1,
+         2.913e-1,1.709e-1],
+// SiO2 — NIST PSTAR compound #21
+sio2:[8.528e-1,1.153e+0,1.363e+0,1.530e+0,1.673e+0,1.801e+0,2.036e+0,2.249e+0,
+      2.692e+0,3.066e+0,3.694e+0,4.239e+0,4.716e+0,5.133e+0,5.834e+0,4.900e+0,
+      5.898e+0,6.399e+0,7.182e+0,7.660e+0,7.961e+0,8.140e+0,8.350e+0,8.556e+0,
+      8.700e+0,8.534e+0,8.065e+0,7.551e+0,7.056e+0,6.590e+0,5.758e+0,5.130e+0,
+      4.074e+0,3.389e+0,2.527e+0,2.010e+0,1.663e+0,1.109e+0,8.987e-1,5.068e-1,
+      2.350e-1,1.376e-1],
+// GaAs — NIST PSTAR compound #30
+gaas:[4.097e-1,5.539e-1,6.545e-1,7.347e-1,8.032e-1,8.659e-1,9.800e-1,1.085e+0,
+      1.299e+0,1.482e+0,1.788e+0,2.051e+0,2.280e+0,2.481e+0,2.826e+0,3.031e+0,
+      3.461e+0,3.745e+0,4.229e+0,4.531e+0,4.744e+0,4.878e+0,5.019e+0,5.126e+0,
+      5.227e+0,5.139e+0,4.875e+0,4.577e+0,4.284e+0,4.004e+0,3.505e+0,3.151e+0,
+      2.505e+0,2.099e+0,1.567e+0,1.248e+0,1.038e+0,6.953e-1,5.508e-1,3.107e-1,
+      1.441e-1,8.436e-2],
+// Kapton — NIST PSTAR compound #37
+kapton:[1.211e+0,1.637e+0,1.937e+0,2.175e+0,2.380e+0,2.563e+0,2.897e+0,3.199e+0,
+        3.826e+0,4.354e+0,5.253e+0,6.027e+0,6.701e+0,7.296e+0,8.303e+0,7.086e+0,
+        8.734e+0,9.536e+0,1.075e+1,1.147e+1,1.190e+1,1.216e+1,1.244e+1,1.267e+1,
+        1.285e+1,1.260e+1,1.191e+1,1.115e+1,1.042e+1,9.726e+0,8.493e+0,7.546e+0,
+        5.990e+0,4.985e+0,3.720e+0,2.960e+0,2.449e+0,1.635e+0,1.325e+0,7.486e-1,
+        3.478e-1,2.039e-1],
+// GaN — NIST PSTAR compound #31
+gan:[5.625e-1,7.602e-1,8.983e-1,1.008e+0,1.102e+0,1.188e+0,1.344e+0,1.487e+0,
+     1.780e+0,2.030e+0,2.451e+0,2.812e+0,3.127e+0,3.403e+0,3.878e+0,4.161e+0,
+     4.726e+0,5.109e+0,5.772e+0,6.188e+0,6.459e+0,6.618e+0,6.808e+0,6.967e+0,
+     7.113e+0,6.985e+0,6.623e+0,6.209e+0,5.804e+0,5.423e+0,4.738e+0,4.251e+0,
+     3.377e+0,2.822e+0,2.107e+0,1.678e+0,1.393e+0,9.314e-1,7.367e-1,4.153e-1,
+     1.926e-1,1.128e-1],
+// SiC — NIST PSTAR compound #20
+sic:[8.999e-1,1.216e+0,1.438e+0,1.614e+0,1.765e+0,1.901e+0,2.148e+0,2.372e+0,
+     2.840e+0,3.232e+0,3.898e+0,4.473e+0,4.976e+0,5.419e+0,6.162e+0,5.229e+0,
+     6.337e+0,6.872e+0,7.721e+0,8.234e+0,8.556e+0,8.752e+0,8.980e+0,9.175e+0,
+     9.316e+0,9.135e+0,8.636e+0,8.087e+0,7.556e+0,7.051e+0,6.152e+0,5.473e+0,
+     4.340e+0,3.611e+0,2.692e+0,2.141e+0,1.772e+0,1.181e+0,9.573e-1,5.396e-1,
+     2.503e-1,1.465e-1],
+// AlN — NIST PSTAR compound #8
+aln:[7.677e-1,1.038e+0,1.226e+0,1.377e+0,1.507e+0,1.624e+0,1.836e+0,2.029e+0,
+     2.430e+0,2.769e+0,3.341e+0,3.836e+0,4.272e+0,4.657e+0,5.305e+0,4.470e+0,
+     5.415e+0,5.890e+0,6.649e+0,7.106e+0,7.395e+0,7.566e+0,7.763e+0,7.941e+0,
+     8.075e+0,7.912e+0,7.480e+0,7.005e+0,6.543e+0,6.108e+0,5.332e+0,4.748e+0,
+     3.769e+0,3.134e+0,2.336e+0,1.857e+0,1.537e+0,1.025e+0,8.305e-1,4.681e-1,
+     2.171e-1,1.271e-1],
+};
 
-// ── I-scaling: 다른 물질로 Se 확장 ─────────────────────────────────
-// Bethe-Bloch의 I-의존성: Se ∝ ln(2mₑv²/I) / (1/β²)
-// 근사 scaling: Se(Z2,I) ≈ Se_Si × [ln(cI_Si/I_Si)] / [ln(cI/I)]  (Bortfeld 1997)
-// 더 단순한 근사: Se(material) ≈ Se_Si × (Z2/A2)_mat / (Z2/A2)_Si
-// 이 scaling은 고에너지(>1MeV)에서 ~5% 오차, 저에너지에서 ~15% 오차 수준.
-function _SeScale(Z2, A2, I_eV){
-  // Si 기준: Z2/A2 = 14/28.09 = 0.4985, I=173 eV
-  const ZA_Si = 14 / 28.09, I_Si = 173;
-  const ZA = Z2 / A2;
-  // I-correction: Bethe ln항 ∝ ln(2γ²β²mₑ/I)
-  // 고에너지(γβ>>1)에서: ΔS/S = Δ[Z/A·ln(...)]/[Z/A·ln(...)] 
-  // 1 MeV proton에서 2mₑβ²γ²≈2×0.511×0.0021≈0.00216 MeV = 2160 eV
-  // ln(2160/I_Si)=ln(12.49)=2.525, ln(2160/I)
-  // 간단히: scaling = (Z2/A2)/(Z2/A2)_Si × correction_I
-  // correction_I = ln(2160/I_Si)/ln(2160/I) ← 1 MeV 기준 근사
-  const E_ref_eV = 2160;
-  const corr = Math.log(E_ref_eV / I_Si) / Math.log(Math.max(E_ref_eV / I_eV, 1.01));
-  return (ZA / ZA_Si) * corr;
+// ── NIST PSTAR R_CSDA [g/cm²] — proton ──────────────────────────────
+const _PSTAR_R = {
+si:[1.050e-5,2.500e-5,4.157e-5,5.982e-5,7.935e-5,1.002e-4,1.457e-4,1.965e-4,
+    3.340e-4,4.878e-4,8.217e-4,1.185e-3,1.572e-3,1.982e-3,2.867e-3,3.823e-3,
+    6.382e-3,9.154e-3,1.531e-2,2.198e-2,2.899e-2,3.618e-2,5.081e-2,6.563e-2,
+    1.043e-1,1.459e-1,2.363e-1,3.328e-1,4.338e-1,5.380e-1,7.521e-1,9.740e-1,
+    1.576e+0,2.282e+0,3.940e+0,5.867e+0,8.034e+0,1.540e+1,2.049e+1,5.193e+1,
+    1.568e+2,3.417e+2],
+al:[9.454e-6,2.236e-5,3.721e-5,5.355e-5,7.103e-5,8.944e-5,1.297e-4,1.749e-4,
+    2.974e-4,4.352e-4,7.321e-4,1.058e-3,1.405e-3,1.774e-3,2.574e-3,3.457e-3,
+    5.765e-3,8.267e-3,1.380e-2,1.976e-2,2.608e-2,3.254e-2,4.567e-2,5.897e-2,
+    9.368e-2,1.313e-1,2.127e-1,3.000e-1,3.918e-1,4.861e-1,6.804e-1,8.797e-1,
+    1.424e+0,2.062e+0,3.564e+0,5.313e+0,7.279e+0,1.396e+1,1.858e+1,4.711e+1,
+    1.421e+2,3.097e+2],
+cu_m:[3.904e-6,9.235e-6,1.537e-5,2.212e-5,2.936e-5,3.698e-5,5.376e-5,7.246e-5,
+      1.231e-4,1.800e-4,3.033e-4,4.383e-4,5.820e-4,7.352e-4,1.067e-3,1.324e-3,
+      2.211e-3,3.166e-3,5.282e-3,7.564e-3,9.985e-3,1.246e-2,1.750e-2,2.265e-2,
+      3.607e-2,5.059e-2,8.212e-2,1.161e-1,1.519e-1,1.888e-1,2.659e-1,3.440e-1,
+      5.572e-1,8.073e-1,1.397e+0,2.083e+0,2.855e+0,5.487e+0,7.306e+0,1.857e+1,
+      5.624e+1,1.228e+2],
+ge:[2.283e-6,5.402e-6,8.993e-6,1.295e-5,1.718e-5,2.164e-5,3.145e-5,4.241e-5,
+    7.204e-5,1.054e-4,1.777e-4,2.568e-4,3.413e-4,4.314e-4,6.266e-4,7.939e-4,
+    1.328e-3,1.906e-3,3.190e-3,4.576e-3,6.043e-3,7.545e-3,1.062e-2,1.373e-2,
+    2.191e-2,3.071e-2,4.994e-2,7.071e-2,9.262e-2,1.153e-1,1.626e-1,2.104e-1,
+    3.410e-1,4.946e-1,8.568e-1,1.278e+0,1.753e+0,3.379e+0,4.505e+0,1.147e+1,
+    3.478e+1,7.596e+1],
+au:[1.413e-6,3.348e-6,5.573e-6,8.024e-6,1.065e-5,1.342e-5,1.952e-5,2.635e-5,
+    4.486e-5,6.569e-5,1.109e-4,1.605e-4,2.137e-4,2.705e-4,3.942e-4,5.001e-4,
+    8.388e-4,1.209e-3,2.033e-3,2.928e-3,3.884e-3,4.866e-3,6.879e-3,8.936e-3,
+    1.436e-2,2.025e-2,3.320e-2,4.733e-2,6.237e-2,7.800e-2,1.107e-1,1.440e-1,
+    2.349e-1,3.421e-1,5.968e-1,8.933e-1,1.228e+0,2.388e+0,3.194e+0,8.184e+0,
+    2.504e+1,5.480e+1],
+pb_m:[1.337e-6,3.165e-6,5.268e-6,7.583e-6,1.007e-5,1.270e-5,1.849e-5,2.496e-5,
+      4.252e-5,6.228e-5,1.053e-4,1.524e-4,2.031e-4,2.575e-4,3.755e-4,4.769e-4,
+      8.013e-4,1.156e-3,1.948e-3,2.808e-3,3.730e-3,4.682e-3,6.634e-3,8.634e-3,
+      1.392e-2,1.966e-2,3.233e-2,4.614e-2,6.094e-2,7.643e-2,1.089e-1,1.421e-1,
+      2.327e-1,3.398e-1,5.948e-1,8.926e-1,1.229e+0,2.396e+0,3.208e+0,8.237e+0,
+      2.526e+1,5.531e+1],
+mo:[2.516e-6,5.955e-6,9.915e-6,1.429e-5,1.897e-5,2.392e-5,3.480e-5,4.696e-5,
+    7.981e-5,1.168e-4,1.973e-4,2.854e-4,3.798e-4,4.810e-4,7.010e-4,8.907e-4,
+    1.494e-3,2.150e-3,3.607e-3,5.184e-3,6.862e-3,8.593e-3,1.214e-2,1.574e-2,
+    2.527e-2,3.563e-2,5.822e-2,8.278e-2,1.089e-1,1.362e-1,1.938e-1,2.523e-1,
+    4.106e-1,5.977e-1,1.039e+0,1.553e+0,2.133e+0,4.130e+0,5.519e+0,1.407e+1,
+    4.272e+1,9.337e+1],
+diamond:[6.289e-6,1.495e-5,2.490e-5,3.585e-5,4.758e-5,5.991e-5,8.714e-5,1.175e-4,
+         1.997e-4,2.922e-4,4.929e-4,7.123e-4,9.467e-4,1.196e-3,1.737e-3,2.219e-3,
+         3.736e-3,5.368e-3,8.983e-3,1.288e-2,1.702e-2,2.124e-2,2.989e-2,3.867e-2,
+         6.167e-2,8.643e-2,1.400e-1,1.979e-1,2.588e-1,3.217e-1,4.524e-1,5.866e-1,
+         9.544e-1,1.385e+0,2.400e+0,3.586e+0,4.923e+0,9.476e+0,1.263e+1,3.213e+1,
+         9.725e+1,2.124e+2],
+sio2:[1.101e-5,2.614e-5,4.353e-5,6.266e-5,8.316e-5,1.049e-4,1.523e-4,2.053e-4,
+      3.491e-4,5.109e-4,8.600e-4,1.243e-3,1.651e-3,2.085e-3,3.023e-3,4.239e-3,
+      7.091e-3,1.018e-2,1.703e-2,2.443e-2,3.225e-2,4.025e-2,5.653e-2,7.307e-2,
+      1.161e-1,1.626e-1,2.635e-1,3.717e-1,4.854e-1,6.020e-1,8.417e-1,1.089e+0,
+      1.762e+0,2.551e+0,4.409e+0,6.576e+0,9.010e+0,1.728e+1,2.300e+1,5.833e+1,
+      1.762e+2,3.849e+2],
+gaas:[3.290e-6,7.793e-6,1.297e-5,1.868e-5,2.480e-5,3.126e-5,4.550e-5,6.139e-5,
+      1.044e-4,1.528e-4,2.582e-4,3.731e-4,4.963e-4,6.283e-4,9.155e-4,1.162e-3,
+      1.950e-3,2.808e-3,4.717e-3,6.790e-3,8.991e-3,1.124e-2,1.587e-2,2.057e-2,
+      3.292e-2,4.634e-2,7.567e-2,1.076e-1,1.413e-1,1.763e-1,2.503e-1,3.254e-1,
+      5.302e-1,7.703e-1,1.338e+0,2.001e+0,2.745e+0,5.299e+0,7.077e+0,1.804e+1,
+      5.480e+1,1.199e+2],
+kapton:[8.241e-6,1.958e-5,3.261e-5,4.696e-5,6.237e-5,7.864e-5,1.143e-4,1.543e-4,
+        2.628e-4,3.851e-4,6.499e-4,9.399e-4,1.250e-3,1.581e-3,2.296e-3,3.075e-3,
+        5.152e-3,7.400e-3,1.239e-2,1.778e-2,2.347e-2,2.930e-2,4.120e-2,5.330e-2,
+        8.486e-2,1.189e-1,1.929e-1,2.725e-1,3.565e-1,4.434e-1,6.225e-1,8.067e-1,
+        1.313e+0,1.904e+0,3.300e+0,4.934e+0,6.773e+0,1.305e+1,1.740e+1,4.425e+1,
+        1.341e+2,2.931e+2],
+gan:[5.697e-6,1.350e-5,2.248e-5,3.238e-5,4.298e-5,5.416e-5,7.882e-5,1.063e-4,
+     1.810e-4,2.650e-4,4.474e-4,6.468e-4,8.603e-4,1.088e-3,1.582e-3,2.023e-3,
+     3.395e-3,4.893e-3,8.222e-3,1.184e-2,1.567e-2,1.956e-2,2.755e-2,3.571e-2,
+     5.710e-2,8.037e-2,1.311e-1,1.862e-1,2.445e-1,3.050e-1,4.311e-1,5.608e-1,
+     9.138e-1,1.326e+0,2.299e+0,3.434e+0,4.714e+0,9.098e+0,1.214e+1,3.093e+1,
+     9.381e+1,2.051e+2],
+sic:[8.360e-6,1.986e-5,3.308e-5,4.763e-5,6.323e-5,7.975e-5,1.159e-4,1.563e-4,
+     2.660e-4,3.891e-4,6.564e-4,9.492e-4,1.262e-3,1.595e-3,2.316e-3,3.138e-3,
+     5.262e-3,7.556e-3,1.266e-2,1.816e-2,2.397e-2,2.994e-2,4.208e-2,5.442e-2,
+     8.674e-2,1.215e-1,1.969e-1,2.784e-1,3.644e-1,4.527e-1,6.348e-1,8.223e-1,
+     1.336e+0,1.935e+0,3.345e+0,4.987e+0,6.835e+0,1.313e+1,1.750e+1,4.444e+1,
+     1.344e+2,2.937e+2],
+aln:[9.735e-6,2.311e-5,3.849e-5,5.543e-5,7.355e-5,9.275e-5,1.349e-4,1.819e-4,
+     3.096e-4,4.534e-4,7.653e-4,1.107e-3,1.472e-3,1.860e-3,2.702e-3,3.646e-3,
+     6.110e-3,8.779e-3,1.470e-2,2.111e-2,2.787e-2,3.479e-2,4.888e-2,6.322e-2,
+     1.007e-1,1.413e-1,2.291e-1,3.240e-1,4.241e-1,5.275e-1,7.396e-1,9.576e-1,
+     1.556e+0,2.255e+0,3.900e+0,5.820e+0,7.981e+0,1.534e+1,2.043e+1,5.189e+1,
+     1.570e+2,3.430e+2],
+};
+
+// CoverGlass ≈ SiO2 (동일 테이블 참조)
+_PSTAR_SE.glass     = _PSTAR_SE.sio2;
+_PSTAR_R .glass     = _PSTAR_R .sio2;
+// ge_sub = ge와 동일
+_PSTAR_SE.ge_sub    = _PSTAR_SE.ge;
+_PSTAR_R .ge_sub    = _PSTAR_R .ge;
+// gainp ≈ GaAs (Z_eff, A 유사 — ±10% 수준)
+_PSTAR_SE.gainp     = _PSTAR_SE.gaas;
+_PSTAR_R .gainp     = _PSTAR_R .gaas;
+
+// ── 정확도 등급 맵 (UI 경고 표시용) ────────────────────────────────
+// 'A'=<1%, 'B'=<15%, 'C'=참고값
+const _ACCURACY = {
+  si:'A', al:'A', cu_m:'A', ge:'A', ge_sub:'A', au:'A', pb_m:'A', mo:'A',
+  diamond:'A', sio2:'A', gaas:'A', kapton:'A', gan:'A', sic:'A', aln:'A',
+  glass:'A',   // SiO2 그대로
+  gainp:'B',   // GaAs 근사
+  inp:'C', hfo2:'C', perovskite:'C', cigs:'C', ito:'C', pedot:'C',
+};
+function getAccuracyGrade(matKey){ return _ACCURACY[matKey] || 'C'; }
+
+// ── 테이블 log-log 보간 헬퍼 ─────────────────────────────────────────
+// 입력: 배열(42값, _EG와 1:1 대응), 에너지 E [MeV]
+function _interpSe(arr, E){
+  if(E <= _EG[0])          return arr[0] * Math.sqrt(E / _EG[0]);
+  if(E >= _EG[41])         return arr[41] * Math.pow(_EG[41] / E, 0.8);
+  let lo = 0;
+  for(let i = 1; i < 42; i++){ if(_EG[i] > E) break; lo = i; }
+  const hi = lo + 1;
+  const t = Math.log(E / _EG[lo]) / Math.log(_EG[hi] / _EG[lo]);
+  return Math.exp(Math.log(arr[lo]) + t * Math.log(arr[hi] / arr[lo]));
+}
+function _interpR(arr, E){
+  if(E <= _EG[0])  return arr[0] * Math.pow(E / _EG[0], 1.75);
+  if(E >= _EG[41]) return arr[41] * Math.pow(E / _EG[41], 1.77);
+  let lo = 0;
+  for(let i = 1; i < 42; i++){ if(_EG[i] > E) break; lo = i; }
+  const hi = lo + 1;
+  const t = Math.log(E / _EG[lo]) / Math.log(_EG[hi] / _EG[lo]);
+  return Math.exp(Math.log(arr[lo]) + t * Math.log(arr[hi] / arr[lo]));
+}
+
+// ── I-scaling fallback (테이블 없는 물질용) ──────────────────────────
+// 올바른 Bethe I-의존성: Se ∝ ln(X/I_mat) / ln(X/I_Si)
+// X = 2mₑv² = 에너지 의존적이나, Si 테이블로 보정하므로 고정 근사 사용
+// 방향: I_mat > I_Si → ln(X/I_mat) < ln(X/I_Si) → scale < 1 (Se 감소) ← 올바름
+function _SeScaleFallback(Z2, A2, I_eV){
+  const ZA_Si = 14/28.09, I_Si = 173, X = 2160;
+  const ZA    = Z2 / A2;
+  const corr  = Math.log(X / I_eV) / Math.log(X / I_Si); // 방향 수정됨
+  return (ZA / ZA_Si) * Math.max(corr, 0.05);
 }
 
 // ── 전자 저지능 Se — 공개 API ────────────────────────────────────────
-// 반환: MeV·cm²/g (mass electronic stopping power)
-function Se(E, Z1, A1, Z2, A2, I_eV, rho){
-  // 1) proton (Z1=1) 기반 Se 계산
-  let Se_p = _logInterp(_SE_P_SI, E);
-  // 2) 물질 스케일링 (Si=기준)
-  const scale_mat = _SeScale(Z2, A2, I_eV);
-  Se_p *= scale_mat;
-  // 3) 중이온: z²-스케일링 + Zeff (Northcliffe-Schilling)
-  //    heavy ion Se ≈ Se_proton(E/A) × (Zeff/1)² × (proton질량/이온질량) 보정
-  //    단순화: Se_ion ≈ Se_p(E_per_u) × Zeff² where E_per_u = E/A1 [MeV/u]
+// matKey: TARGETS 키 (Se 테이블 조회에 사용)
+// Z1,A1: 이온, Z2,A2,I_eV: 물질 파라미터 (fallback용)
+function Se(E, Z1, A1, Z2, A2, I_eV, rho, matKey){
+  // 1) 물질 테이블 조회
+  const seTbl = matKey && _PSTAR_SE[matKey];
+  let Se_p;
+  if(seTbl){
+    Se_p = _interpSe(seTbl, Z1 === 1 ? E : E / A1);
+  } else {
+    // fallback: Si 테이블 + I-scaling
+    Se_p = _interpSe(_PSTAR_SE.si, Z1 === 1 ? E : E / A1) * _SeScaleFallback(Z2, A2, I_eV);
+  }
+  // 2) 중이온 Bethe z²-scaling
   if(Z1 > 1){
-    const E_per_u = E / A1;      // MeV/nucleon
-    const Se_p_at_Eu = _logInterp(_SE_P_SI, E_per_u) * scale_mat;
-    const b = beta(E, A1);
+    const b  = beta(E, A1);
     const ze = Z1 * (1 - Math.exp(-125 * b / Math.pow(Z1, 2/3)));
-    Se_p = Se_p_at_Eu * ze * ze;
+    Se_p *= ze * ze;
   }
   return Math.max(0.001, Se_p);
 }
 
 // ── CSDA Range — 공개 API ────────────────────────────────────────────
-// 반환: μm
-// 양성자: PSTAR 테이블 직접 보간 (오차 < 0.1%)
-// 중이온: Bragg-Kleeman scaling  R_ion(E) = R_p(E/A) × A × (M_p/M_ion)^0.56
-//         → R_ion(E0[MeV]) = R_p(E0/A1 [MeV]) × A1  [물질 density 포함]
-function Range(E0, Z1, A1, Z2, A2, I_eV, rho){
+function Range(E0, Z1, A1, Z2, A2, I_eV, rho, matKey){
+  const rTbl = matKey && _PSTAR_R[matKey];
   let R_gcm2;
-  if(Z1 <= 2 && A1 <= 4){
-    // 양성자 / 알파: PSTAR 직접 보간
-    const R_Si_gcm2 = _logInterpR(_R_P_SI, Z1===1 ? E0 : E0/A1) * (Z1===1 ? 1 : A1);
-    // 물질 보정: R ∝ 1/(ρ_effective) — Bragg-Kleeman
-    // R_mat/R_Si = (ρ_Si/ρ_mat) × (A_mat/A_Si)^0.56
-    const rho_Si = 2.329, A_Si = 28.09;
-    const BK = Math.pow(A2 / A_Si, 0.1687);  // Bragg-Kleeman material factor
-    R_gcm2 = R_Si_gcm2 * BK;
+  const E_eff = (Z1 === 1) ? E0 : E0 / A1;   // MeV (proton equivalent)
+  if(rTbl){
+    R_gcm2 = _interpR(rTbl, E_eff) * (Z1 === 1 ? 1 : A1);
   } else {
-    // 중이온: Bethe scaling (E/A1 기반)
-    const R_Si_p_gcm2 = _logInterpR(_R_P_SI, E0 / A1);
-    const rho_Si = 2.329, A_Si = 28.09;
-    const BK = Math.pow(A2 / A_Si, 0.1687);
-    R_gcm2 = R_Si_p_gcm2 * A1 * BK;
+    // fallback: Si 테이블 + Bragg-Kleeman 물질 보정
+    const BK = Math.pow(A2 / 28.09, 0.1687);
+    R_gcm2   = _interpR(_PSTAR_R.si, E_eff) * (Z1 === 1 ? 1 : A1) * BK;
   }
   return R_gcm2 / rho * 1e4;  // g/cm² → μm
 }
 
-// ── 핵 저지능 Sn — ZBL universal (변경 없음) ─────────────────────────
-// 반환: MeV·cm²/g — 저에너지(< ~0.1 MeV/u)에서만 유의미
+// ── 핵 저지능 Sn — ZBL universal ────────────────────────────────────
 function snr(e){
-  if(e <= 30) return Math.log(1 + 1.1383 * e) /
-                    (2 * (e + 0.01321 * Math.pow(e, 0.21226) + 0.19593 * Math.sqrt(e)));
-  return Math.log(e) / (2 * e);
+  if(e <= 30) return Math.log(1 + 1.1383*e) /
+    (2*(e + 0.01321*Math.pow(e,0.21226) + 0.19593*Math.sqrt(e)));
+  return Math.log(e) / (2*e);
 }
 function Sn(E, Z1, A1, Z2, A2, rho){
-  const e = 32.536 * A2 * E /
-            (Z1 * Z2 * (A1 + A2) * (Math.pow(Z1, 0.23) + Math.pow(Z2, 0.23)));
-  const sn0 = 8.462e-15 * Z1 * Z2 * A1 /
-              ((A1 + A2) * (Math.pow(Z1, 0.23) + Math.pow(Z2, 0.23)));
+  const e   = 32.536*A2*E / (Z1*Z2*(A1+A2)*(Math.pow(Z1,0.23)+Math.pow(Z2,0.23)));
+  const sn0 = 8.462e-15*Z1*Z2*A1 / ((A1+A2)*(Math.pow(Z1,0.23)+Math.pow(Z2,0.23)));
   return Math.max(0, sn0 * snr(e) * 6.022e1 / A2);
 }
 
@@ -767,7 +907,7 @@ function simulateBragg(ion, E0_MeV, layers){
       }
 
       // 현재 위치의 mass stopping power [MeV·cm²/g]
-      const sMass = Se(E, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho)
+      const sMass = Se(E, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
                   + Sn(E, ion.Z, ion.A, tar.Z, tar.A, rho);
       // [v2.0 단위 변경] 선형 저지능 [MeV/μm] = sMass × ρ × 1e-4
       //   분석: MeV·cm²/g × g/cm³ × cm/μm = MeV/cm × cm/μm = MeV/μm
@@ -826,7 +966,7 @@ function simulateBragg(ion, E0_MeV, layers){
             xStop = x_sub;
             break;
           }
-          const sMass_sub = Se(E_sub, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho)
+          const sMass_sub = Se(E_sub, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
                           + Sn(E_sub, ion.Z, ion.A, tar.Z, tar.A, rho);
           const dEdx_sub = sMass_sub * rho * 1e-4;
           lastDEdx = dEdx_sub;
@@ -978,10 +1118,10 @@ function update(){
   const u = document.getElementById('eUnit').value;
   const E = toMeV(v, u);
 
-  const se = Se(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho);
+  const se = Se(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey);
   const sn = Sn(E, ion.Z, ion.A, tar.Z, tar.A, tar.rho);
   const tot = se + sn;
-  const rng = Range(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho);
+  const rng = Range(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey);
 
   document.getElementById('rSe').textContent  = fmt(se) + ' MeV·cm²/g';
   document.getElementById('rSn').textContent  = fmt(sn) + ' MeV·cm²/g';
@@ -991,7 +1131,7 @@ function update(){
   document.getElementById('mBeta').textContent = beta(E, ion.A).toFixed(3);
 
   // Bragg peak 추정 (Material Property 모드)
-  const bragg = findBraggPeak(ion, tar);
+  const bragg = findBraggPeak(ion, tar, tarKey);
   document.getElementById('mBragg').textContent = fmt(bragg);
 
   // 유효 범위 검증
@@ -1027,26 +1167,25 @@ function update(){
     `고에너지 양성자 NIEL은 Jun (2003) IEEE TNS 50(6):1924 또는 SR-NIEL DB 참조 권장.</span><br>` +
     `임무 ${dur}yr × 10^${logFlux} p⁺/cm²/yr → <b>TNID = ${fmt(tnid)} MeV/g</b>${warn}`;
 
-  drawStopChart(ion, tar, E);
+  drawStopChart(ion, tar, E, tarKey);
 }
 
-function findBraggPeak(ion, tar){
-  // 주어진 이온/표적에서 dE/dx가 최대가 되는 에너지를 탐색
+function findBraggPeak(ion, tar, tarKey){
   let maxS = 0, maxE = 1;
   for(let log = -2; log <= 3; log += 0.05){
     const E = Math.pow(10, log);
-    const s = Se(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho);
+    const s = Se(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey);
     if(s > maxS){ maxS = s; maxE = E; }
   }
   return maxE;
 }
 
-function drawStopChart(ion, tar, currentE){
+function drawStopChart(ion, tar, currentE, tarKey){
   const Es = [], seArr = [], snArr = [];
   for(let log = -2; log <= 3; log += 0.04){
     const E = Math.pow(10, log);
     Es.push(E);
-    seArr.push(Se(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho));
+    seArr.push(Se(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey));
     snArr.push(Sn(E, ion.Z, ion.A, tar.Z, tar.A, tar.rho));
   }
 

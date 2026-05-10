@@ -193,6 +193,12 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
   .pb{padding:12px}
 }
 </style>
+  <!-- Cloudflare Workers NIST PSTAR API 연동 -->
+<script>
+  window.WORKER_API_URL = "https://stop-nist-pstar-proxy.hongyeolkim81.workers.dev";
+</script>
+<script src="stop-workers-integration.js"></script>
+  
 </head>
 <body>
 <div class="wrap">

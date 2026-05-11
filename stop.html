@@ -16,7 +16,6 @@
   --ok-bg:rgba(13,138,94,.09);--warn-bg:rgba(184,110,0,.09);--bad-bg:rgba(181,32,32,.09);
   --ok-bd:rgba(13,138,94,.35);--warn-bd:rgba(184,110,0,.35);--bad-bd:rgba(181,32,32,.35);
   --c-se:#1a52c8;--c-sn:#0d8a5e;--c-niel:#8b2fc9;--c-rng:#b86e00;--c-bragg:#b52020;
-  /* 층별 색상 팔레트 (최대 8층) */
   --c-l1:rgba(26,82,200,.18);--c-l2:rgba(13,138,94,.18);--c-l3:rgba(184,110,0,.18);
   --c-l4:rgba(139,47,201,.18);--c-l5:rgba(181,32,32,.18);--c-l6:rgba(0,150,160,.18);
   --c-l7:rgba(220,100,50,.18);--c-l8:rgba(70,90,160,.18);
@@ -35,15 +34,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:20p
 .nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
 .live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* ── 모드 토글 ── */
 .mode-toggle{display:flex;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:4px;margin-bottom:18px;gap:4px;width:fit-content}
 .mode-btn{flex:0 0 auto;padding:9px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:none;color:var(--muted);cursor:pointer;border-radius:5px;transition:all .15s;white-space:nowrap}
 .mode-btn:hover{color:var(--text)}
 .mode-btn.active{background:var(--bg1);color:var(--accent);font-weight:700;box-shadow:0 1px 3px rgba(30,64,120,.08)}
 .mode-panel{display:none}
 .mode-panel.active{display:block}
-
 .panel{background:var(--bg1);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
 .ph{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .phdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
@@ -85,73 +81,28 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .v-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)}
 .v-warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd)}
 .v-bad{background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad-bd)}
-
-/* ── 다중 층 매니저 ── */
 .layer-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
-/* ─── layer-row: 3행 카드 레이아웃 (가독성 + 라벨 가시성 우선)
-     1행: [번호 | 이름 | 물질 select | 삭제]            (4-컬럼)
-     2행: 파라미터 라벨 (두께 / 밀도 / I)              (3-컬럼 균등)
-     3행: 파라미터 입력칸                                (3-컬럼 균등)
-     ─ 1행과 2/3행은 컬럼 구조가 다르므로 nested grid 대신
-       sub-container(.layer-row-params)로 분리하여 단순화. */
-.layer-row{
-  display:grid;
-  grid-template-columns:30px 1fr 1.1fr 30px;
-  gap:8px 8px;
-  align-items:center;
-  padding:10px 12px;
-  background:var(--bg2);
-  border:1px solid var(--border2);
-  border-radius:6px;
-  transition:all .15s;
-}
+.layer-row{display:grid;grid-template-columns:30px 1fr 1.1fr 30px;gap:8px 8px;align-items:center;padding:10px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;transition:all .15s;}
 .layer-row.dragging{opacity:.45;background:var(--bg3)}
 .layer-row.drag-over{border-color:var(--accent);box-shadow:0 0 0 2px rgba(26,82,200,.2)}
 .layer-row.dead{background:#fbeaea;border-color:#f5b8b8}
-/* drag handle 숨김 (좁은 layer-row에선 불필요) */
 .layer-row .layer-grip{display:none}
 .layer-row > .layer-num{grid-column:1}
 .layer-row > input[type=text]{grid-column:2;font-family:var(--sans);font-weight:500;padding:7px 10px;font-size:13px;min-width:0}
 .layer-row > select{grid-column:3;padding:7px 10px;font-size:13px;min-width:0}
 .layer-row > .layer-del{grid-column:4}
-/* params: 라벨 + 입력을 묶는 하위 그리드 (전체 폭 사용) */
-.layer-row > .layer-row-params{
-  grid-column:1 / -1;
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:4px 8px;
-  margin-top:2px;
-}
-.layer-row-params .lp-label{
-  font-family:var(--mono);
-  font-size:10.5px;
-  letter-spacing:.04em;
-  color:var(--muted);
-  text-transform:uppercase;
-  padding-left:2px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.layer-row-params input[type=number]{
-  font-size:13px;
-  padding:7px 10px;
-  font-family:var(--mono);
-  min-width:0;
-  width:100%;
-}
+.layer-row > .layer-row-params{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 8px;margin-top:2px;}
+.layer-row-params .lp-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;padding-left:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.layer-row-params input[type=number]{font-size:13px;padding:7px 10px;font-family:var(--mono);min-width:0;width:100%;}
 .layer-row-params input[type=number]::placeholder{color:var(--muted);opacity:.5;font-size:11px}
 .layer-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);text-align:center;background:var(--bg1);border-radius:3px;padding:3px 0}
 .layer-grip{cursor:grab;color:var(--dim);font-size:14px;text-align:center;user-select:none}
 .layer-grip:active{cursor:grabbing}
 .layer-del{background:transparent;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:0;line-height:1;transition:color .15s}
 .layer-del:hover{color:var(--bad)}
-/* layer-head: 카드 모드에선 헤더 라벨 의미 없음 (각 input 위에 라벨 표시) */
 .layer-head{display:none}
 .add-btn{padding:8px 14px;font-family:var(--mono);font-size:12px;border-radius:4px;border:1px dashed var(--border2);background:transparent;color:var(--accent);cursor:pointer;width:100%;transition:all .15s;letter-spacing:.04em;text-transform:uppercase}
 .add-btn:hover{border-style:solid;background:var(--bg2);border-color:var(--accent)}
-
-/* ── 결과 리포트 ── */
 .report-card{padding:14px 16px;border-radius:6px;margin-bottom:10px;font-family:var(--sans);font-size:14px;line-height:1.7}
 .report-stop{background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn)}
 .report-pass{background:var(--ok-bg);border:1px solid var(--ok-bd);color:var(--ok)}
@@ -162,29 +113,15 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .lsum-color{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .lsum-vals{font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.5;word-break:keep-all;overflow-wrap:break-word}
 .lsum-vals .nowrap{white-space:nowrap;display:inline-block}
-
 footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .ft{font-family:var(--mono);font-size:12px;color:var(--dim)}
-
-/* ─── 좁은 화면 (≤ 1100px): layer-row를 2줄 카드로 재배치
-     이유: .g2 좌측 컬럼이 380px이므로 그 안의 layer-row는 항상 좁음.
-           화면 폭 ≤ 1100px에서는 .g2가 1fr로 바뀌어도 가독성 위해 카드 유지. */
-/* ─── 좁은 화면 (≤ 1100px): .g2를 1열로
-     layer-row는 항상 카드 모드이므로 별도 재정의 불필요 */
-@media(max-width:1100px){
-  .g2{grid-template-columns:1fr}
-  .g3,.g4{grid-template-columns:1fr 1fr}
-}
-
-/* ─── 매우 좁은 화면 (≤ 600px): 폰트/padding 축소, 헤더 정렬 ─── */
+@media(max-width:1100px){.g2{grid-template-columns:1fr}.g3,.g4{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){
   .g3,.g4{grid-template-columns:1fr}
   .layer-row{padding:8px 10px;gap:6px 8px}
-  .layer-row > input[type=text],
-  .layer-row > select{font-size:13px;padding:6px 8px;min-width:0}
+  .layer-row > input[type=text],.layer-row > select{font-size:13px;padding:6px 8px;min-width:0}
   .layer-row-params input[type=number]{font-size:12px;padding:6px 8px}
   .layer-row-params .lp-label{font-size:10px}
-  /* 헤더 정렬 */
   header{flex-direction:column;align-items:flex-start;gap:8px}
   .htags{flex-wrap:wrap}
   .nav-btn{font-size:11px;padding:4px 9px}
@@ -193,12 +130,60 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
   .pb{padding:12px}
 }
 </style>
-  <!-- Cloudflare Workers NIST PSTAR API 연동 -->
+
+<!-- ═══════════════════════════════════════════════════════
+     Cloudflare Workers NIST PSTAR API 연동 v2
+     변경: update() → async, Workers KV에서 Se/Range 직접 조회
+     ═══════════════════════════════════════════════════════ -->
 <script>
-  window.WORKER_API_URL = "https://stop-nist-pstar-proxy.hongyeolkim81.workers.dev";
+window.WORKER_API_URL = "https://stop-nist-pstar-proxy.hongyeolkim81.workers.dev";
+
+// Workers API에서 전자 저지능 Se 조회
+async function fetchWorkerSe(material, E_MeV, ionZ) {
+  const ionStr = ionZ === 1 ? 'p' : 'alpha';
+  const url = `${window.WORKER_API_URL}/api/pstar/se?material=${encodeURIComponent(material)}&E=${E_MeV}&ion=${ionStr}`;
+  try {
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.status === 'success' && data.source === 'NIST KV') {
+      return { Se: data.Se_MeV_cm2_per_g };
+    }
+  } catch(e) {}
+  return null;
+}
+
+// Workers API에서 CSDA Range 조회
+async function fetchWorkerRange(material, E_MeV, ionZ) {
+  const ionStr = ionZ === 1 ? 'p' : 'alpha';
+  const url = `${window.WORKER_API_URL}/api/pstar/range?material=${encodeURIComponent(material)}&E=${E_MeV}&ion=${ionStr}`;
+  try {
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.status === 'success' && data.source === 'NIST KV') {
+      return { R_um: data.R_um };
+    }
+  } catch(e) {}
+  return null;
+}
+
+// TARGETS key → Workers API material name 매핑
+window.MATERIAL_NAME_MAP = {
+  si:      'Silicon',
+  al:      'Aluminum',
+  cu_m:    'Copper',
+  au:      'Gold',
+  pb_m:    'Lead',
+  diamond: 'Diamond',
+  sio2:    'Silicon Dioxide',
+  gaas:    'Gallium Arsenide',
+  kapton:  'Kapton Polyimide Film',
+  gan:     'Gallium Nitride',
+  sic:     'Silicon Carbide',
+  aln:     'Aluminum Nitride',
+  glass:   'Silicon Dioxide',
+};
 </script>
-<script src="stop-workers-integration.js"></script>
-  
+
 </head>
 <body>
 <div class="wrap">
@@ -220,29 +205,19 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
   </div>
 </header>
 
-<!-- ═════════════════ 모드 토글 ═════════════════ -->
 <div class="mode-toggle" role="tablist">
   <button class="mode-btn active" id="modeMatBtn" role="tab" aria-selected="true">📊 Material Property</button>
   <button class="mode-btn" id="modeDepthBtn" role="tab" aria-selected="false">🎯 Depth Profile (Bragg)</button>
 </div>
 
-<!-- ═════════════════ 모드 1: Material Property ═════════════════ -->
 <div class="mode-panel active" id="modeMaterialPanel">
-
 <div class="g2">
-<!-- 좌: 컨트롤 -->
 <div>
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--c-se)"></div><div class="phtxt">Beam & Target</div></div>
     <div class="pb">
-      <div class="field">
-        <label>입사 이온</label>
-        <select id="ion"></select>
-      </div>
-      <div class="field">
-        <label>표적 물질</label>
-        <select id="target"></select>
-      </div>
+      <div class="field"><label>입사 이온</label><select id="ion"></select></div>
+      <div class="field"><label>표적 물질</label><select id="target"></select></div>
       <div class="field">
         <label>에너지</label>
         <div style="display:grid;grid-template-columns:1fr 90px;gap:6px">
@@ -263,31 +238,17 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
       </div>
     </div>
   </div>
-
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--c-niel)"></div><div class="phtxt">계산 결과</div></div>
     <div class="pb">
-      <div class="field">
-        <div class="shdr"><span class="sname">전자 저지능 Sₑ</span><span class="sval" id="rSe">—</span></div>
-      </div>
-      <div class="field">
-        <div class="shdr"><span class="sname">핵 저지능 Sₙ</span><span class="sval" id="rSn">—</span></div>
-      </div>
-      <div class="field">
-        <div class="shdr"><span class="sname">전체 저지능 S</span><span class="sval" id="rTot">—</span></div>
-      </div>
-      <div class="field">
-        <div class="shdr"><span class="sname">사정거리 R<sub>CSDA</sub></span><span class="sval" id="rRng">—</span></div>
-      </div>
-      <div class="formula" style="font-size:11px;line-height:1.5;margin-top:6px">
-        S 단위: MeV·cm²/g (PSTAR 표준)<br>
-        R 단위: μm
-      </div>
+      <div class="field"><div class="shdr"><span class="sname">전자 저지능 Sₑ</span><span class="sval" id="rSe">—</span></div></div>
+      <div class="field"><div class="shdr"><span class="sname">핵 저지능 Sₙ</span><span class="sval" id="rSn">—</span></div></div>
+      <div class="field"><div class="shdr"><span class="sname">전체 저지능 S</span><span class="sval" id="rTot">—</span></div></div>
+      <div class="field"><div class="shdr"><span class="sname">사정거리 R<sub>CSDA</sub></span><span class="sval" id="rRng">—</span></div></div>
+      <div class="formula" style="font-size:11px;line-height:1.5;margin-top:6px">S 단위: MeV·cm²/g (PSTAR 표준)<br>R 단위: μm</div>
     </div>
   </div>
 </div>
-
-<!-- 우: 차트 -->
 <div>
   <div class="g4">
     <div class="mc"><div class="mcl">LET (현재)</div><div class="mcv" id="mLET">—</div><div class="mcu">MeV·cm²/g</div></div>
@@ -295,7 +256,6 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
     <div class="mc"><div class="mcl">Bragg E*</div><div class="mcv" id="mBragg">—</div><div class="mcu">MeV (peak)</div></div>
     <div class="mc"><div class="mcl">검증</div><div class="mcv" id="mValid" style="font-size:14px">—</div><div class="mcu">유효 범위</div></div>
   </div>
-
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--c-se)"></div><div class="phtxt">Stopping Power vs Energy</div></div>
     <div class="pb">
@@ -307,45 +267,28 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
       </div>
     </div>
   </div>
-
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--c-niel)"></div><div class="phtxt">NIEL 해석 — TNID 추정</div></div>
     <div class="pb">
       <div class="g3" style="margin-bottom:10px">
-        <div class="field">
-          <label>임무 기간 (yr)</label>
-          <input type="number" id="dur" value="3" min="0.1" step="0.5">
-        </div>
-        <div class="field">
-          <label>플럭스 log₁₀(p⁺/cm²/yr)</label>
-          <input type="number" id="logFlux" value="10" min="6" max="14" step="0.5">
-        </div>
-        <div class="field">
-          <label>계산 결과 TNID</label>
-          <div class="sval" id="rTnid" style="padding:7px 0">—</div>
-        </div>
+        <div class="field"><label>임무 기간 (yr)</label><input type="number" id="dur" value="3" min="0.1" step="0.5"></div>
+        <div class="field"><label>플럭스 log₁₀(p⁺/cm²/yr)</label><input type="number" id="logFlux" value="10" min="6" max="14" step="0.5"></div>
+        <div class="field"><label>계산 결과 TNID</label><div class="sval" id="rTnid" style="padding:7px 0">—</div></div>
       </div>
       <div id="nielInterp" class="mnote"></div>
     </div>
   </div>
 </div>
 </div>
+</div>
 
-</div><!-- end mode 1 -->
-
-<!-- ═════════════════ 모드 2: Depth Profile (Bragg Peak) ═════════════════ -->
 <div class="mode-panel" id="modeDepthPanel">
-
 <div class="g2">
-<!-- 좌: 빔 + 층 매니저 -->
 <div>
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--c-bragg)"></div><div class="phtxt">Incident Beam</div></div>
     <div class="pb">
-      <div class="field">
-        <label>입사 이온</label>
-        <select id="dpIon"></select>
-      </div>
+      <div class="field"><label>입사 이온</label><select id="dpIon"></select></div>
       <div class="field">
         <label>초기 에너지 E₀</label>
         <div style="display:grid;grid-template-columns:1fr 90px;gap:6px">
@@ -362,7 +305,6 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
       </div>
     </div>
   </div>
-
   <div class="panel">
     <div class="ph">
       <div class="phdot" style="background:var(--c-rng)"></div>
@@ -371,9 +313,7 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
       <button class="ph-btn" onclick="clearLayers()">전체 삭제</button>
     </div>
     <div class="pb">
-      <div class="layer-head">
-        <span></span><span></span><span>이름</span><span>물질</span><span>두께(μm)</span><span>밀도</span><span>I(eV)</span><span></span>
-      </div>
+      <div class="layer-head"><span></span><span></span><span>이름</span><span>물질</span><span>두께(μm)</span><span>밀도</span><span>I(eV)</span><span></span></div>
       <div id="layerList" class="layer-list"></div>
       <button class="add-btn" onclick="addLayer()">+ 층 추가</button>
       <div style="margin-top:14px">
@@ -390,8 +330,6 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
     </div>
   </div>
 </div>
-
-<!-- 우: Bragg curve + 리포트 -->
 <div>
   <div class="g4">
     <div class="mc"><div class="mcl">초기 에너지</div><div class="mcv" id="dpE0">—</div><div class="mcu">MeV</div></div>
@@ -399,7 +337,6 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
     <div class="mc"><div class="mcl">잔여 에너지</div><div class="mcv" id="dpResE">—</div><div class="mcu">MeV (출구)</div></div>
     <div class="mc"><div class="mcl">상태</div><div class="mcv" id="dpStatus" style="font-size:14px">—</div><div class="mcu">투과 여부</div></div>
   </div>
-
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--c-bragg)"></div><div class="phtxt">Energy Loss vs Depth — Bragg Curve</div></div>
     <div class="pb">
@@ -411,7 +348,6 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
       </div>
     </div>
   </div>
-
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--c-rng)"></div><div class="phtxt">시뮬레이션 리포트</div></div>
     <div class="pb">
@@ -421,23 +357,18 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
   </div>
 </div>
 </div>
-
-</div><!-- end mode 2 -->
+</div>
 
 <footer>
   <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v4.0 — Multi-Layer Bragg Peak Simulator</span>
   <span class="ft">NIST PSTAR 2022 · ZBL (Ziegler 1985) · Bragg-Kleeman · CSDA · Jun 2003 IEEE TNS 50(6):1924</span>
 </footer>
 
-</div><!-- /.wrap -->
-
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 'use strict';
 
-// ════════════════════════════════════════════════════════════════════
-// SECTION 1. 데이터베이스 (이온, 물질)
-// ════════════════════════════════════════════════════════════════════
 const IONS = {
   p:     {name:'양성자(H⁺)', Z:1,  A:1   },
   he4:   {name:'알파(He-4)', Z:2,  A:4   },
@@ -455,9 +386,6 @@ const IONS = {
   bi:    {name:'비스무트(Bi)',Z:83, A:209 },
 };
 
-// 물질 데이터베이스: Z, A는 weighted-mean (Bragg-Kleeman 가법성)
-// I (mean excitation energy, eV): NIST PSTAR/ASTAR 기준
-// nr: Si 대비 NIEL 비 (Jun 2003 @ 10 MeV proton)
 const TARGETS = {
   si:        {name:'Si',          Z:14,   A:28.09, rho:2.33,  I:173, nr:1.00},
   ge:        {name:'Ge',          Z:32,   A:72.63, rho:5.32,  I:350, nr:2.69},
@@ -471,62 +399,24 @@ const TARGETS = {
   al:        {name:'Al',          Z:13,   A:26.98, rho:2.70,  I:166, nr:0.90},
   cu_m:      {name:'Cu',          Z:29,   A:63.55, rho:8.96,  I:322, nr:1.80},
   pb_m:      {name:'Pb',          Z:82,   A:207.2, rho:11.35, I:823, nr:4.50},
-  // ─── v2.0 추가: 층 시뮬레이션용 추가 물질 ───
-  // 페로브스카이트 (MAPbI3 유사 평균값)
   perovskite:{name:'Perovskite',  Z:35,   A:75.0,  rho:4.10,  I:400, nr:2.20},
-  // CIGS (Cu(In,Ga)Se2 평균)
   cigs:      {name:'CIGS',        Z:32,   A:74.0,  rho:5.75,  I:380, nr:2.00},
-  // 다이아몬드 (사용자 NV센터 분야)
   diamond:   {name:'Diamond',     Z:6,    A:12.01, rho:3.515, I:78,  nr:0.18},
-  // 글래스 (커버 글래스, fused silica 근사)
   glass:     {name:'CoverGlass',  Z:10,   A:20.03, rho:2.50,  I:139, nr:0.80},
-  // Kapton/Polyimide (위성 외피)
   kapton:    {name:'Kapton',      Z:5.5,  A:11.1,  rho:1.42,  I:75,  nr:0.55},
-  // ITO (투명 전극)
   ito:       {name:'ITO',         Z:30,   A:71.0,  rho:7.14,  I:330, nr:1.85},
-  // PEDOT:PSS (정공 수송층)
   pedot:     {name:'PEDOT:PSS',   Z:6,    A:14.0,  rho:1.45,  I:80,  nr:0.50},
-  // Mo (CIGS 후방 전극)
   mo:        {name:'Mo',          Z:42,   A:95.96, rho:10.22, I:424, nr:2.50},
-  // CdS (버퍼 층)
   cds:       {name:'CdS',         Z:32,   A:72.2,  rho:4.82,  I:330, nr:1.95},
-  // Ge 기판 (TJ solar cell)
   ge_sub:    {name:'Ge sub.',     Z:32,   A:72.63, rho:5.32,  I:350, nr:2.69},
-  // GaInP (TJ top cell)
   gainp:     {name:'GaInP',       Z:34,   A:74.0,  rho:4.47,  I:370, nr:2.85},
 };
 
-// ════════════════════════════════════════════════════════════════════
-// SECTION 2. 물리 엔진 — PSTAR 다물질 테이블 v4.0
-// ════════════════════════════════════════════════════════════════════
-//
-// [v4.0 변경 — 2026-05]
-//  v3.0: Si 단일 PSTAR 테이블 + I-scaling으로 타 물질 근사
-//        → Cu(+150%), Ge(+375%) 등 고Z 물질에서 심각한 오차
-//  v4.0: 14개 물질 NIST PSTAR 테이블 직접 내장 → proton 오차 < 1%
-//        I-scaling은 테이블 없는 물질에만 적용 (경고 표시)
-//        I-scaling 방향 버그 수정 (v3.0에서 분자/분모 반전 오류 존재)
-//
-// 정확도 등급:
-//   A (< 1%)  : PSTAR 직접 — Si, Al, Cu, Ge, Au, Pb, Mo,
-//               Diamond, SiO₂, GaAs, Kapton, GaN, SiC, AlN
-//   B (< 15%) : I-scaling — glass(≈SiO₂), kapton 유사 유기물
-//   C (< 30%) : I-scaling — InP, HfO₂, ITO, Perovskite, CIGS
-//   D (참고값) : 중이온 (Bethe z²-scaling, ±50%)
-//
-// 데이터 출처:
-//   NIST PSTAR 2022  https://physics.nist.gov/PhysRefData/Star/Text/PSTAR.html
-//   ICRU Report 49 (1993) — Stopping Powers for Protons and Alpha Particles
-// ════════════════════════════════════════════════════════════════════
-
-// ── 상대론 유틸리티 ──────────────────────────────────────────────────
 function beta(E, A){
   const mp = 938.272;
   return Math.sqrt(1 - (A * mp / (E + A * mp)) ** 2);
 }
 
-// ── PSTAR 공통 에너지 그리드 (42포인트, MeV) ─────────────────────────
-// 모든 Se/R 테이블이 이 순서로 값을 저장함
 const _EG = [
   0.001,0.002,0.003,0.004,0.005,0.006,0.008,0.010,
   0.015,0.020,0.030,0.040,0.050,0.060,0.080,0.100,
@@ -536,223 +426,55 @@ const _EG = [
   500.0,1000.
 ];
 
-// ── NIST PSTAR 전자 저지능 Se [MeV·cm²/g] — proton ──────────────────
-// 키: TARGETS의 material key와 동일
 const _PSTAR_SE = {
-// Si — NIST PSTAR material #14
-si:[7.288e-1,9.844e-1,1.163e+0,1.304e+0,1.427e+0,1.540e+0,1.742e+0,1.924e+0,
-    2.299e+0,2.617e+0,3.154e+0,3.618e+0,4.023e+0,4.378e+0,4.979e+0,4.285e+0,
-    5.016e+0,5.477e+0,6.163e+0,6.587e+0,6.859e+0,7.020e+0,7.176e+0,7.287e+0,
-    7.387e+0,7.259e+0,6.895e+0,6.469e+0,6.034e+0,5.632e+0,4.930e+0,4.383e+0,
-    3.483e+0,2.895e+0,2.161e+0,1.719e+0,1.420e+0,9.455e-1,7.671e-1,4.320e-1,
-    2.001e-1,1.170e-1],
-// Al — NIST PSTAR material #1
-al:[8.013e-1,1.083e+0,1.280e+0,1.437e+0,1.571e+0,1.692e+0,1.912e+0,2.115e+0,
-    2.531e+0,2.882e+0,3.478e+0,3.992e+0,4.438e+0,4.830e+0,5.492e+0,4.547e+0,
-    5.461e+0,5.820e+0,6.455e+0,6.882e+0,7.176e+0,7.351e+0,7.553e+0,7.737e+0,
-    7.869e+0,7.713e+0,7.278e+0,6.824e+0,6.384e+0,5.967e+0,5.220e+0,4.651e+0,
-    3.695e+0,3.073e+0,2.293e+0,1.824e+0,1.510e+0,1.007e+0,8.148e-1,4.586e-1,
-    2.124e-1,1.241e-1],
-// Cu — NIST PSTAR material #13
-cu_m:[5.401e-1,7.297e-1,8.621e-1,9.674e-1,1.057e+0,1.139e+0,1.287e+0,1.422e+0,
-      1.700e+0,1.935e+0,2.330e+0,2.670e+0,2.962e+0,3.218e+0,3.649e+0,3.433e+0,
-      3.982e+0,4.318e+0,4.897e+0,5.240e+0,5.417e+0,5.527e+0,5.698e+0,5.848e+0,
-      5.923e+0,5.800e+0,5.480e+0,5.137e+0,4.802e+0,4.485e+0,3.920e+0,3.501e+0,
-      2.779e+0,2.317e+0,1.727e+0,1.372e+0,1.135e+0,7.565e-1,6.008e-1,3.377e-1,
-      1.561e-1,9.126e-2],
-// Ge — NIST PSTAR material #32
-ge:[3.997e-1,5.401e-1,6.383e-1,7.166e-1,7.834e-1,8.443e-1,9.540e-1,1.055e+0,
-    1.262e+0,1.438e+0,1.733e+0,1.987e+0,2.204e+0,2.393e+0,2.719e+0,2.918e+0,
-    3.147e+0,3.607e+0,4.069e+0,4.355e+0,4.575e+0,4.716e+0,4.755e+0,4.839e+0,
-    4.944e+0,4.812e+0,4.558e+0,4.274e+0,3.994e+0,3.730e+0,3.259e+0,2.946e+0,
-    2.337e+0,1.961e+0,1.464e+0,1.165e+0,9.679e-1,6.479e-1,5.116e-1,2.882e-1,
-    1.334e-1,7.810e-2],
-// Au — NIST PSTAR material #6
-au:[2.376e-1,3.212e-1,3.795e-1,4.261e-1,4.657e-1,5.018e-1,5.674e-1,6.275e-1,
-    7.516e-1,8.567e-1,1.032e+0,1.183e+0,1.313e+0,1.427e+0,1.620e+0,1.779e+0,
-    2.096e+0,2.285e+0,2.598e+0,2.810e+0,2.934e+0,3.004e+0,3.090e+0,3.163e+0,
-    3.239e+0,3.194e+0,3.048e+0,2.877e+0,2.704e+0,2.537e+0,2.230e+0,2.005e+0,
-    1.601e+0,1.344e+0,1.010e+0,8.079e-1,6.726e-1,4.539e-1,3.609e-1,2.046e-1,
-    9.533e-2,5.601e-2],
-// Pb — NIST PSTAR material #55
-pb_m:[2.231e-1,3.015e-1,3.562e-1,3.999e-1,4.371e-1,4.707e-1,5.323e-1,5.889e-1,
-      7.055e-1,8.044e-1,9.700e-1,1.112e+0,1.234e+0,1.342e+0,1.526e+0,1.676e+0,
-      1.975e+0,2.152e+0,2.449e+0,2.651e+0,2.768e+0,2.834e+0,2.915e+0,2.985e+0,
-      3.060e+0,3.024e+0,2.893e+0,2.737e+0,2.578e+0,2.424e+0,2.136e+0,1.924e+0,
-      1.539e+0,1.293e+0,9.735e-1,7.807e-1,6.514e-1,4.410e-1,3.511e-1,1.994e-1,
-      9.309e-2,5.468e-2],
-// Mo — NIST PSTAR material #42
-mo:[3.552e-1,4.802e-1,5.675e-1,6.370e-1,6.966e-1,7.504e-1,8.485e-1,9.385e-1,
-    1.124e+0,1.282e+0,1.545e+0,1.772e+0,1.968e+0,2.140e+0,2.433e+0,2.598e+0,
-    3.010e+0,3.262e+0,3.704e+0,3.974e+0,4.163e+0,4.282e+0,4.393e+0,4.498e+0,
-    4.601e+0,4.537e+0,4.310e+0,4.055e+0,3.800e+0,3.556e+0,3.118e+0,2.804e+0,
-    2.232e+0,1.871e+0,1.399e+0,1.113e+0,9.254e-1,6.212e-1,4.928e-1,2.782e-1,
-    1.290e-1,7.561e-2],
-// Diamond (C) — NIST PSTAR material #12
-diamond:[1.263e+0,1.707e+0,2.018e+0,2.265e+0,2.475e+0,2.661e+0,3.002e+0,3.308e+0,
-         3.935e+0,4.460e+0,5.322e+0,6.016e+0,6.579e+0,7.042e+0,7.756e+0,6.233e+0,
-         7.647e+0,8.231e+0,9.162e+0,9.741e+0,1.009e+1,1.031e+1,1.057e+1,1.078e+1,
-         1.093e+1,1.069e+1,1.010e+1,9.442e+0,8.804e+0,8.206e+0,7.155e+0,6.356e+0,
-         5.040e+0,4.191e+0,3.121e+0,2.481e+0,2.052e+0,1.369e+0,1.109e+0,6.266e-1,
-         2.913e-1,1.709e-1],
-// SiO2 — NIST PSTAR compound #21
-sio2:[8.528e-1,1.153e+0,1.363e+0,1.530e+0,1.673e+0,1.801e+0,2.036e+0,2.249e+0,
-      2.692e+0,3.066e+0,3.694e+0,4.239e+0,4.716e+0,5.133e+0,5.834e+0,4.900e+0,
-      5.898e+0,6.399e+0,7.182e+0,7.660e+0,7.961e+0,8.140e+0,8.350e+0,8.556e+0,
-      8.700e+0,8.534e+0,8.065e+0,7.551e+0,7.056e+0,6.590e+0,5.758e+0,5.130e+0,
-      4.074e+0,3.389e+0,2.527e+0,2.010e+0,1.663e+0,1.109e+0,8.987e-1,5.068e-1,
-      2.350e-1,1.376e-1],
-// GaAs — NIST PSTAR compound #30
-gaas:[4.097e-1,5.539e-1,6.545e-1,7.347e-1,8.032e-1,8.659e-1,9.800e-1,1.085e+0,
-      1.299e+0,1.482e+0,1.788e+0,2.051e+0,2.280e+0,2.481e+0,2.826e+0,3.031e+0,
-      3.461e+0,3.745e+0,4.229e+0,4.531e+0,4.744e+0,4.878e+0,5.019e+0,5.126e+0,
-      5.227e+0,5.139e+0,4.875e+0,4.577e+0,4.284e+0,4.004e+0,3.505e+0,3.151e+0,
-      2.505e+0,2.099e+0,1.567e+0,1.248e+0,1.038e+0,6.953e-1,5.508e-1,3.107e-1,
-      1.441e-1,8.436e-2],
-// Kapton — NIST PSTAR compound #37
-kapton:[1.211e+0,1.637e+0,1.937e+0,2.175e+0,2.380e+0,2.563e+0,2.897e+0,3.199e+0,
-        3.826e+0,4.354e+0,5.253e+0,6.027e+0,6.701e+0,7.296e+0,8.303e+0,7.086e+0,
-        8.734e+0,9.536e+0,1.075e+1,1.147e+1,1.190e+1,1.216e+1,1.244e+1,1.267e+1,
-        1.285e+1,1.260e+1,1.191e+1,1.115e+1,1.042e+1,9.726e+0,8.493e+0,7.546e+0,
-        5.990e+0,4.985e+0,3.720e+0,2.960e+0,2.449e+0,1.635e+0,1.325e+0,7.486e-1,
-        3.478e-1,2.039e-1],
-// GaN — NIST PSTAR compound #31
-gan:[5.625e-1,7.602e-1,8.983e-1,1.008e+0,1.102e+0,1.188e+0,1.344e+0,1.487e+0,
-     1.780e+0,2.030e+0,2.451e+0,2.812e+0,3.127e+0,3.403e+0,3.878e+0,4.161e+0,
-     4.726e+0,5.109e+0,5.772e+0,6.188e+0,6.459e+0,6.618e+0,6.808e+0,6.967e+0,
-     7.113e+0,6.985e+0,6.623e+0,6.209e+0,5.804e+0,5.423e+0,4.738e+0,4.251e+0,
-     3.377e+0,2.822e+0,2.107e+0,1.678e+0,1.393e+0,9.314e-1,7.367e-1,4.153e-1,
-     1.926e-1,1.128e-1],
-// SiC — NIST PSTAR compound #20
-sic:[8.999e-1,1.216e+0,1.438e+0,1.614e+0,1.765e+0,1.901e+0,2.148e+0,2.372e+0,
-     2.840e+0,3.232e+0,3.898e+0,4.473e+0,4.976e+0,5.419e+0,6.162e+0,5.229e+0,
-     6.337e+0,6.872e+0,7.721e+0,8.234e+0,8.556e+0,8.752e+0,8.980e+0,9.175e+0,
-     9.316e+0,9.135e+0,8.636e+0,8.087e+0,7.556e+0,7.051e+0,6.152e+0,5.473e+0,
-     4.340e+0,3.611e+0,2.692e+0,2.141e+0,1.772e+0,1.181e+0,9.573e-1,5.396e-1,
-     2.503e-1,1.465e-1],
-// AlN — NIST PSTAR compound #8
-aln:[7.677e-1,1.038e+0,1.226e+0,1.377e+0,1.507e+0,1.624e+0,1.836e+0,2.029e+0,
-     2.430e+0,2.769e+0,3.341e+0,3.836e+0,4.272e+0,4.657e+0,5.305e+0,4.470e+0,
-     5.415e+0,5.890e+0,6.649e+0,7.106e+0,7.395e+0,7.566e+0,7.763e+0,7.941e+0,
-     8.075e+0,7.912e+0,7.480e+0,7.005e+0,6.543e+0,6.108e+0,5.332e+0,4.748e+0,
-     3.769e+0,3.134e+0,2.336e+0,1.857e+0,1.537e+0,1.025e+0,8.305e-1,4.681e-1,
-     2.171e-1,1.271e-1],
+si:[7.288e-1,9.844e-1,1.163e+0,1.304e+0,1.427e+0,1.540e+0,1.742e+0,1.924e+0,2.299e+0,2.617e+0,3.154e+0,3.618e+0,4.023e+0,4.378e+0,4.979e+0,4.285e+0,5.016e+0,5.477e+0,6.163e+0,6.587e+0,6.859e+0,7.020e+0,7.176e+0,7.287e+0,7.387e+0,7.259e+0,6.895e+0,6.469e+0,6.034e+0,5.632e+0,4.930e+0,4.383e+0,3.483e+0,2.895e+0,2.161e+0,1.719e+0,1.420e+0,9.455e-1,7.671e-1,4.320e-1,2.001e-1,1.170e-1],
+al:[8.013e-1,1.083e+0,1.280e+0,1.437e+0,1.571e+0,1.692e+0,1.912e+0,2.115e+0,2.531e+0,2.882e+0,3.478e+0,3.992e+0,4.438e+0,4.830e+0,5.492e+0,4.547e+0,5.461e+0,5.820e+0,6.455e+0,6.882e+0,7.176e+0,7.351e+0,7.553e+0,7.737e+0,7.869e+0,7.713e+0,7.278e+0,6.824e+0,6.384e+0,5.967e+0,5.220e+0,4.651e+0,3.695e+0,3.073e+0,2.293e+0,1.824e+0,1.510e+0,1.007e+0,8.148e-1,4.586e-1,2.124e-1,1.241e-1],
+cu_m:[5.401e-1,7.297e-1,8.621e-1,9.674e-1,1.057e+0,1.139e+0,1.287e+0,1.422e+0,1.700e+0,1.935e+0,2.330e+0,2.670e+0,2.962e+0,3.218e+0,3.649e+0,3.433e+0,3.982e+0,4.318e+0,4.897e+0,5.240e+0,5.417e+0,5.527e+0,5.698e+0,5.848e+0,5.923e+0,5.800e+0,5.480e+0,5.137e+0,4.802e+0,4.485e+0,3.920e+0,3.501e+0,2.779e+0,2.317e+0,1.727e+0,1.372e+0,1.135e+0,7.565e-1,6.008e-1,3.377e-1,1.561e-1,9.126e-2],
+ge:[3.997e-1,5.401e-1,6.383e-1,7.166e-1,7.834e-1,8.443e-1,9.540e-1,1.055e+0,1.262e+0,1.438e+0,1.733e+0,1.987e+0,2.204e+0,2.393e+0,2.719e+0,2.918e+0,3.147e+0,3.607e+0,4.069e+0,4.355e+0,4.575e+0,4.716e+0,4.755e+0,4.839e+0,4.944e+0,4.812e+0,4.558e+0,4.274e+0,3.994e+0,3.730e+0,3.259e+0,2.946e+0,2.337e+0,1.961e+0,1.464e+0,1.165e+0,9.679e-1,6.479e-1,5.116e-1,2.882e-1,1.334e-1,7.810e-2],
+au:[2.376e-1,3.212e-1,3.795e-1,4.261e-1,4.657e-1,5.018e-1,5.674e-1,6.275e-1,7.516e-1,8.567e-1,1.032e+0,1.183e+0,1.313e+0,1.427e+0,1.620e+0,1.779e+0,2.096e+0,2.285e+0,2.598e+0,2.810e+0,2.934e+0,3.004e+0,3.090e+0,3.163e+0,3.239e+0,3.194e+0,3.048e+0,2.877e+0,2.704e+0,2.537e+0,2.230e+0,2.005e+0,1.601e+0,1.344e+0,1.010e+0,8.079e-1,6.726e-1,4.539e-1,3.609e-1,2.046e-1,9.533e-2,5.601e-2],
+pb_m:[2.231e-1,3.015e-1,3.562e-1,3.999e-1,4.371e-1,4.707e-1,5.323e-1,5.889e-1,7.055e-1,8.044e-1,9.700e-1,1.112e+0,1.234e+0,1.342e+0,1.526e+0,1.676e+0,1.975e+0,2.152e+0,2.449e+0,2.651e+0,2.768e+0,2.834e+0,2.915e+0,2.985e+0,3.060e+0,3.024e+0,2.893e+0,2.737e+0,2.578e+0,2.424e+0,2.136e+0,1.924e+0,1.539e+0,1.293e+0,9.735e-1,7.807e-1,6.514e-1,4.410e-1,3.511e-1,1.994e-1,9.309e-2,5.468e-2],
+mo:[3.552e-1,4.802e-1,5.675e-1,6.370e-1,6.966e-1,7.504e-1,8.485e-1,9.385e-1,1.124e+0,1.282e+0,1.545e+0,1.772e+0,1.968e+0,2.140e+0,2.433e+0,2.598e+0,3.010e+0,3.262e+0,3.704e+0,3.974e+0,4.163e+0,4.282e+0,4.393e+0,4.498e+0,4.601e+0,4.537e+0,4.310e+0,4.055e+0,3.800e+0,3.556e+0,3.118e+0,2.804e+0,2.232e+0,1.871e+0,1.399e+0,1.113e+0,9.254e-1,6.212e-1,4.928e-1,2.782e-1,1.290e-1,7.561e-2],
+diamond:[1.263e+0,1.707e+0,2.018e+0,2.265e+0,2.475e+0,2.661e+0,3.002e+0,3.308e+0,3.935e+0,4.460e+0,5.322e+0,6.016e+0,6.579e+0,7.042e+0,7.756e+0,6.233e+0,7.647e+0,8.231e+0,9.162e+0,9.741e+0,1.009e+1,1.031e+1,1.057e+1,1.078e+1,1.093e+1,1.069e+1,1.010e+1,9.442e+0,8.804e+0,8.206e+0,7.155e+0,6.356e+0,5.040e+0,4.191e+0,3.121e+0,2.481e+0,2.052e+0,1.369e+0,1.109e+0,6.266e-1,2.913e-1,1.709e-1],
+sio2:[8.528e-1,1.153e+0,1.363e+0,1.530e+0,1.673e+0,1.801e+0,2.036e+0,2.249e+0,2.692e+0,3.066e+0,3.694e+0,4.239e+0,4.716e+0,5.133e+0,5.834e+0,4.900e+0,5.898e+0,6.399e+0,7.182e+0,7.660e+0,7.961e+0,8.140e+0,8.350e+0,8.556e+0,8.700e+0,8.534e+0,8.065e+0,7.551e+0,7.056e+0,6.590e+0,5.758e+0,5.130e+0,4.074e+0,3.389e+0,2.527e+0,2.010e+0,1.663e+0,1.109e+0,8.987e-1,5.068e-1,2.350e-1,1.376e-1],
+gaas:[4.097e-1,5.539e-1,6.545e-1,7.347e-1,8.032e-1,8.659e-1,9.800e-1,1.085e+0,1.299e+0,1.482e+0,1.788e+0,2.051e+0,2.280e+0,2.481e+0,2.826e+0,3.031e+0,3.461e+0,3.745e+0,4.229e+0,4.531e+0,4.744e+0,4.878e+0,5.019e+0,5.126e+0,5.227e+0,5.139e+0,4.875e+0,4.577e+0,4.284e+0,4.004e+0,3.505e+0,3.151e+0,2.505e+0,2.099e+0,1.567e+0,1.248e+0,1.038e+0,6.953e-1,5.508e-1,3.107e-1,1.441e-1,8.436e-2],
+kapton:[1.211e+0,1.637e+0,1.937e+0,2.175e+0,2.380e+0,2.563e+0,2.897e+0,3.199e+0,3.826e+0,4.354e+0,5.253e+0,6.027e+0,6.701e+0,7.296e+0,8.303e+0,7.086e+0,8.734e+0,9.536e+0,1.075e+1,1.147e+1,1.190e+1,1.216e+1,1.244e+1,1.267e+1,1.285e+1,1.260e+1,1.191e+1,1.115e+1,1.042e+1,9.726e+0,8.493e+0,7.546e+0,5.990e+0,4.985e+0,3.720e+0,2.960e+0,2.449e+0,1.635e+0,1.325e+0,7.486e-1,3.478e-1,2.039e-1],
+gan:[5.625e-1,7.602e-1,8.983e-1,1.008e+0,1.102e+0,1.188e+0,1.344e+0,1.487e+0,1.780e+0,2.030e+0,2.451e+0,2.812e+0,3.127e+0,3.403e+0,3.878e+0,4.161e+0,4.726e+0,5.109e+0,5.772e+0,6.188e+0,6.459e+0,6.618e+0,6.808e+0,6.967e+0,7.113e+0,6.985e+0,6.623e+0,6.209e+0,5.804e+0,5.423e+0,4.738e+0,4.251e+0,3.377e+0,2.822e+0,2.107e+0,1.678e+0,1.393e+0,9.314e-1,7.367e-1,4.153e-1,1.926e-1,1.128e-1],
+sic:[8.999e-1,1.216e+0,1.438e+0,1.614e+0,1.765e+0,1.901e+0,2.148e+0,2.372e+0,2.840e+0,3.232e+0,3.898e+0,4.473e+0,4.976e+0,5.419e+0,6.162e+0,5.229e+0,6.337e+0,6.872e+0,7.721e+0,8.234e+0,8.556e+0,8.752e+0,8.980e+0,9.175e+0,9.316e+0,9.135e+0,8.636e+0,8.087e+0,7.556e+0,7.051e+0,6.152e+0,5.473e+0,4.340e+0,3.611e+0,2.692e+0,2.141e+0,1.772e+0,1.181e+0,9.573e-1,5.396e-1,2.503e-1,1.465e-1],
+aln:[7.677e-1,1.038e+0,1.226e+0,1.377e+0,1.507e+0,1.624e+0,1.836e+0,2.029e+0,2.430e+0,2.769e+0,3.341e+0,3.836e+0,4.272e+0,4.657e+0,5.305e+0,4.470e+0,5.415e+0,5.890e+0,6.649e+0,7.106e+0,7.395e+0,7.566e+0,7.763e+0,7.941e+0,8.075e+0,7.912e+0,7.480e+0,7.005e+0,6.543e+0,6.108e+0,5.332e+0,4.748e+0,3.769e+0,3.134e+0,2.336e+0,1.857e+0,1.537e+0,1.025e+0,8.305e-1,4.681e-1,2.171e-1,1.271e-1],
 };
 
-// ── NIST PSTAR R_CSDA [g/cm²] — proton ──────────────────────────────
 const _PSTAR_R = {
-si:[1.050e-5,2.500e-5,4.157e-5,5.982e-5,7.935e-5,1.002e-4,1.457e-4,1.965e-4,
-    3.340e-4,4.878e-4,8.217e-4,1.185e-3,1.572e-3,1.982e-3,2.867e-3,3.823e-3,
-    6.382e-3,9.154e-3,1.531e-2,2.198e-2,2.899e-2,3.618e-2,5.081e-2,6.563e-2,
-    1.043e-1,1.459e-1,2.363e-1,3.328e-1,4.338e-1,5.380e-1,7.521e-1,9.740e-1,
-    1.576e+0,2.282e+0,3.940e+0,5.867e+0,8.034e+0,1.540e+1,2.049e+1,5.193e+1,
-    1.568e+2,3.417e+2],
-al:[9.454e-6,2.236e-5,3.721e-5,5.355e-5,7.103e-5,8.944e-5,1.297e-4,1.749e-4,
-    2.974e-4,4.352e-4,7.321e-4,1.058e-3,1.405e-3,1.774e-3,2.574e-3,3.457e-3,
-    5.765e-3,8.267e-3,1.380e-2,1.976e-2,2.608e-2,3.254e-2,4.567e-2,5.897e-2,
-    9.368e-2,1.313e-1,2.127e-1,3.000e-1,3.918e-1,4.861e-1,6.804e-1,8.797e-1,
-    1.424e+0,2.062e+0,3.564e+0,5.313e+0,7.279e+0,1.396e+1,1.858e+1,4.711e+1,
-    1.421e+2,3.097e+2],
-cu_m:[3.904e-6,9.235e-6,1.537e-5,2.212e-5,2.936e-5,3.698e-5,5.376e-5,7.246e-5,
-      1.231e-4,1.800e-4,3.033e-4,4.383e-4,5.820e-4,7.352e-4,1.067e-3,1.324e-3,
-      2.211e-3,3.166e-3,5.282e-3,7.564e-3,9.985e-3,1.246e-2,1.750e-2,2.265e-2,
-      3.607e-2,5.059e-2,8.212e-2,1.161e-1,1.519e-1,1.888e-1,2.659e-1,3.440e-1,
-      5.572e-1,8.073e-1,1.397e+0,2.083e+0,2.855e+0,5.487e+0,7.306e+0,1.857e+1,
-      5.624e+1,1.228e+2],
-ge:[2.283e-6,5.402e-6,8.993e-6,1.295e-5,1.718e-5,2.164e-5,3.145e-5,4.241e-5,
-    7.204e-5,1.054e-4,1.777e-4,2.568e-4,3.413e-4,4.314e-4,6.266e-4,7.939e-4,
-    1.328e-3,1.906e-3,3.190e-3,4.576e-3,6.043e-3,7.545e-3,1.062e-2,1.373e-2,
-    2.191e-2,3.071e-2,4.994e-2,7.071e-2,9.262e-2,1.153e-1,1.626e-1,2.104e-1,
-    3.410e-1,4.946e-1,8.568e-1,1.278e+0,1.753e+0,3.379e+0,4.505e+0,1.147e+1,
-    3.478e+1,7.596e+1],
-au:[1.413e-6,3.348e-6,5.573e-6,8.024e-6,1.065e-5,1.342e-5,1.952e-5,2.635e-5,
-    4.486e-5,6.569e-5,1.109e-4,1.605e-4,2.137e-4,2.705e-4,3.942e-4,5.001e-4,
-    8.388e-4,1.209e-3,2.033e-3,2.928e-3,3.884e-3,4.866e-3,6.879e-3,8.936e-3,
-    1.436e-2,2.025e-2,3.320e-2,4.733e-2,6.237e-2,7.800e-2,1.107e-1,1.440e-1,
-    2.349e-1,3.421e-1,5.968e-1,8.933e-1,1.228e+0,2.388e+0,3.194e+0,8.184e+0,
-    2.504e+1,5.480e+1],
-pb_m:[1.337e-6,3.165e-6,5.268e-6,7.583e-6,1.007e-5,1.270e-5,1.849e-5,2.496e-5,
-      4.252e-5,6.228e-5,1.053e-4,1.524e-4,2.031e-4,2.575e-4,3.755e-4,4.769e-4,
-      8.013e-4,1.156e-3,1.948e-3,2.808e-3,3.730e-3,4.682e-3,6.634e-3,8.634e-3,
-      1.392e-2,1.966e-2,3.233e-2,4.614e-2,6.094e-2,7.643e-2,1.089e-1,1.421e-1,
-      2.327e-1,3.398e-1,5.948e-1,8.926e-1,1.229e+0,2.396e+0,3.208e+0,8.237e+0,
-      2.526e+1,5.531e+1],
-mo:[2.516e-6,5.955e-6,9.915e-6,1.429e-5,1.897e-5,2.392e-5,3.480e-5,4.696e-5,
-    7.981e-5,1.168e-4,1.973e-4,2.854e-4,3.798e-4,4.810e-4,7.010e-4,8.907e-4,
-    1.494e-3,2.150e-3,3.607e-3,5.184e-3,6.862e-3,8.593e-3,1.214e-2,1.574e-2,
-    2.527e-2,3.563e-2,5.822e-2,8.278e-2,1.089e-1,1.362e-1,1.938e-1,2.523e-1,
-    4.106e-1,5.977e-1,1.039e+0,1.553e+0,2.133e+0,4.130e+0,5.519e+0,1.407e+1,
-    4.272e+1,9.337e+1],
-diamond:[6.289e-6,1.495e-5,2.490e-5,3.585e-5,4.758e-5,5.991e-5,8.714e-5,1.175e-4,
-         1.997e-4,2.922e-4,4.929e-4,7.123e-4,9.467e-4,1.196e-3,1.737e-3,2.219e-3,
-         3.736e-3,5.368e-3,8.983e-3,1.288e-2,1.702e-2,2.124e-2,2.989e-2,3.867e-2,
-         6.167e-2,8.643e-2,1.400e-1,1.979e-1,2.588e-1,3.217e-1,4.524e-1,5.866e-1,
-         9.544e-1,1.385e+0,2.400e+0,3.586e+0,4.923e+0,9.476e+0,1.263e+1,3.213e+1,
-         9.725e+1,2.124e+2],
-sio2:[1.101e-5,2.614e-5,4.353e-5,6.266e-5,8.316e-5,1.049e-4,1.523e-4,2.053e-4,
-      3.491e-4,5.109e-4,8.600e-4,1.243e-3,1.651e-3,2.085e-3,3.023e-3,4.239e-3,
-      7.091e-3,1.018e-2,1.703e-2,2.443e-2,3.225e-2,4.025e-2,5.653e-2,7.307e-2,
-      1.161e-1,1.626e-1,2.635e-1,3.717e-1,4.854e-1,6.020e-1,8.417e-1,1.089e+0,
-      1.762e+0,2.551e+0,4.409e+0,6.576e+0,9.010e+0,1.728e+1,2.300e+1,5.833e+1,
-      1.762e+2,3.849e+2],
-gaas:[3.290e-6,7.793e-6,1.297e-5,1.868e-5,2.480e-5,3.126e-5,4.550e-5,6.139e-5,
-      1.044e-4,1.528e-4,2.582e-4,3.731e-4,4.963e-4,6.283e-4,9.155e-4,1.162e-3,
-      1.950e-3,2.808e-3,4.717e-3,6.790e-3,8.991e-3,1.124e-2,1.587e-2,2.057e-2,
-      3.292e-2,4.634e-2,7.567e-2,1.076e-1,1.413e-1,1.763e-1,2.503e-1,3.254e-1,
-      5.302e-1,7.703e-1,1.338e+0,2.001e+0,2.745e+0,5.299e+0,7.077e+0,1.804e+1,
-      5.480e+1,1.199e+2],
-kapton:[8.241e-6,1.958e-5,3.261e-5,4.696e-5,6.237e-5,7.864e-5,1.143e-4,1.543e-4,
-        2.628e-4,3.851e-4,6.499e-4,9.399e-4,1.250e-3,1.581e-3,2.296e-3,3.075e-3,
-        5.152e-3,7.400e-3,1.239e-2,1.778e-2,2.347e-2,2.930e-2,4.120e-2,5.330e-2,
-        8.486e-2,1.189e-1,1.929e-1,2.725e-1,3.565e-1,4.434e-1,6.225e-1,8.067e-1,
-        1.313e+0,1.904e+0,3.300e+0,4.934e+0,6.773e+0,1.305e+1,1.740e+1,4.425e+1,
-        1.341e+2,2.931e+2],
-gan:[5.697e-6,1.350e-5,2.248e-5,3.238e-5,4.298e-5,5.416e-5,7.882e-5,1.063e-4,
-     1.810e-4,2.650e-4,4.474e-4,6.468e-4,8.603e-4,1.088e-3,1.582e-3,2.023e-3,
-     3.395e-3,4.893e-3,8.222e-3,1.184e-2,1.567e-2,1.956e-2,2.755e-2,3.571e-2,
-     5.710e-2,8.037e-2,1.311e-1,1.862e-1,2.445e-1,3.050e-1,4.311e-1,5.608e-1,
-     9.138e-1,1.326e+0,2.299e+0,3.434e+0,4.714e+0,9.098e+0,1.214e+1,3.093e+1,
-     9.381e+1,2.051e+2],
-sic:[8.360e-6,1.986e-5,3.308e-5,4.763e-5,6.323e-5,7.975e-5,1.159e-4,1.563e-4,
-     2.660e-4,3.891e-4,6.564e-4,9.492e-4,1.262e-3,1.595e-3,2.316e-3,3.138e-3,
-     5.262e-3,7.556e-3,1.266e-2,1.816e-2,2.397e-2,2.994e-2,4.208e-2,5.442e-2,
-     8.674e-2,1.215e-1,1.969e-1,2.784e-1,3.644e-1,4.527e-1,6.348e-1,8.223e-1,
-     1.336e+0,1.935e+0,3.345e+0,4.987e+0,6.835e+0,1.313e+1,1.750e+1,4.444e+1,
-     1.344e+2,2.937e+2],
-aln:[9.735e-6,2.311e-5,3.849e-5,5.543e-5,7.355e-5,9.275e-5,1.349e-4,1.819e-4,
-     3.096e-4,4.534e-4,7.653e-4,1.107e-3,1.472e-3,1.860e-3,2.702e-3,3.646e-3,
-     6.110e-3,8.779e-3,1.470e-2,2.111e-2,2.787e-2,3.479e-2,4.888e-2,6.322e-2,
-     1.007e-1,1.413e-1,2.291e-1,3.240e-1,4.241e-1,5.275e-1,7.396e-1,9.576e-1,
-     1.556e+0,2.255e+0,3.900e+0,5.820e+0,7.981e+0,1.534e+1,2.043e+1,5.189e+1,
-     1.570e+2,3.430e+2],
+si:[1.050e-5,2.500e-5,4.157e-5,5.982e-5,7.935e-5,1.002e-4,1.457e-4,1.965e-4,3.340e-4,4.878e-4,8.217e-4,1.185e-3,1.572e-3,1.982e-3,2.867e-3,3.823e-3,6.382e-3,9.154e-3,1.531e-2,2.198e-2,2.899e-2,3.618e-2,5.081e-2,6.563e-2,1.043e-1,1.459e-1,2.363e-1,3.328e-1,4.338e-1,5.380e-1,7.521e-1,9.740e-1,1.576e+0,2.282e+0,3.940e+0,5.867e+0,8.034e+0,1.540e+1,2.049e+1,5.193e+1,1.568e+2,3.417e+2],
+al:[9.454e-6,2.236e-5,3.721e-5,5.355e-5,7.103e-5,8.944e-5,1.297e-4,1.749e-4,2.974e-4,4.352e-4,7.321e-4,1.058e-3,1.405e-3,1.774e-3,2.574e-3,3.457e-3,5.765e-3,8.267e-3,1.380e-2,1.976e-2,2.608e-2,3.254e-2,4.567e-2,5.897e-2,9.368e-2,1.313e-1,2.127e-1,3.000e-1,3.918e-1,4.861e-1,6.804e-1,8.797e-1,1.424e+0,2.062e+0,3.564e+0,5.313e+0,7.279e+0,1.396e+1,1.858e+1,4.711e+1,1.421e+2,3.097e+2],
+cu_m:[3.904e-6,9.235e-6,1.537e-5,2.212e-5,2.936e-5,3.698e-5,5.376e-5,7.246e-5,1.231e-4,1.800e-4,3.033e-4,4.383e-4,5.820e-4,7.352e-4,1.067e-3,1.324e-3,2.211e-3,3.166e-3,5.282e-3,7.564e-3,9.985e-3,1.246e-2,1.750e-2,2.265e-2,3.607e-2,5.059e-2,8.212e-2,1.161e-1,1.519e-1,1.888e-1,2.659e-1,3.440e-1,5.572e-1,8.073e-1,1.397e+0,2.083e+0,2.855e+0,5.487e+0,7.306e+0,1.857e+1,5.624e+1,1.228e+2],
+ge:[2.283e-6,5.402e-6,8.993e-6,1.295e-5,1.718e-5,2.164e-5,3.145e-5,4.241e-5,7.204e-5,1.054e-4,1.777e-4,2.568e-4,3.413e-4,4.314e-4,6.266e-4,7.939e-4,1.328e-3,1.906e-3,3.190e-3,4.576e-3,6.043e-3,7.545e-3,1.062e-2,1.373e-2,2.191e-2,3.071e-2,4.994e-2,7.071e-2,9.262e-2,1.153e-1,1.626e-1,2.104e-1,3.410e-1,4.946e-1,8.568e-1,1.278e+0,1.753e+0,3.379e+0,4.505e+0,1.147e+1,3.478e+1,7.596e+1],
+au:[1.413e-6,3.348e-6,5.573e-6,8.024e-6,1.065e-5,1.342e-5,1.952e-5,2.635e-5,4.486e-5,6.569e-5,1.109e-4,1.605e-4,2.137e-4,2.705e-4,3.942e-4,5.001e-4,8.388e-4,1.209e-3,2.033e-3,2.928e-3,3.884e-3,4.866e-3,6.879e-3,8.936e-3,1.436e-2,2.025e-2,3.320e-2,4.733e-2,6.237e-2,7.800e-2,1.107e-1,1.440e-1,2.349e-1,3.421e-1,5.968e-1,8.933e-1,1.228e+0,2.388e+0,3.194e+0,8.184e+0,2.504e+1,5.480e+1],
+pb_m:[1.337e-6,3.165e-6,5.268e-6,7.583e-6,1.007e-5,1.270e-5,1.849e-5,2.496e-5,4.252e-5,6.228e-5,1.053e-4,1.524e-4,2.031e-4,2.575e-4,3.755e-4,4.769e-4,8.013e-4,1.156e-3,1.948e-3,2.808e-3,3.730e-3,4.682e-3,6.634e-3,8.634e-3,1.392e-2,1.966e-2,3.233e-2,4.614e-2,6.094e-2,7.643e-2,1.089e-1,1.421e-1,2.327e-1,3.398e-1,5.948e-1,8.926e-1,1.229e+0,2.396e+0,3.208e+0,8.237e+0,2.526e+1,5.531e+1],
+mo:[2.516e-6,5.955e-6,9.915e-6,1.429e-5,1.897e-5,2.392e-5,3.480e-5,4.696e-5,7.981e-5,1.168e-4,1.973e-4,2.854e-4,3.798e-4,4.810e-4,7.010e-4,8.907e-4,1.494e-3,2.150e-3,3.607e-3,5.184e-3,6.862e-3,8.593e-3,1.214e-2,1.574e-2,2.527e-2,3.563e-2,5.822e-2,8.278e-2,1.089e-1,1.362e-1,1.938e-1,2.523e-1,4.106e-1,5.977e-1,1.039e+0,1.553e+0,2.133e+0,4.130e+0,5.519e+0,1.407e+1,4.272e+1,9.337e+1],
+diamond:[6.289e-6,1.495e-5,2.490e-5,3.585e-5,4.758e-5,5.991e-5,8.714e-5,1.175e-4,1.997e-4,2.922e-4,4.929e-4,7.123e-4,9.467e-4,1.196e-3,1.737e-3,2.219e-3,3.736e-3,5.368e-3,8.983e-3,1.288e-2,1.702e-2,2.124e-2,2.989e-2,3.867e-2,6.167e-2,8.643e-2,1.400e-1,1.979e-1,2.588e-1,3.217e-1,4.524e-1,5.866e-1,9.544e-1,1.385e+0,2.400e+0,3.586e+0,4.923e+0,9.476e+0,1.263e+1,3.213e+1,9.725e+1,2.124e+2],
+sio2:[1.101e-5,2.614e-5,4.353e-5,6.266e-5,8.316e-5,1.049e-4,1.523e-4,2.053e-4,3.491e-4,5.109e-4,8.600e-4,1.243e-3,1.651e-3,2.085e-3,3.023e-3,4.239e-3,7.091e-3,1.018e-2,1.703e-2,2.443e-2,3.225e-2,4.025e-2,5.653e-2,7.307e-2,1.161e-1,1.626e-1,2.635e-1,3.717e-1,4.854e-1,6.020e-1,8.417e-1,1.089e+0,1.762e+0,2.551e+0,4.409e+0,6.576e+0,9.010e+0,1.728e+1,2.300e+1,5.833e+1,1.762e+2,3.849e+2],
+gaas:[3.290e-6,7.793e-6,1.297e-5,1.868e-5,2.480e-5,3.126e-5,4.550e-5,6.139e-5,1.044e-4,1.528e-4,2.582e-4,3.731e-4,4.963e-4,6.283e-4,9.155e-4,1.162e-3,1.950e-3,2.808e-3,4.717e-3,6.790e-3,8.991e-3,1.124e-2,1.587e-2,2.057e-2,3.292e-2,4.634e-2,7.567e-2,1.076e-1,1.413e-1,1.763e-1,2.503e-1,3.254e-1,5.302e-1,7.703e-1,1.338e+0,2.001e+0,2.745e+0,5.299e+0,7.077e+0,1.804e+1,5.480e+1,1.199e+2],
+kapton:[8.241e-6,1.958e-5,3.261e-5,4.696e-5,6.237e-5,7.864e-5,1.143e-4,1.543e-4,2.628e-4,3.851e-4,6.499e-4,9.399e-4,1.250e-3,1.581e-3,2.296e-3,3.075e-3,5.152e-3,7.400e-3,1.239e-2,1.778e-2,2.347e-2,2.930e-2,4.120e-2,5.330e-2,8.486e-2,1.189e-1,1.929e-1,2.725e-1,3.565e-1,4.434e-1,6.225e-1,8.067e-1,1.313e+0,1.904e+0,3.300e+0,4.934e+0,6.773e+0,1.305e+1,1.740e+1,4.425e+1,1.341e+2,2.931e+2],
+gan:[5.697e-6,1.350e-5,2.248e-5,3.238e-5,4.298e-5,5.416e-5,7.882e-5,1.063e-4,1.810e-4,2.650e-4,4.474e-4,6.468e-4,8.603e-4,1.088e-3,1.582e-3,2.023e-3,3.395e-3,4.893e-3,8.222e-3,1.184e-2,1.567e-2,1.956e-2,2.755e-2,3.571e-2,5.710e-2,8.037e-2,1.311e-1,1.862e-1,2.445e-1,3.050e-1,4.311e-1,5.608e-1,9.138e-1,1.326e+0,2.299e+0,3.434e+0,4.714e+0,9.098e+0,1.214e+1,3.093e+1,9.381e+1,2.051e+2],
+sic:[8.360e-6,1.986e-5,3.308e-5,4.763e-5,6.323e-5,7.975e-5,1.159e-4,1.563e-4,2.660e-4,3.891e-4,6.564e-4,9.492e-4,1.262e-3,1.595e-3,2.316e-3,3.138e-3,5.262e-3,7.556e-3,1.266e-2,1.816e-2,2.397e-2,2.994e-2,4.208e-2,5.442e-2,8.674e-2,1.215e-1,1.969e-1,2.784e-1,3.644e-1,4.527e-1,6.348e-1,8.223e-1,1.336e+0,1.935e+0,3.345e+0,4.987e+0,6.835e+0,1.313e+1,1.750e+1,4.444e+1,1.344e+2,2.937e+2],
+aln:[9.735e-6,2.311e-5,3.849e-5,5.543e-5,7.355e-5,9.275e-5,1.349e-4,1.819e-4,3.096e-4,4.534e-4,7.653e-4,1.107e-3,1.472e-3,1.860e-3,2.702e-3,3.646e-3,6.110e-3,8.779e-3,1.470e-2,2.111e-2,2.787e-2,3.479e-2,4.888e-2,6.322e-2,1.007e-1,1.413e-1,2.291e-1,3.240e-1,4.241e-1,5.275e-1,7.396e-1,9.576e-1,1.556e+0,2.255e+0,3.900e+0,5.820e+0,7.981e+0,1.534e+1,2.043e+1,5.189e+1,1.570e+2,3.430e+2],
 };
 
-// CoverGlass ≈ SiO2 (동일 테이블 참조)
-_PSTAR_SE.glass     = _PSTAR_SE.sio2;
-_PSTAR_R .glass     = _PSTAR_R .sio2;
-// ge_sub = ge와 동일
-_PSTAR_SE.ge_sub    = _PSTAR_SE.ge;
-_PSTAR_R .ge_sub    = _PSTAR_R .ge;
-// gainp ≈ GaAs (Z_eff, A 유사 — ±10% 수준)
-_PSTAR_SE.gainp     = _PSTAR_SE.gaas;
-_PSTAR_R .gainp     = _PSTAR_R .gaas;
+_PSTAR_SE.glass  = _PSTAR_SE.sio2;  _PSTAR_R.glass  = _PSTAR_R.sio2;
+_PSTAR_SE.ge_sub = _PSTAR_SE.ge;    _PSTAR_R.ge_sub = _PSTAR_R.ge;
+_PSTAR_SE.gainp  = _PSTAR_SE.gaas;  _PSTAR_R.gainp  = _PSTAR_R.gaas;
 
-// ── 정확도 등급 맵 (UI 경고 표시용) ────────────────────────────────
-// 'A'=<1%, 'B'=<15%, 'C'=참고값
 const _ACCURACY = {
   si:'A', al:'A', cu_m:'A', ge:'A', ge_sub:'A', au:'A', pb_m:'A', mo:'A',
   diamond:'A', sio2:'A', gaas:'A', kapton:'A', gan:'A', sic:'A', aln:'A',
-  glass:'A',   // SiO2 그대로
-  gainp:'B',   // GaAs 근사
+  glass:'A', gainp:'B',
   inp:'C', hfo2:'C', perovskite:'C', cigs:'C', ito:'C', pedot:'C',
 };
 function getAccuracyGrade(matKey){ return _ACCURACY[matKey] || 'C'; }
 
-// ── 테이블 log-log 보간 헬퍼 ─────────────────────────────────────────
-// 입력: 배열(42값, _EG와 1:1 대응), 에너지 E [MeV]
 function _interpSe(arr, E){
-  if(E <= _EG[0])          return arr[0] * Math.sqrt(E / _EG[0]);
-  if(E >= _EG[41])         return arr[41] * Math.pow(_EG[41] / E, 0.8);
+  if(E <= _EG[0])  return arr[0] * Math.sqrt(E / _EG[0]);
+  if(E >= _EG[41]) return arr[41] * Math.pow(_EG[41] / E, 0.8);
   let lo = 0;
   for(let i = 1; i < 42; i++){ if(_EG[i] > E) break; lo = i; }
   const hi = lo + 1;
@@ -769,31 +491,21 @@ function _interpR(arr, E){
   return Math.exp(Math.log(arr[lo]) + t * Math.log(arr[hi] / arr[lo]));
 }
 
-// ── I-scaling fallback (테이블 없는 물질용) ──────────────────────────
-// 올바른 Bethe I-의존성: Se ∝ ln(X/I_mat) / ln(X/I_Si)
-// X = 2mₑv² = 에너지 의존적이나, Si 테이블로 보정하므로 고정 근사 사용
-// 방향: I_mat > I_Si → ln(X/I_mat) < ln(X/I_Si) → scale < 1 (Se 감소) ← 올바름
 function _SeScaleFallback(Z2, A2, I_eV){
   const ZA_Si = 14/28.09, I_Si = 173, X = 2160;
-  const ZA    = Z2 / A2;
-  const corr  = Math.log(X / I_eV) / Math.log(X / I_Si); // 방향 수정됨
+  const ZA = Z2 / A2;
+  const corr = Math.log(X / I_eV) / Math.log(X / I_Si);
   return (ZA / ZA_Si) * Math.max(corr, 0.05);
 }
 
-// ── 전자 저지능 Se — 공개 API ────────────────────────────────────────
-// matKey: TARGETS 키 (Se 테이블 조회에 사용)
-// Z1,A1: 이온, Z2,A2,I_eV: 물질 파라미터 (fallback용)
 function Se(E, Z1, A1, Z2, A2, I_eV, rho, matKey){
-  // 1) 물질 테이블 조회
   const seTbl = matKey && _PSTAR_SE[matKey];
   let Se_p;
   if(seTbl){
     Se_p = _interpSe(seTbl, Z1 === 1 ? E : E / A1);
   } else {
-    // fallback: Si 테이블 + I-scaling
     Se_p = _interpSe(_PSTAR_SE.si, Z1 === 1 ? E : E / A1) * _SeScaleFallback(Z2, A2, I_eV);
   }
-  // 2) 중이온 Bethe z²-scaling
   if(Z1 > 1){
     const b  = beta(E, A1);
     const ze = Z1 * (1 - Math.exp(-125 * b / Math.pow(Z1, 2/3)));
@@ -802,25 +514,21 @@ function Se(E, Z1, A1, Z2, A2, I_eV, rho, matKey){
   return Math.max(0.001, Se_p);
 }
 
-// ── CSDA Range — 공개 API ────────────────────────────────────────────
 function Range(E0, Z1, A1, Z2, A2, I_eV, rho, matKey){
   const rTbl = matKey && _PSTAR_R[matKey];
   let R_gcm2;
-  const E_eff = (Z1 === 1) ? E0 : E0 / A1;   // MeV (proton equivalent)
+  const E_eff = (Z1 === 1) ? E0 : E0 / A1;
   if(rTbl){
     R_gcm2 = _interpR(rTbl, E_eff) * (Z1 === 1 ? 1 : A1);
   } else {
-    // fallback: Si 테이블 + Bragg-Kleeman 물질 보정
     const BK = Math.pow(A2 / 28.09, 0.1687);
     R_gcm2   = _interpR(_PSTAR_R.si, E_eff) * (Z1 === 1 ? 1 : A1) * BK;
   }
-  return R_gcm2 / rho * 1e4;  // g/cm² → μm
+  return R_gcm2 / rho * 1e4;
 }
 
-// ── 핵 저지능 Sn — ZBL universal ────────────────────────────────────
 function snr(e){
-  if(e <= 30) return Math.log(1 + 1.1383*e) /
-    (2*(e + 0.01321*Math.pow(e,0.21226) + 0.19593*Math.sqrt(e)));
+  if(e <= 30) return Math.log(1 + 1.1383*e) / (2*(e + 0.01321*Math.pow(e,0.21226) + 0.19593*Math.sqrt(e)));
   return Math.log(e) / (2*e);
 }
 function Sn(E, Z1, A1, Z2, A2, rho){
@@ -829,64 +537,32 @@ function Sn(E, Z1, A1, Z2, A2, rho){
   return Math.max(0, sn0 * snr(e) * 6.022e1 / A2);
 }
 
-// ════════════════════════════════════════════════════════════════════
-// SECTION 3. 다중 층 Bragg Peak 시뮬레이션 엔진 (CSDA)
-// ════════════════════════════════════════════════════════════════════
-//
-// 알고리즘 (CSDA — Continuous Slowing-Down Approximation):
-//   1. 입자가 층 1부터 순차적으로 진입
-//   2. 각 층 내부를 dx 슬라이스로 나누어 적분:
-//        E(x+dx) = E(x) - (Se+Sn)(E) · ρ · dx
-//   3. dx 적응형 제어:
-//        |ΔE/E| > 5% → dx ← dx/2 (Bragg peak 근처 정확도 확보)
-//        |ΔE/E| < 1% → dx ← dx×1.5 (효율)
-//   4. 정지 조건: E < E_min (= 입사 에너지의 0.1% 또는 0.001 MeV)
-//   5. 무한 루프 방지: 반복 횟수 상한 (MAX_STEPS=2e5)
-//
-// 출력:
-//   profile[]: {x_um, E_MeV, dEdx_MeV_per_um, layer_idx}
-//   stopped: bool, range_um, exit_E_MeV, layer_results[]
-// ════════════════════════════════════════════════════════════════════
-
-// ────────────────────────────────────────────────────────────────────
-// [v2.1 RESOLUTION UPGRADE 2026-05]
-// dx 제어 매개변수 — Bragg peak 해상도 향상
-//
-// 변경점:
-//   DX_INIT_UM        0.05 → 0.02   (초기 3× 세밀)
-//   FRAC_HIGH         0.05 → 0.02   (강제 분할 임계 강화)
-//   FRAC_LOW          0.01 → 0.003  (dx 증가 빈도 낮춤)
-//   GROW_RATE         1.5  → 1.3    (부드러운 증가)
-//   신규 LOWE_DX_CAP    : E < ENDREGION_FACTOR·E_floor 영역에서 dx 상한
-//   신규 SUBSTEP_COUNT  : 정지 직전 마지막 step을 N등분해 profile에 추가
-// ────────────────────────────────────────────────────────────────────
-const E_MIN_FRACTION = 0.001;     // E0의 0.1% 이하면 정지로 간주
-const E_MIN_ABS = 0.001;          // MeV 절대 하한
-const DX_INIT_UM = 0.02;          // 초기 step 크기 (이전 0.05)
-const DX_MIN_UM = 1e-4;           // 최소 step (0.1 nm)
-const DX_MAX_FACTOR = 0.05;       // 한 step에서 층 두께의 5% 이내
-const MAX_STEPS = 5e5;            // 무한 루프 방지 (해상도 향상으로 ↑)
-// 적응형 분할 임계
-const FRAC_HIGH = 0.02;           // ΔE/E > 2% → dx 절반
-const FRAC_LOW  = 0.003;          // ΔE/E < 0.3% → dx 증가
-const GROW_RATE = 1.3;            // dx 증가 비율
-// 정지 직전 영역 dx 강제 캡
-const ENDREGION_FACTOR = 100;     // E < 100·E_floor 일 때 진입 ("Bragg peak 영역")
-const LOWE_DX_CAP_UM = 0.005;     // 그 영역에서 dx ≤ 5 nm
-// 정지 직전 마지막 dxStep을 sub-step 분할
-const SUBSTEP_COUNT = 8;          // 마지막 정지 step을 8등분
+// ═══════════════════════════════════════════════════════════
+// SECTION 3. Bragg 시뮬레이션 엔진
+// ═══════════════════════════════════════════════════════════
+const E_MIN_FRACTION = 0.001;
+const E_MIN_ABS = 0.001;
+const DX_INIT_UM = 0.02;
+const DX_MIN_UM = 1e-4;
+const DX_MAX_FACTOR = 0.05;
+const MAX_STEPS = 5e5;
+const FRAC_HIGH = 0.02;
+const FRAC_LOW  = 0.003;
+const GROW_RATE = 1.3;
+const ENDREGION_FACTOR = 100;
+const LOWE_DX_CAP_UM = 0.005;
+const SUBSTEP_COUNT = 8;
 
 function simulateBragg(ion, E0_MeV, layers){
   const profile = [];
   const layerResults = [];
   let E = E0_MeV;
-  let xCum = 0;                   // 누적 깊이 (μm)
+  let xCum = 0;
   let stopped = false;
   let stopLayer = -1;
   const E_floor = Math.max(E0_MeV * E_MIN_FRACTION, E_MIN_ABS);
   let totalSteps = 0;
 
-  // 시작점 기록
   profile.push({ x: 0, E: E0_MeV, dEdx: 0, layer: 0 });
 
   for(let li = 0; li < layers.length; li++){
@@ -904,87 +580,48 @@ function simulateBragg(ion, E0_MeV, layers){
     let stepsInLayer = 0;
     let layerStopped = false;
 
-    // ── 층 내부 CSDA 적분 ──
     while(xInLayer < t_um && !stopped){
       totalSteps++;
-      if(totalSteps > MAX_STEPS){
-        console.warn('Bragg sim: MAX_STEPS reached');
-        break;
-      }
+      if(totalSteps > MAX_STEPS){ console.warn('Bragg sim: MAX_STEPS reached'); break; }
 
-      // 현재 위치의 mass stopping power [MeV·cm²/g]
       const sMass = Se(E, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
                   + Sn(E, ion.Z, ion.A, tar.Z, tar.A, rho);
-      // [v2.0 단위 변경] 선형 저지능 [MeV/μm] = sMass × ρ × 1e-4
-      //   분석: MeV·cm²/g × g/cm³ × cm/μm = MeV/cm × cm/μm = MeV/μm
       const dEdx_lin = sMass * rho * 1e-4;
 
-      // [v2.1] 정지 직전 영역 — dx 강제 cap (Bragg peak 정밀 샘플링)
-      //   E가 E_floor의 ENDREGION_FACTOR배 이하로 떨어지면
-      //   peak 영역으로 간주, dx ≤ LOWE_DX_CAP_UM (5 nm) 강제.
       const inEndRegion = (E < ENDREGION_FACTOR * E_floor);
-      const dxHardCap = inEndRegion
-        ? Math.min(LOWE_DX_CAP_UM, t_um * DX_MAX_FACTOR)
-        : (t_um * DX_MAX_FACTOR);
+      const dxHardCap = inEndRegion ? Math.min(LOWE_DX_CAP_UM, t_um * DX_MAX_FACTOR) : (t_um * DX_MAX_FACTOR);
       if(dx > dxHardCap) dx = dxHardCap;
 
-      // dx 조정 — 한 step의 ΔE/E
       const dE_test = dEdx_lin * dx;
       const fracLoss = dE_test / E;
-      if(fracLoss > FRAC_HIGH && dx > DX_MIN_UM * 2){
-        dx = Math.max(DX_MIN_UM, dx / 2);
-        continue;  // 같은 위치에서 더 작은 step으로 재시도
-      }
-      if(fracLoss < FRAC_LOW && dx < dxHardCap){
-        dx = Math.min(dx * GROW_RATE, dxHardCap);
-      }
+      if(fracLoss > FRAC_HIGH && dx > DX_MIN_UM * 2){ dx = Math.max(DX_MIN_UM, dx / 2); continue; }
+      if(fracLoss < FRAC_LOW && dx < dxHardCap){ dx = Math.min(dx * GROW_RATE, dxHardCap); }
 
-      // 마지막 step은 층 경계에 정확히 도달
       const dxStep = Math.min(dx, t_um - xInLayer);
-
-      // 에너지 갱신
       const dE = dEdx_lin * dxStep;
       const newE = E - dE;
 
       xCum += dxStep;
       xInLayer += dxStep;
 
-      // 정지 조건
       if(newE <= E_floor){
-        // [v2.1] 정지 직전 sub-step 분할 — peak 정점 정밀 샘플링
-        //   마지막 dxStep 구간에서 에너지가 E → ~0으로 급감.
-        //   이 구간을 SUBSTEP_COUNT 등분해 각 분할점의 (x, E, dE/dx)를
-        //   profile에 추가한다. 이게 Bragg peak를 "뾰족하게" 보이게 만드는 핵심.
-        //
-        //   에너지 보존을 위해, 분할 적분도 CSDA 미니 적분으로 수행:
-        //     E_sub(0) = E (이전 step 시작 에너지)
-        //     E_sub(k+1) = E_sub(k) - S(E_sub(k))·ρ·dx_sub
-        //   목표: E_sub가 E_floor에 가장 가까이 도달하는 위치에서 정지.
         const x_substep_start = xCum - dxStep;
         const dx_sub = dxStep / SUBSTEP_COUNT;
         let E_sub = E;
         let x_sub = x_substep_start;
         let lastDEdx = dEdx_lin;
-        let xStop = xCum;  // 기본값: 마지막 위치
+        let xStop = xCum;
 
         for(let k = 0; k < SUBSTEP_COUNT; k++){
-          if(E_sub <= E_floor){
-            xStop = x_sub;
-            break;
-          }
+          if(E_sub <= E_floor){ xStop = x_sub; break; }
           const sMass_sub = Se(E_sub, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
                           + Sn(E_sub, ion.Z, ion.A, tar.Z, tar.A, rho);
           const dEdx_sub = sMass_sub * rho * 1e-4;
           lastDEdx = dEdx_sub;
-          // 이번 sub-step의 시작 에너지/위치를 profile에 추가
-          //   (k==0이면 이전 main step에서 이미 push되었을 수도 있으나
-          //    Bragg peak 영역에서는 중복 점이 부드러운 곡선에 도움됨)
           profile.push({ x: x_sub, E: E_sub, dEdx: dEdx_sub, layer: li });
-          // sub-step 진행
           const dE_sub_test = dEdx_sub * dx_sub;
           if(E_sub - dE_sub_test <= E_floor){
-            // 이 sub-step 내에서 정지 — 선형 보간으로 정확한 정지점
-            const frac = E_sub / dEdx_sub;  // E를 모두 잃기까지 이동 거리
+            const frac = E_sub / dEdx_sub;
             xStop = x_sub + Math.min(dx_sub, frac);
             E_sub = 0;
             break;
@@ -992,13 +629,8 @@ function simulateBragg(ion, E0_MeV, layers){
           E_sub -= dE_sub_test;
           x_sub += dx_sub;
         }
-        // 정지점 자체 (dE/dx는 마지막 sub-step 값, E=0)
         profile.push({ x: xStop, E: 0, dEdx: lastDEdx, layer: li });
-        stopped = true;
-        layerStopped = true;
-        stopLayer = li;
-        E = 0;
-        xCum = xStop;
+        stopped = true; layerStopped = true; stopLayer = li; E = 0; xCum = xStop;
         break;
       }
 
@@ -1007,51 +639,30 @@ function simulateBragg(ion, E0_MeV, layers){
       stepsInLayer++;
     }
 
-    // 층 결과 기록
     layerResults.push({
-      idx: li,
-      name: L.name || tar.name,
-      material: L.material,
-      thickness_um: t_um,
-      entryE_MeV: entryE,
+      idx: li, name: L.name || tar.name, material: L.material,
+      thickness_um: t_um, entryE_MeV: entryE,
       exitE_MeV: layerStopped ? 0 : E,
       dE_MeV: layerStopped ? entryE : (entryE - E),
-      stopped: layerStopped,
-      steps: stepsInLayer,
-      dose_MeV_per_g: 0  // 아래에서 계산
+      stopped: layerStopped, steps: stepsInLayer, dose_MeV_per_g: 0
     });
-
     if(stopped) break;
   }
 
-  // 각 층 흡수 선량 계산 (MeV/g per particle)
-  // 단위: ΔE [MeV] / (ρ [g/cm³] × t [μm] × 10⁻⁴ cm/μm) = MeV / (g/cm² × cm) ... 단순화 위해 per cm² per particle
   for(const lr of layerResults){
     const tar = TARGETS[layers[lr.idx].material];
     const rho = parseFloat(layers[lr.idx].density) || tar.rho;
     const t_cm = lr.thickness_um * 1e-4;
-    // 흡수 에너지 / 단위 질량 = ΔE / (ρ·t) [MeV / (g/cm²)] per particle per cm²
     lr.dose_MeV_per_g = lr.dE_MeV / (rho * t_cm);
   }
 
-  // 총 두께 (정지 안 했을 때 출구 위치)
   const totalThickness = layers.reduce((s, l) => s + (parseFloat(l.thickness) || 0), 0);
-
-  return {
-    profile,
-    layerResults,
-    stopped,
-    stopLayer,
-    range_um: stopped ? xCum : totalThickness,
-    exitE_MeV: stopped ? 0 : E,
-    E0_MeV,
-    totalThickness_um: totalThickness
-  };
+  return { profile, layerResults, stopped, stopLayer, range_um: stopped ? xCum : totalThickness, exitE_MeV: stopped ? 0 : E, E0_MeV, totalThickness_um: totalThickness };
 }
 
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // SECTION 4. 유틸리티
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 function toMeV(v, u){ return u === 'keV' ? v / 1e3 : u === 'GeV' ? v * 1e3 : v; }
 function fmt(v, d=3){
   if(!isFinite(v) || v === 0) return '0';
@@ -1065,23 +676,20 @@ function supE(e){
   return String(e).split('').map(c => s[c] || c).join('');
 }
 
-// ════════════════════════════════════════════════════════════════════
-// SECTION 5. UI 초기화 — 드롭다운 채우기
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// SECTION 5. UI 초기화
+// ═══════════════════════════════════════════════════════════
 function fillSelects(){
   const fillIon = (id) => {
     const el = document.getElementById(id);
     el.innerHTML = '';
     Object.entries(IONS).forEach(([k, v]) => {
       const o = document.createElement('option');
-      o.value = k; o.textContent = v.name;
-      el.appendChild(o);
+      o.value = k; o.textContent = v.name; el.appendChild(o);
     });
   };
-  fillIon('ion');
-  fillIon('dpIon');
+  fillIon('ion'); fillIon('dpIon');
   document.getElementById('dpIon').value = 'p';
-
   const tarEl = document.getElementById('target');
   tarEl.innerHTML = '';
   Object.entries(TARGETS).forEach(([k, v]) => {
@@ -1091,9 +699,10 @@ function fillSelects(){
   });
 }
 
-// ════════════════════════════════════════════════════════════════════
-// SECTION 6. 모드 1 — Material Property (기존 로직 유지·정비)
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// SECTION 6. 모드 1 — Material Property
+// ★ update()가 async로 변경됨: Workers API 우선 조회
+// ═══════════════════════════════════════════════════════════
 let stopChart = null;
 
 function syncSlider(){
@@ -1116,7 +725,7 @@ function setE(v, u){
   syncSlider();
 }
 
-function update(){
+async function update(){
   const ionKey = document.getElementById('ion').value;
   const tarKey = document.getElementById('target').value;
   const ion = IONS[ionKey], tar = TARGETS[tarKey] || TARGETS.si;
@@ -1124,43 +733,50 @@ function update(){
   const u = document.getElementById('eUnit').value;
   const E = toMeV(v, u);
 
-  const se = Se(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey);
-  const sn = Sn(E, ion.Z, ion.A, tar.Z, tar.A, tar.rho);
-  const tot = se + sn;
-  const rng = Range(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey);
+  // ── 기본값: 내부 PSTAR 테이블 ──
+  let se  = Se(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey);
+  let rng = Range(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey);
+  let dataSource = '내부 PSTAR 테이블';
 
-  document.getElementById('rSe').textContent  = fmt(se) + ' MeV·cm²/g';
-  document.getElementById('rSn').textContent  = fmt(sn) + ' MeV·cm²/g';
+  // ── Workers KV 우선 조회 (Proton/Alpha + 매핑된 물질만) ──
+  if (ion.Z <= 2 && window.WORKER_API_URL && window.MATERIAL_NAME_MAP) {
+    const matName = window.MATERIAL_NAME_MAP[tarKey];
+    if (matName) {
+      const [seResult, rngResult] = await Promise.all([
+        fetchWorkerSe(matName, E, ion.Z),
+        fetchWorkerRange(matName, E, ion.Z),
+      ]);
+      if (seResult) { se = seResult.Se; dataSource = 'NIST KV (A급, <1%)'; }
+      if (rngResult) { rng = rngResult.R_um; }
+    }
+  }
+
+  const sn  = Sn(E, ion.Z, ion.A, tar.Z, tar.A, tar.rho);
+  const tot = se + sn;
+
+  document.getElementById('rSe').textContent  = fmt(se)  + ' MeV·cm²/g';
+  document.getElementById('rSn').textContent  = fmt(sn)  + ' MeV·cm²/g';
   document.getElementById('rTot').textContent = fmt(tot) + ' MeV·cm²/g';
   document.getElementById('rRng').textContent = fmt(rng) + ' μm';
   document.getElementById('mLET').textContent = fmt(tot);
   document.getElementById('mBeta').textContent = beta(E, ion.A).toFixed(3);
 
-  // Bragg peak 추정 (Material Property 모드)
   const bragg = findBraggPeak(ion, tar, tarKey);
   document.getElementById('mBragg').textContent = fmt(bragg);
 
-  // 유효 범위 검증
   const b = beta(E, ion.A);
-  let validity, vClass;
-  if(b < 0.01){ validity = '⚠ 너무 저속 (LSS 영역)'; vClass = 'v-warn'; }
-  else if(b > 0.99){ validity = '⚠ 초상대론적'; vClass = 'v-warn'; }
-  else if(E < 0.01){ validity = '⚠ <10 keV — Sₙ 지배'; vClass = 'v-warn'; }
-  else { validity = '✓ Bethe-Bloch 유효'; vClass = 'v-ok'; }
+  let validity;
+  if(b < 0.01)     validity = '⚠ 너무 저속 (LSS 영역)';
+  else if(b > 0.99) validity = '⚠ 초상대론적';
+  else if(E < 0.01) validity = '⚠ <10 keV — Sₙ 지배';
+  else              validity = `✓ ${dataSource}`;
   const mv = document.getElementById('mValid');
   mv.textContent = validity;
   mv.className = 'mcv';
 
-  // TNID 계산
   const dur = parseFloat(document.getElementById('dur').value) || 1;
   const logFlux = parseFloat(document.getElementById('logFlux').value) || 10;
   const flux = Math.pow(10, logFlux);
-  // [P0-PATCH 2026-05] NIEL=Sn 표기 정정. Sn은 저에너지(<10MeV) 근사일 뿐,
-  //   정확한 NIEL은 Lindhard partition function L(T) 포함 적분 필요.
-  //   참조: Jun 2003 IEEE TNS 50(6):1924, Akkerman 2001 J Phys D 34.
-  // [v2.0 단위 변경] sn 이제 MeV·cm²/g 단위 (PSTAR 표준)
-  // TNID = NIEL × fluence × duration
-  //      = MeV·cm²/g × p/cm²/yr × yr = MeV/g (총 누적)
   const tnid = sn * flux * dur;
   document.getElementById('rTnid').textContent = fmt(tnid) + ' MeV/g';
 
@@ -1169,7 +785,7 @@ function update(){
   document.getElementById('nielInterp').innerHTML =
     `<b>${tar.name}</b> 소재, <b>${ion.name}</b> @ ${v} ${u}<br>` +
     `<b>Sₙ ≈ NIEL (저에너지 근사)</b> = <b>${fmt(sn)} MeV·cm²/g</b>  (Si 대비 <b>${(tar.nr || 1).toFixed(2)}배</b>)<br>` +
-    `<span style="font-size:11px;color:var(--muted)">⚠ 정확한 NIEL = ∫(dσ/dT)·L(T)·T dT (Lindhard partition). Sₙ만으로의 근사는 양성자 ≲10 MeV에서만 유효.<br>` +
+    `<span style="font-size:11px;color:var(--muted)">데이터 소스: <b>${dataSource}</b><br>` +
     `고에너지 양성자 NIEL은 Jun (2003) IEEE TNS 50(6):1924 또는 SR-NIEL DB 참조 권장.</span><br>` +
     `임무 ${dur}yr × 10^${logFlux} p⁺/cm²/yr → <b>TNID = ${fmt(tnid)} MeV/g</b>${warn}`;
 
@@ -1194,493 +810,257 @@ function drawStopChart(ion, tar, currentE, tarKey){
     seArr.push(Se(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey));
     snArr.push(Sn(E, ion.Z, ion.A, tar.Z, tar.A, tar.rho));
   }
-
   const ctx = document.getElementById('stopChart').getContext('2d');
   if(stopChart) stopChart.destroy();
   stopChart = new Chart(ctx, {
     type: 'line',
-    data: {
-      datasets: [
-        { label:'Sₑ', data:Es.map((e,i)=>({x:e,y:seArr[i]})),
-          borderColor:'#1a52c8', backgroundColor:'rgba(26,82,200,.08)',
-          borderWidth:2, pointRadius:0, fill:true, tension:0.25 },
-        { label:'Sₙ', data:Es.map((e,i)=>({x:e,y:snArr[i]})),
-          borderColor:'#0d8a5e', backgroundColor:'rgba(13,138,94,.08)',
-          borderWidth:2, pointRadius:0, fill:true, tension:0.25 }
-      ]
-    },
+    data: { datasets: [
+      { label:'Sₑ', data:Es.map((e,i)=>({x:e,y:seArr[i]})), borderColor:'#1a52c8', backgroundColor:'rgba(26,82,200,.08)', borderWidth:2, pointRadius:0, fill:true, tension:0.25 },
+      { label:'Sₙ', data:Es.map((e,i)=>({x:e,y:snArr[i]})), borderColor:'#0d8a5e', backgroundColor:'rgba(13,138,94,.08)', borderWidth:2, pointRadius:0, fill:true, tension:0.25 }
+    ]},
     options: {
       responsive:true, maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{ callbacks:{
-          title: c => 'E = ' + c[0].parsed.x.toPrecision(3) + ' MeV',
-          label: c => c.dataset.label + ' = ' + c.parsed.y.toExponential(2) + ' MeV·cm²/g'
-        }},
-        annotation: { annotations: {
-          currentE: {
-            type:'line', xMin:currentE, xMax:currentE,
-            borderColor:'#b86e00', borderWidth:1.5, borderDash:[5,4],
-            label:{ display:false }
-          }
-        }}
+      plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{ title: c => 'E = ' + c[0].parsed.x.toPrecision(3) + ' MeV', label: c => c.dataset.label + ' = ' + c.parsed.y.toExponential(2) + ' MeV·cm²/g' }},
+        annotation: { annotations: { currentE: { type:'line', xMin:currentE, xMax:currentE, borderColor:'#b86e00', borderWidth:1.5, borderDash:[5,4], label:{display:false} }}}
       },
       scales:{
-        x:{ type:'logarithmic', title:{display:true,text:'에너지 (MeV) — '+ion.name,color:'#3a5070',font:{size:12}},
-            grid:{color:'rgba(0,0,0,.07)'}, ticks:{color:'#3a5070',font:{size:11}} },
-        y:{ type:'logarithmic', title:{display:true,text:'Sₑ, Sₙ (MeV·cm²/g)',color:'#3a5070',font:{size:12}},
-            grid:{color:'rgba(0,0,0,.07)'}, ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toPrecision(2)} }
+        x:{ type:'logarithmic', title:{display:true,text:'에너지 (MeV) — '+ion.name,color:'#3a5070',font:{size:12}}, grid:{color:'rgba(0,0,0,.07)'}, ticks:{color:'#3a5070',font:{size:11}} },
+        y:{ type:'logarithmic', title:{display:true,text:'Sₑ, Sₙ (MeV·cm²/g)',color:'#3a5070',font:{size:12}}, grid:{color:'rgba(0,0,0,.07)'}, ticks:{color:'#3a5070',font:{size:11},callback:v=>v.toPrecision(2)} }
       }
     }
   });
 }
 
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // SECTION 7. 모드 2 — Multi-Layer Bragg Peak
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 let braggChart = null;
-let layers = []; // {name, material, thickness, density, I}
+let layers = [];
 
 const PRESETS = {
-  si_solar: {
-    name: 'Si 태양전지 (커버유리 + Si 셀)',
-    layers: [
-      { name:'CMG (cover glass)', material:'glass',     thickness:150, density:2.50, I:139 },
-      { name:'AR coating (SiO₂)', material:'sio2',      thickness:0.1, density:2.20, I:139 },
-      { name:'Emitter (n+ Si)',   material:'si',        thickness:0.5, density:2.33, I:173 },
-      { name:'Base (p Si)',       material:'si',        thickness:200, density:2.33, I:173 },
-    ]
-  },
-  perov_tandem: {
-    name: '페로브스카이트/Si 탠덤 셀',
-    layers: [
-      { name:'ITO (top)',         material:'ito',        thickness:0.1,  density:7.14,  I:330 },
-      { name:'PEDOT:PSS (HTL)',   material:'pedot',      thickness:0.04, density:1.45,  I:80  },
-      { name:'Perovskite top',    material:'perovskite', thickness:0.5,  density:4.10,  I:400 },
-      { name:'Recomb. layer',     material:'ito',        thickness:0.02, density:7.14,  I:330 },
-      { name:'Si bottom cell',    material:'si',         thickness:180,  density:2.33,  I:173 },
-    ]
-  },
-  gaas_tj: {
-    name: 'GaAs 트리플 정션',
-    layers: [
-      { name:'AR (MgF₂/ZnS)',     material:'sio2',  thickness:0.15, density:2.20, I:139 },
-      { name:'GaInP (top)',       material:'gainp', thickness:0.6,  density:4.47, I:370 },
-      { name:'Tunnel junction 1', material:'gaas',  thickness:0.05, density:5.32, I:384 },
-      { name:'GaAs (mid)',        material:'gaas',  thickness:3.0,  density:5.32, I:384 },
-      { name:'Tunnel junction 2', material:'gaas',  thickness:0.05, density:5.32, I:384 },
-      { name:'Ge (bottom)',       material:'ge_sub',thickness:140,  density:5.32, I:350 },
-    ]
-  },
-  cmos_die: {
-    name: 'CMOS IC die (passivation + metal stack + Si)',
-    layers: [
-      { name:'Passivation SiO₂',  material:'sio2',  thickness:1.0,  density:2.20, I:139 },
-      { name:'Metal stack (Cu)',  material:'cu_m',  thickness:5.0,  density:8.96, I:322 },
-      { name:'ILD (SiO₂)',        material:'sio2',  thickness:3.0,  density:2.20, I:139 },
-      { name:'Si active region',  material:'si',    thickness:5.0,  density:2.33, I:173 },
-      { name:'Si bulk',           material:'si',    thickness:300,  density:2.33, I:173 },
-    ]
-  },
-  diamond_nv: {
-    name: '다이아몬드 NV센터 (Au 마커 + 다이아몬드)',
-    layers: [
-      { name:'Au 마커',           material:'au',      thickness:0.1, density:19.32, I:790 },
-      { name:'Diamond (NV layer)',material:'diamond', thickness:50,  density:3.515, I:78  },
-      { name:'Diamond (bulk)',    material:'diamond', thickness:200, density:3.515, I:78  },
-    ]
-  },
-  gan_sic: {
-    name: 'GaN HEMT on SiC (전력 RF)',
-    layers: [
-      { name:'Passivation Si₃N₄', material:'aln',   thickness:0.2, density:3.26, I:130 },
-      { name:'AlGaN barrier',     material:'aln',   thickness:0.025, density:3.26, I:130 },
-      { name:'GaN channel',       material:'gan',   thickness:2.0,   density:6.15, I:210 },
-      { name:'Buffer (AlGaN)',    material:'aln',   thickness:1.0,   density:3.26, I:130 },
-      { name:'SiC substrate',     material:'sic',   thickness:350,   density:3.21, I:150 },
-    ]
-  }
+  si_solar: { name:'Si 태양전지', layers:[
+    {name:'CMG (cover glass)',material:'glass',    thickness:150, density:2.50, I:139},
+    {name:'AR coating (SiO₂)',material:'sio2',     thickness:0.1, density:2.20, I:139},
+    {name:'Emitter (n+ Si)',  material:'si',       thickness:0.5, density:2.33, I:173},
+    {name:'Base (p Si)',      material:'si',       thickness:200, density:2.33, I:173},
+  ]},
+  perov_tandem: { name:'페로브스카이트/Si 탠덤', layers:[
+    {name:'ITO (top)',        material:'ito',       thickness:0.1,  density:7.14,  I:330},
+    {name:'PEDOT:PSS (HTL)', material:'pedot',     thickness:0.04, density:1.45,  I:80 },
+    {name:'Perovskite top',  material:'perovskite',thickness:0.5,  density:4.10,  I:400},
+    {name:'Recomb. layer',   material:'ito',       thickness:0.02, density:7.14,  I:330},
+    {name:'Si bottom cell',  material:'si',        thickness:180,  density:2.33,  I:173},
+  ]},
+  gaas_tj: { name:'GaAs 트리플 정션', layers:[
+    {name:'AR (MgF₂/ZnS)',   material:'sio2',  thickness:0.15, density:2.20, I:139},
+    {name:'GaInP (top)',     material:'gainp', thickness:0.6,  density:4.47, I:370},
+    {name:'Tunnel junction 1',material:'gaas', thickness:0.05, density:5.32, I:384},
+    {name:'GaAs (mid)',      material:'gaas',  thickness:3.0,  density:5.32, I:384},
+    {name:'Tunnel junction 2',material:'gaas', thickness:0.05, density:5.32, I:384},
+    {name:'Ge (bottom)',     material:'ge_sub',thickness:140,  density:5.32, I:350},
+  ]},
+  cmos_die: { name:'CMOS IC die', layers:[
+    {name:'Passivation SiO₂',material:'sio2', thickness:1.0,  density:2.20, I:139},
+    {name:'Metal stack (Cu)',material:'cu_m', thickness:5.0,  density:8.96, I:322},
+    {name:'ILD (SiO₂)',      material:'sio2', thickness:3.0,  density:2.20, I:139},
+    {name:'Si active region',material:'si',   thickness:5.0,  density:2.33, I:173},
+    {name:'Si bulk',         material:'si',   thickness:300,  density:2.33, I:173},
+  ]},
+  diamond_nv: { name:'다이아몬드 NV센터', layers:[
+    {name:'Au 마커',          material:'au',     thickness:0.1, density:19.32, I:790},
+    {name:'Diamond (NV layer)',material:'diamond',thickness:50,  density:3.515, I:78 },
+    {name:'Diamond (bulk)',  material:'diamond',thickness:200, density:3.515, I:78 },
+  ]},
+  gan_sic: { name:'GaN HEMT on SiC', layers:[
+    {name:'Passivation Si₃N₄',material:'aln', thickness:0.2,   density:3.26, I:130},
+    {name:'AlGaN barrier',   material:'aln',  thickness:0.025, density:3.26, I:130},
+    {name:'GaN channel',     material:'gan',  thickness:2.0,   density:6.15, I:210},
+    {name:'Buffer (AlGaN)',  material:'aln',  thickness:1.0,   density:3.26, I:130},
+    {name:'SiC substrate',   material:'sic',  thickness:350,   density:3.21, I:150},
+  ]},
 };
 
 function genLayerId(){ return 'L' + Math.random().toString(36).slice(2, 9); }
 
 function addLayer(material='si', name='', thickness=10){
-  if(layers.length >= 8){
-    alert('최대 8개 층까지 지원합니다.');
-    return;
-  }
+  if(layers.length >= 8){ alert('최대 8개 층까지 지원합니다.'); return; }
   const tar = TARGETS[material] || TARGETS.si;
-  layers.push({
-    id: genLayerId(),
-    name: name || tar.name,
-    material: material,
-    thickness: thickness,
-    density: tar.rho,
-    I: tar.I
-  });
-  renderLayers();
-  runDepthSim();
+  layers.push({ id:genLayerId(), name:name||tar.name, material, thickness, density:tar.rho, I:tar.I });
+  renderLayers(); runDepthSim();
 }
-
-function removeLayer(id){
-  layers = layers.filter(l => l.id !== id);
-  renderLayers();
-  runDepthSim();
-}
-
-function clearLayers(){
-  if(!confirm('모든 층을 삭제하시겠습니까?')) return;
-  layers = [];
-  renderLayers();
-  runDepthSim();
-}
-
+function removeLayer(id){ layers = layers.filter(l => l.id !== id); renderLayers(); runDepthSim(); }
+function clearLayers(){ if(!confirm('모든 층을 삭제하시겠습니까?')) return; layers = []; renderLayers(); runDepthSim(); }
 function loadPreset(key){
-  const p = PRESETS[key];
-  if(!p) return;
-  layers = p.layers.map(l => ({ ...l, id: genLayerId() }));
-  renderLayers();
-  runDepthSim();
+  const p = PRESETS[key]; if(!p) return;
+  layers = p.layers.map(l => ({ ...l, id:genLayerId() }));
+  renderLayers(); runDepthSim();
 }
-
 function updateLayerField(id, field, value){
-  const l = layers.find(x => x.id === id);
-  if(!l) return;
+  const l = layers.find(x => x.id === id); if(!l) return;
   if(field === 'material'){
     const tar = TARGETS[value];
-    if(tar){
-      l.material = value;
-      // 물질 바뀌면 밀도/I도 기본값으로 갱신 (사용자 수정값 보존하려면 별도 플래그 필요)
-      l.density = tar.rho;
-      l.I = tar.I;
-      if(!l.name || Object.values(TARGETS).some(t => t.name === l.name)){
-        l.name = tar.name;
-      }
-    }
-  } else {
-    l[field] = value;
-  }
-  renderLayers();
-  runDepthSim();
+    if(tar){ l.material=value; l.density=tar.rho; l.I=tar.I; if(!l.name||Object.values(TARGETS).some(t=>t.name===l.name)) l.name=tar.name; }
+  } else { l[field]=value; }
+  renderLayers(); runDepthSim();
 }
 
 function renderLayers(){
-  const list = document.getElementById('layerList');
-  if(!list) return;
-  if(layers.length === 0){
-    list.innerHTML = '<div style="text-align:center;padding:30px 10px;color:var(--dim);font-size:13px">층이 없습니다. <strong>+ 층 추가</strong> 버튼을 누르거나 프리셋을 선택하세요.</div>';
-    return;
-  }
-  // 물질 옵션 HTML
-  const matOpts = Object.entries(TARGETS)
-    .map(([k, v]) => `<option value="${k}">${v.name}</option>`)
-    .join('');
-
-  list.innerHTML = layers.map((l, i) => {
-    const colorIdx = (i % 8) + 1;
-    return `
-      <div class="layer-row" draggable="true" data-id="${l.id}" data-idx="${i}"
-           ondragstart="onDragStart(event)" ondragover="onDragOver(event)"
-           ondrop="onDrop(event)" ondragend="onDragEnd(event)" ondragleave="onDragLeave(event)">
-        <div class="layer-num" style="background:var(--c-l${colorIdx})">${i+1}</div>
-        <div class="layer-grip" title="드래그로 순서 변경">⋮⋮</div>
-        <input type="text" value="${l.name}" placeholder="층 이름" title="층 이름"
-               onchange="updateLayerField('${l.id}', 'name', this.value)">
-        <select title="물질 선택" onchange="updateLayerField('${l.id}', 'material', this.value)">
-          ${matOpts.replace(`value="${l.material}"`, `value="${l.material}" selected`)}
-        </select>
-        <button class="layer-del" onclick="removeLayer('${l.id}')" title="삭제">×</button>
-        <div class="layer-row-params">
-          <div class="lp-label" title="층의 물리적 두께 (마이크로미터)">두께 (μm)</div>
-          <div class="lp-label" title="물질의 질량 밀도 (g/cm³)">밀도 (g/cm³)</div>
-          <div class="lp-label" title="평균 여기 에너지 — Bethe-Bloch 공식의 핵심 파라미터 (eV)">평균여기E I (eV)</div>
-          <input type="number" value="${l.thickness}" min="0.001" step="0.1"
-                 placeholder="μm" title="두께 (μm) — 층의 물리적 깊이"
-                 onchange="updateLayerField('${l.id}', 'thickness', parseFloat(this.value))">
-          <input type="number" value="${l.density}" min="0.01" step="0.01"
-                 placeholder="g/cm³" title="밀도 (g/cm³) — Bragg 가법성 기반 보정"
-                 onchange="updateLayerField('${l.id}', 'density', parseFloat(this.value))">
-          <input type="number" value="${l.I}" min="10" step="1"
-                 placeholder="eV" title="Mean Excitation Energy I (eV) — Bethe-Bloch dE/dx 공식 ln(2mₑv²/I) 항"
-                 onchange="updateLayerField('${l.id}', 'I', parseFloat(this.value))">
-        </div>
-      </div>`;
+  const list = document.getElementById('layerList'); if(!list) return;
+  if(layers.length === 0){ list.innerHTML='<div style="text-align:center;padding:30px 10px;color:var(--dim);font-size:13px">층이 없습니다. <strong>+ 층 추가</strong> 버튼을 누르거나 프리셋을 선택하세요.</div>'; return; }
+  const matOpts = Object.entries(TARGETS).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('');
+  list.innerHTML = layers.map((l,i) => {
+    const ci = (i%8)+1;
+    return `<div class="layer-row" draggable="true" data-id="${l.id}" data-idx="${i}" ondragstart="onDragStart(event)" ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragend="onDragEnd(event)" ondragleave="onDragLeave(event)">
+      <div class="layer-num" style="background:var(--c-l${ci})">${i+1}</div>
+      <div class="layer-grip" title="드래그로 순서 변경">⋮⋮</div>
+      <input type="text" value="${l.name}" placeholder="층 이름" onchange="updateLayerField('${l.id}','name',this.value)">
+      <select onchange="updateLayerField('${l.id}','material',this.value)">${matOpts.replace(`value="${l.material}"`,`value="${l.material}" selected`)}</select>
+      <button class="layer-del" onclick="removeLayer('${l.id}')" title="삭제">×</button>
+      <div class="layer-row-params">
+        <div class="lp-label">두께 (μm)</div><div class="lp-label">밀도 (g/cm³)</div><div class="lp-label">평균여기E I (eV)</div>
+        <input type="number" value="${l.thickness}" min="0.001" step="0.1" placeholder="μm" onchange="updateLayerField('${l.id}','thickness',parseFloat(this.value))">
+        <input type="number" value="${l.density}" min="0.01" step="0.01" placeholder="g/cm³" onchange="updateLayerField('${l.id}','density',parseFloat(this.value))">
+        <input type="number" value="${l.I}" min="10" step="1" placeholder="eV" onchange="updateLayerField('${l.id}','I',parseFloat(this.value))">
+      </div>
+    </div>`;
   }).join('');
 }
 
-// ── 드래그 앤 드롭 (HTML5 native) ──
 let dragSrcId = null;
-function onDragStart(e){
-  dragSrcId = e.currentTarget.dataset.id;
-  e.currentTarget.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-}
-function onDragOver(e){
-  e.preventDefault();
-  e.currentTarget.classList.add('drag-over');
-  e.dataTransfer.dropEffect = 'move';
-}
-function onDragLeave(e){
-  e.currentTarget.classList.remove('drag-over');
-}
+function onDragStart(e){ dragSrcId=e.currentTarget.dataset.id; e.currentTarget.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; }
+function onDragOver(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); e.dataTransfer.dropEffect='move'; }
+function onDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
 function onDrop(e){
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  const dstId = e.currentTarget.dataset.id;
-  if(!dragSrcId || dragSrcId === dstId) return;
-  const srcIdx = layers.findIndex(l => l.id === dragSrcId);
-  const dstIdx = layers.findIndex(l => l.id === dstId);
-  if(srcIdx < 0 || dstIdx < 0) return;
-  const [moved] = layers.splice(srcIdx, 1);
-  layers.splice(dstIdx, 0, moved);
-  renderLayers();
-  runDepthSim();
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const dstId=e.currentTarget.dataset.id; if(!dragSrcId||dragSrcId===dstId) return;
+  const si=layers.findIndex(l=>l.id===dragSrcId), di=layers.findIndex(l=>l.id===dstId);
+  if(si<0||di<0) return;
+  const [m]=layers.splice(si,1); layers.splice(di,0,m);
+  renderLayers(); runDepthSim();
 }
-function onDragEnd(e){
-  e.currentTarget.classList.remove('dragging');
-  document.querySelectorAll('.layer-row').forEach(r => r.classList.remove('drag-over'));
-  dragSrcId = null;
-}
+function onDragEnd(e){ e.currentTarget.classList.remove('dragging'); document.querySelectorAll('.layer-row').forEach(r=>r.classList.remove('drag-over')); dragSrcId=null; }
 
-// ── 시뮬레이션 실행 + 차트 그리기 ──
-function setDpE(v, u){
-  document.getElementById('dpEVal').value = v;
-  document.getElementById('dpEUnit').value = u;
-  runDepthSim();
-}
+function setDpE(v, u){ document.getElementById('dpEVal').value=v; document.getElementById('dpEUnit').value=u; runDepthSim(); }
 
 function runDepthSim(){
-  const ionKey = document.getElementById('dpIon').value;
-  const ion = IONS[ionKey];
-  const v = parseFloat(document.getElementById('dpEVal').value) || 50;
-  const u = document.getElementById('dpEUnit').value;
-  const E0 = toMeV(v, u);
+  const ionKey=document.getElementById('dpIon').value;
+  const ion=IONS[ionKey];
+  const v=parseFloat(document.getElementById('dpEVal').value)||50;
+  const u=document.getElementById('dpEUnit').value;
+  const E0=toMeV(v,u);
 
-  if(layers.length === 0){
-    document.getElementById('dpE0').textContent = fmt(E0);
-    document.getElementById('dpRange').textContent = '—';
-    document.getElementById('dpResE').textContent = '—';
-    document.getElementById('dpStatus').textContent = '층 없음';
-    document.getElementById('dpReport').innerHTML = '<div class="mnote">층을 추가하거나 프리셋을 선택하세요.</div>';
-    document.getElementById('dpLayerSummary').innerHTML = '';
-    if(braggChart){ braggChart.destroy(); braggChart = null; }
+  if(layers.length===0){
+    document.getElementById('dpE0').textContent=fmt(E0);
+    ['dpRange','dpResE'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('dpStatus').textContent='층 없음';
+    document.getElementById('dpReport').innerHTML='<div class="mnote">층을 추가하거나 프리셋을 선택하세요.</div>';
+    document.getElementById('dpLayerSummary').innerHTML='';
+    if(braggChart){ braggChart.destroy(); braggChart=null; }
     return;
   }
 
-  const result = simulateBragg(ion, E0, layers);
+  const result=simulateBragg(ion,E0,layers);
+  document.getElementById('dpE0').textContent=fmt(E0);
+  document.getElementById('dpRange').textContent=fmt(result.range_um,4);
+  document.getElementById('dpResE').textContent=fmt(result.exitE_MeV,3);
+  const statusEl=document.getElementById('dpStatus');
+  if(result.stopped){ statusEl.textContent='✕ 정지 (층 '+(result.stopLayer+1)+')'; statusEl.style.color='var(--warn)'; }
+  else { statusEl.textContent='✓ 투과'; statusEl.style.color='var(--ok)'; }
 
-  // 메트릭 카드
-  document.getElementById('dpE0').textContent = fmt(E0);
-  document.getElementById('dpRange').textContent = fmt(result.range_um, 4);
-  document.getElementById('dpResE').textContent = fmt(result.exitE_MeV, 3);
-  const statusEl = document.getElementById('dpStatus');
-  if(result.stopped){
-    statusEl.textContent = '✕ 정지 (층 ' + (result.stopLayer + 1) + ')';
-    statusEl.style.color = 'var(--warn)';
-  } else {
-    statusEl.textContent = '✓ 투과';
-    statusEl.style.color = 'var(--ok)';
-  }
-
-  // 리포트
   let reportHtml;
   if(result.stopped){
-    const sl = layers[result.stopLayer];
-    const tar = TARGETS[sl.material];
-    reportHtml = `<div class="report-card report-stop">
-      <strong>${ion.name}</strong> @ <strong>${fmt(E0)} MeV</strong> 입사 →
-      <strong>층 ${result.stopLayer + 1} (${sl.name || tar.name})</strong> 내부에서 정지 (Bragg peak).<br>
-      정지 위치: <strong>${fmt(result.range_um, 4)} μm</strong> (총 스택 ${fmt(result.totalThickness_um, 4)} μm 중)<br>
-      <span style="font-size:12px;opacity:.85">대부분의 에너지가 이 층에 흡수되었습니다. 방사선 손상이 집중되는 위치입니다.</span>
-    </div>`;
+    const sl=layers[result.stopLayer], tar=TARGETS[sl.material];
+    reportHtml=`<div class="report-card report-stop"><strong>${ion.name}</strong> @ <strong>${fmt(E0)} MeV</strong> 입사 → <strong>층 ${result.stopLayer+1} (${sl.name||tar.name})</strong> 내부에서 정지 (Bragg peak).<br>정지 위치: <strong>${fmt(result.range_um,4)} μm</strong> (총 스택 ${fmt(result.totalThickness_um,4)} μm 중)<br><span style="font-size:12px;opacity:.85">대부분의 에너지가 이 층에 흡수되었습니다. 방사선 손상이 집중되는 위치입니다.</span></div>`;
   } else {
-    reportHtml = `<div class="report-card report-pass">
-      <strong>${ion.name}</strong> @ <strong>${fmt(E0)} MeV</strong> 입사 → 전체 스택 <strong>투과 (${fmt(result.totalThickness_um, 4)} μm)</strong>.<br>
-      잔여 에너지: <strong>${fmt(result.exitE_MeV, 3)} MeV</strong> (입사 대비 ${(100 * result.exitE_MeV / E0).toFixed(1)}%)<br>
-      <span style="font-size:12px;opacity:.85">입자가 모든 층을 통과했습니다. 더 두꺼운 차폐 또는 더 낮은 에너지에서는 정지할 수 있습니다.</span>
-    </div>`;
+    reportHtml=`<div class="report-card report-pass"><strong>${ion.name}</strong> @ <strong>${fmt(E0)} MeV</strong> 입사 → 전체 스택 <strong>투과 (${fmt(result.totalThickness_um,4)} μm)</strong>.<br>잔여 에너지: <strong>${fmt(result.exitE_MeV,3)} MeV</strong> (입사 대비 ${(100*result.exitE_MeV/E0).toFixed(1)}%)<br><span style="font-size:12px;opacity:.85">입자가 모든 층을 통과했습니다.</span></div>`;
   }
-  document.getElementById('dpReport').innerHTML = reportHtml;
+  document.getElementById('dpReport').innerHTML=reportHtml;
 
-  // 층별 요약
-  const summary = result.layerResults.map((lr, i) => {
-    const colorIdx = (i % 8) + 1;
-    const dose = lr.dose_MeV_per_g;
-    const lossPct = lr.entryE_MeV > 0 ? (100 * lr.dE_MeV / lr.entryE_MeV).toFixed(1) : '0';
-    return `<div class="lsum-card">
-      <div class="lsum-name">
-        <span class="lsum-color" style="background:var(--c-l${colorIdx})"></span>
-        <strong>L${lr.idx + 1}: ${lr.name}</strong>
-      </div>
-      <div class="lsum-vals">
-        <span class="nowrap">ΔE = ${fmt(lr.dE_MeV, 3)} MeV</span> <span class="nowrap">(${lossPct}%)</span><br>
-        <span class="nowrap">D = ${fmt(dose, 3)} MeV·cm²/g</span><br>
-        ${lr.stopped
-          ? '<span style="color:var(--warn)">⚠ 이 층에서 정지</span>'
-          : '<span class="nowrap">진입 ' + fmt(lr.entryE_MeV, 3) + ' MeV</span> → <span class="nowrap">출구 ' + fmt(lr.exitE_MeV, 3) + ' MeV</span>'}
-      </div>
-    </div>`;
+  const summary=result.layerResults.map((lr,i) => {
+    const ci=(i%8)+1, dose=lr.dose_MeV_per_g;
+    const lossPct=lr.entryE_MeV>0?(100*lr.dE_MeV/lr.entryE_MeV).toFixed(1):'0';
+    return `<div class="lsum-card"><div class="lsum-name"><span class="lsum-color" style="background:var(--c-l${ci})"></span><strong>L${lr.idx+1}: ${lr.name}</strong></div><div class="lsum-vals"><span class="nowrap">ΔE = ${fmt(lr.dE_MeV,3)} MeV</span> <span class="nowrap">(${lossPct}%)</span><br><span class="nowrap">D = ${fmt(dose,3)} MeV·cm²/g</span><br>${lr.stopped?'<span style="color:var(--warn)">⚠ 이 층에서 정지</span>':'<span class="nowrap">진입 '+fmt(lr.entryE_MeV,3)+' MeV</span> → <span class="nowrap">출구 '+fmt(lr.exitE_MeV,3)+' MeV</span>'}</div></div>`;
   }).join('');
-  document.getElementById('dpLayerSummary').innerHTML = summary;
-
-  // 차트
+  document.getElementById('dpLayerSummary').innerHTML=summary;
   drawBraggChart(result, ion);
 }
 
 function drawBraggChart(result, ion){
-  const ctx = document.getElementById('braggChart').getContext('2d');
+  const ctx=document.getElementById('braggChart').getContext('2d');
   if(braggChart) braggChart.destroy();
-
-  // dE/dx vs x
-  const dEdxData = result.profile.map(p => ({ x: p.x, y: p.dEdx }));
-  // E(x) vs x
-  const eData = result.profile.map(p => ({ x: p.x, y: p.E }));
-
-  // 층 경계 annotation (배경 색상 박스)
-  const layerAnnotations = {};
-  let xCum = 0;
-  layers.forEach((l, i) => {
-    const t = parseFloat(l.thickness) || 0;
-    const colorIdx = (i % 8) + 1;
-    const colorVar = getComputedStyle(document.documentElement)
-                       .getPropertyValue('--c-l' + colorIdx).trim();
-    layerAnnotations['box' + i] = {
-      type: 'box',
-      xMin: xCum, xMax: xCum + t,
-      backgroundColor: colorVar,
-      borderColor: 'transparent',
-      borderWidth: 0,
-      drawTime: 'beforeDatasetsDraw',
-      label: {
-        display: true,
-        content: 'L' + (i+1),
-        position: { x:'start', y:'start' },
-        font:{ family:'Space Mono', size:9, weight:'700' },
-        color:'#3a5070',
-        backgroundColor:'transparent',
-        padding:{ top:3, left:5 }
-      }
-    };
-    xCum += t;
+  const dEdxData=result.profile.map(p=>({x:p.x,y:p.dEdx}));
+  const eData=result.profile.map(p=>({x:p.x,y:p.E}));
+  const layerAnnotations={};
+  let xCum=0;
+  layers.forEach((l,i)=>{
+    const t=parseFloat(l.thickness)||0, ci=(i%8)+1;
+    const colorVar=getComputedStyle(document.documentElement).getPropertyValue('--c-l'+ci).trim();
+    layerAnnotations['box'+i]={ type:'box', xMin:xCum, xMax:xCum+t, backgroundColor:colorVar, borderColor:'transparent', borderWidth:0, drawTime:'beforeDatasetsDraw', label:{display:true,content:'L'+(i+1),position:{x:'start',y:'start'},font:{family:'Space Mono',size:9,weight:'700'},color:'#3a5070',backgroundColor:'transparent',padding:{top:3,left:5}} };
+    xCum+=t;
   });
-  // 정지 위치 점선
-  if(result.stopped){
-    layerAnnotations.stopLine = {
-      type:'line',
-      xMin: result.range_um, xMax: result.range_um,
-      borderColor:'var(--c-bragg)', borderWidth:1.5, borderDash:[6,4]
-    };
-  }
+  if(result.stopped){ layerAnnotations.stopLine={ type:'line', xMin:result.range_um, xMax:result.range_um, borderColor:'var(--c-bragg)', borderWidth:1.5, borderDash:[6,4] }; }
 
-  braggChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      datasets: [
-        {
-          label:'dE/dx',
-          data: dEdxData,
-          borderColor:'#b52020',
-          backgroundColor:'rgba(181,32,32,.14)',
-          borderWidth:2, pointRadius:0, fill:true, tension:0.15,
-          yAxisID:'y'
-        },
-        {
-          label:'E(x)',
-          data: eData,
-          borderColor:'rgba(26,82,200,.6)',
-          borderWidth:1.5, pointRadius:0, fill:false, tension:0.15,
-          borderDash:[3,3],
-          yAxisID:'y2'
-        }
-      ]
-    },
-    options: {
+  braggChart=new Chart(ctx,{
+    type:'line',
+    data:{ datasets:[
+      { label:'dE/dx', data:dEdxData, borderColor:'#b52020', backgroundColor:'rgba(181,32,32,.14)', borderWidth:2, pointRadius:0, fill:true, tension:0.15, yAxisID:'y' },
+      { label:'E(x)',  data:eData,    borderColor:'rgba(26,82,200,.6)', borderWidth:1.5, pointRadius:0, fill:false, tension:0.15, borderDash:[3,3], yAxisID:'y2' }
+    ]},
+    options:{
       responsive:true, maintainAspectRatio:false,
-      interaction: { mode:'index', intersect:false },
-      plugins:{
-        legend:{display:false},
-        annotation: { annotations: layerAnnotations },
-        tooltip:{ callbacks:{
-          title: c => 'x = ' + c[0].parsed.x.toFixed(3) + ' μm',
-          label: c => c.dataset.label === 'dE/dx'
-            ? 'dE/dx = ' + c.parsed.y.toExponential(2) + ' MeV/μm'
-            : 'E = ' + c.parsed.y.toFixed(3) + ' MeV'
-        }}
+      interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{display:false}, annotation:{annotations:layerAnnotations},
+        tooltip:{callbacks:{ title:c=>'x = '+c[0].parsed.x.toFixed(3)+' μm', label:c=>c.dataset.label==='dE/dx'?'dE/dx = '+c.parsed.y.toExponential(2)+' MeV/μm':'E = '+c.parsed.y.toFixed(3)+' MeV' }}
       },
       scales:{
-        x:{ type:'linear', title:{display:true,text:'누적 깊이 x (μm)',color:'#3a5070',font:{size:12}},
-            grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#3a5070',font:{size:11}} },
-        y:{ type:'linear', position:'left',
-            title:{display:true,text:'dE/dx (MeV/μm)',color:'#b52020',font:{size:12}},
-            grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#b52020',font:{size:11}, callback:v=>v.toPrecision(2)} },
-        y2:{ type:'linear', position:'right',
-            title:{display:true,text:'E (MeV)',color:'#1a52c8',font:{size:12}},
-            grid:{display:false}, ticks:{color:'#1a52c8',font:{size:11}} }
+        x:{ type:'linear', title:{display:true,text:'누적 깊이 x (μm)',color:'#3a5070',font:{size:12}}, grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#3a5070',font:{size:11}} },
+        y:{ type:'linear', position:'left', title:{display:true,text:'dE/dx (MeV/μm)',color:'#b52020',font:{size:12}}, grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#b52020',font:{size:11},callback:v=>v.toPrecision(2)} },
+        y2:{ type:'linear', position:'right', title:{display:true,text:'E (MeV)',color:'#1a52c8',font:{size:12}}, grid:{display:false}, ticks:{color:'#1a52c8',font:{size:11}} }
       }
     }
   });
 }
 
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // SECTION 8. 모드 전환
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 function switchMode(mode){
-  const matBtn = document.getElementById('modeMatBtn');
-  const dpBtn = document.getElementById('modeDepthBtn');
-  const matPanel = document.getElementById('modeMaterialPanel');
-  const dpPanel = document.getElementById('modeDepthPanel');
-
-  if(mode === 'depth'){
-    matBtn.classList.remove('active'); matBtn.setAttribute('aria-selected', 'false');
-    dpBtn.classList.add('active'); dpBtn.setAttribute('aria-selected', 'true');
-    matPanel.classList.remove('active');
-    dpPanel.classList.add('active');
-    // depth 모드에서는 빈 상태면 기본 프리셋 로드
-    if(layers.length === 0) loadPreset('si_solar');
-    else runDepthSim();
+  const matBtn=document.getElementById('modeMatBtn'), dpBtn=document.getElementById('modeDepthBtn');
+  const matPanel=document.getElementById('modeMaterialPanel'), dpPanel=document.getElementById('modeDepthPanel');
+  if(mode==='depth'){
+    matBtn.classList.remove('active'); matBtn.setAttribute('aria-selected','false');
+    dpBtn.classList.add('active'); dpBtn.setAttribute('aria-selected','true');
+    matPanel.classList.remove('active'); dpPanel.classList.add('active');
+    if(layers.length===0) loadPreset('si_solar'); else runDepthSim();
   } else {
-    dpBtn.classList.remove('active'); dpBtn.setAttribute('aria-selected', 'false');
-    matBtn.classList.add('active'); matBtn.setAttribute('aria-selected', 'true');
-    dpPanel.classList.remove('active');
-    matPanel.classList.add('active');
-    // 차트 재크기 조정 (Chart.js 숨김 상태에서 그려진 경우 보정)
-    setTimeout(() => { if(stopChart) stopChart.resize(); }, 50);
+    dpBtn.classList.remove('active'); dpBtn.setAttribute('aria-selected','false');
+    matBtn.classList.add('active'); matBtn.setAttribute('aria-selected','true');
+    dpPanel.classList.remove('active'); matPanel.classList.add('active');
+    setTimeout(()=>{ if(stopChart) stopChart.resize(); }, 50);
   }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// SECTION 9. Chart.js Annotation Plugin 동적 로드
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// SECTION 9. Chart.js Annotation Plugin
+// ═══════════════════════════════════════════════════════════
 function loadAnnotationPlugin(callback){
-  const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js';
-  s.onload = () => {
-    if(window.Chart && window['chartjs-plugin-annotation']){
-      Chart.register(window['chartjs-plugin-annotation']);
-    }
-    callback();
-  };
-  s.onerror = () => {
-    console.warn('Annotation plugin load failed; charts will render without layer overlays');
-    callback();
-  };
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js';
+  s.onload=()=>{ if(window.Chart&&window['chartjs-plugin-annotation']) Chart.register(window['chartjs-plugin-annotation']); callback(); };
+  s.onerror=()=>{ console.warn('Annotation plugin load failed'); callback(); };
   document.head.appendChild(s);
 }
 
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // SECTION 10. 초기화
-// ════════════════════════════════════════════════════════════════════
-function onTargetChange(){
-  const t = TARGETS[document.getElementById('target').value];
-  if(t) update();
-}
+// ═══════════════════════════════════════════════════════════
+function onTargetChange(){ const t=TARGETS[document.getElementById('target').value]; if(t) update(); }
 
 document.addEventListener('DOMContentLoaded', () => {
   fillSelects();
-  document.getElementById('target').value = 'si';
-  document.getElementById('ion').value = 'p';
-
-  // 모드 1 이벤트
+  document.getElementById('target').value='si';
+  document.getElementById('ion').value='p';
   document.getElementById('eVal').addEventListener('input', syncSlider);
   document.getElementById('eUnit').addEventListener('change', syncSlider);
   document.getElementById('eSlider').addEventListener('input', syncFromSlider);
@@ -1688,20 +1068,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('target').addEventListener('change', onTargetChange);
   document.getElementById('dur').addEventListener('input', update);
   document.getElementById('logFlux').addEventListener('input', update);
-
-  // 모드 2 이벤트
   document.getElementById('dpIon').addEventListener('change', runDepthSim);
   document.getElementById('dpEVal').addEventListener('input', runDepthSim);
   document.getElementById('dpEUnit').addEventListener('change', runDepthSim);
-
-  // 모드 토글
-  document.getElementById('modeMatBtn').addEventListener('click', () => switchMode('material'));
-  document.getElementById('modeDepthBtn').addEventListener('click', () => switchMode('depth'));
-
-  // Annotation plugin 로드 후 첫 차트 그리기
-  loadAnnotationPlugin(() => {
-    syncSlider();
-  });
+  document.getElementById('modeMatBtn').addEventListener('click', ()=>switchMode('material'));
+  document.getElementById('modeDepthBtn').addEventListener('click', ()=>switchMode('depth'));
+  loadAnnotationPlugin(()=>{ syncSlider(); });
 });
 </script>
 </body>

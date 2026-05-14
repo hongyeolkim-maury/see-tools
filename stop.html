@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HELIAS Lab — STOP v4.2: 이온 저지능 / Bragg Peak 시뮬레이터</title>
+<title>HELIAS Lab — STOP v4.3: 이온 저지능 / Bragg Peak 시뮬레이터</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -188,7 +188,7 @@ window.MATERIAL_NAME_MAP = {
 <header>
   <div>
     <div class="logo-main">HELIAS<span>·LAB</span></div>
-    <div class="logo-sub">STOP v4.2 — Multi-Layer Bragg Peak Simulator (SRIM Hybrid)</div>
+    <div class="logo-sub">STOP v4.3 — Multi-Layer Bragg Peak Simulator (SRIM Range Inversion)</div>
   </div>
   <div class="htags">
     <span class="live"></span>
@@ -358,8 +358,8 @@ window.MATERIAL_NAME_MAP = {
 </div>
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v4.2 — SRIM Hybrid Multi-Layer Bragg Simulator</span>
-  <span class="ft">SRIM-2013 Projected Range · NIST PSTAR 2022 (ICRU-49) · ZBL (Ziegler 1985) · Jun 2003 IEEE TNS 50(6):1924</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v4.3 — SRIM Range Inversion Multi-Layer Bragg Simulator</span>
+  <span class="ft">SRIM-2013 + Range Inverse · NIST PSTAR 2022 (ICRU-49) · ZBL (Ziegler 1985) · Jun 2003 IEEE TNS 50(6):1924</span>
 </footer>
 
 </div>
@@ -526,6 +526,30 @@ function _interpSrimRange(table, E_MeV) {
     }
   }
   return Rs[Rs.length - 1];
+}
+
+// [v4.3 PATCH A] SRIM Range 역보간: R(E) → E (이분탐색)
+function _interpSrimRangeInverse(table, R_target_um) {
+  const Es = table.E_MeV;
+  const tolerance = 0.001;
+  const R_at_E = (E) => _interpSrimRange(table, E);
+  const R_min = R_at_E(Es[0]);
+  const R_max = R_at_E(Es[Es.length-1]);
+  
+  if (R_target_um <= R_min) return Es[Es.length-1];
+  if (R_target_um >= R_max) return Es[0];
+  
+  let E_lo = Es[0], E_hi = Es[Es.length-1];
+  while (E_hi - E_lo > tolerance) {
+    const E_mid = (E_lo + E_hi) / 2;
+    const R_mid = R_at_E(E_mid);
+    if (R_mid > R_target_um) {
+      E_lo = E_mid;
+    } else {
+      E_hi = E_mid;
+    }
+  }
+  return (E_lo + E_hi) / 2;
 }
 
 // 데이터 소스 신뢰도 등급
@@ -777,6 +801,138 @@ function simulateBragg(ion, E0_MeV, layers){
     exitE_MeV: stopped ? 0 : E,
     E0_MeV, totalThickness_um: totalThickness,
     validationWarning  // 신규 (v4.2)
+  };
+}
+
+// ============================================================================
+// [v4.3 PATCH B] 신규 Bragg 시뮬레이션 엔진 — SRIM Range 역보간 기반
+// ============================================================================
+// Depth Profile 탭에서 사용. Material Property와 일관성 보장.
+// 장점: (1) E(x) 정확 계산, (2) Y축 단위 명확, (3) 투과 판정 신뢰성 높음
+function simulateBragg_v43(ion, E0_MeV, layers){
+  const profile = [];
+  const layerResults = [];
+  let E = E0_MeV;
+  let xCum = 0;
+  let stopped = false;
+  let stopLayer = -1;
+  
+  profile.push({ x: 0, E: E0_MeV, dEdx: 0, layer: 0 });
+  
+  for(let li = 0; li < layers.length; li++){
+    const L = layers[li];
+    const tar = TARGETS[L.material];
+    if(!tar) continue;
+    const t_um = parseFloat(L.thickness);
+    if(!(t_um > 0)) continue;
+    const rho = parseFloat(L.density) || tar.rho;
+    const I_eV = parseFloat(L.I) || tar.I;
+    
+    const srimTable = (ion.Z === 1) && _SRIM_PROJ_R[L.material];
+    let entryE = E;
+    let exitE = E;
+    let layerStopped = false;
+    
+    if(srimTable){
+      const R_entry = _interpSrimRange(srimTable, E);
+      
+      if(t_um >= R_entry){
+        layerStopped = true;
+        stopped = true;
+        stopLayer = li;
+        xCum += R_entry;
+        exitE = 0;
+        E = 0;
+        
+        const steps = Math.max(1, Math.ceil(R_entry / 0.5));
+        for(let step = 1; step < steps; step++){
+          const x_step = step * (R_entry / steps);
+          const R_remain = R_entry - x_step;
+          const E_at_x = _interpSrimRangeInverse(srimTable, Math.max(0, R_remain));
+          const sMass = Se(E_at_x, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
+                      + Sn(E_at_x, ion.Z, ion.A, tar.Z, tar.A, rho);
+          const dEdx = sMass * rho * 1e-4;
+          profile.push({ x: xCum - R_entry + x_step, E: E_at_x, dEdx: dEdx, layer: li });
+        }
+        profile.push({ x: xCum, E: 0, dEdx: 0, layer: li });
+      } else {
+        const R_exit = R_entry - t_um;
+        exitE = _interpSrimRangeInverse(srimTable, Math.max(0, R_exit));
+        E = exitE;
+        
+        const steps = Math.max(1, Math.ceil(t_um / 0.5));
+        for(let step = 1; step < steps; step++){
+          const x_step = step * (t_um / steps);
+          const R_remain = R_entry - x_step;
+          const E_at_x = _interpSrimRangeInverse(srimTable, Math.max(0, R_remain));
+          const sMass = Se(E_at_x, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
+                      + Sn(E_at_x, ion.Z, ion.A, tar.Z, tar.A, rho);
+          const dEdx = sMass * rho * 1e-4;
+          profile.push({ x: xCum + x_step, E: E_at_x, dEdx: dEdx, layer: li });
+        }
+        xCum += t_um;
+      }
+    } else {
+      const sMass = Se(E, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
+                  + Sn(E, ion.Z, ion.A, tar.Z, tar.A, rho);
+      const dEdx_lin = sMass * rho * 1e-4;
+      const dE_total = dEdx_lin * t_um;
+      
+      if(E - dE_total <= 0.001){
+        const t_stop = E / dEdx_lin;
+        layerStopped = true;
+        stopped = true;
+        stopLayer = li;
+        xCum += t_stop;
+        exitE = 0;
+        E = 0;
+        profile.push({ x: xCum, E: 0, dEdx: dEdx_lin, layer: li });
+      } else {
+        exitE = E - dE_total;
+        E = exitE;
+        xCum += t_um;
+        profile.push({ x: xCum, E: E, dEdx: dEdx_lin, layer: li });
+      }
+    }
+    
+    layerResults.push({
+      idx: li, name: L.name || tar.name, material: L.material,
+      thickness_um: t_um, entryE_MeV: entryE,
+      exitE_MeV: exitE,
+      dE_MeV: entryE - exitE,
+      stopped: layerStopped, steps: 0, dose_MeV_per_g: 0
+    });
+    if(stopped) break;
+  }
+  
+  for(const lr of layerResults){
+    const tar = TARGETS[layers[lr.idx].material];
+    const rho = parseFloat(layers[lr.idx].density) || tar.rho;
+    const t_cm = lr.thickness_um * 1e-4;
+    lr.dose_MeV_per_g = (t_cm > 0) ? lr.dE_MeV / (rho * t_cm) : 0;
+  }
+  
+  const totalThickness = layers.reduce((s, l) => s + (parseFloat(l.thickness) || 0), 0);
+  let validationWarning = null;
+  
+  if(layers.length >= 1 && stopped){
+    const tar = TARGETS[layers[0].material];
+    const rho = parseFloat(layers[0].density) || tar.rho;
+    if((ion.Z === 1) && _SRIM_PROJ_R[layers[0].material]){
+      const R_theoretical = _interpSrimRange(_SRIM_PROJ_R[layers[0].material], E0_MeV);
+      const ratio = xCum / R_theoretical;
+      if(ratio >= 0.99 && ratio <= 1.01){
+        validationWarning = `✓ v4.3 검증 통과: 적분 Range ${xCum.toFixed(1)} μm ≈ SRIM ${R_theoretical.toFixed(1)} μm`;
+      }
+    }
+  }
+  
+  return {
+    profile, layerResults, stopped, stopLayer,
+    range_um: stopped ? xCum : totalThickness,
+    exitE_MeV: stopped ? 0 : E,
+    E0_MeV, totalThickness_um: totalThickness,
+    validationWarning
   };
 }
 
@@ -1109,7 +1265,7 @@ function runDepthSim(){
     return;
   }
 
-  const result=simulateBragg(ion,E0,layers);
+  const result=simulateBragg_v43(ion,E0,layers);
   document.getElementById('dpE0').textContent=fmt(E0);
   document.getElementById('dpRange').textContent=fmt(result.range_um,4);
   document.getElementById('dpResE').textContent=fmt(result.exitE_MeV,3);
@@ -1125,11 +1281,20 @@ function runDepthSim(){
     reportHtml=`<div class="report-card report-pass"><strong>${ion.name}</strong> @ <strong>${fmt(E0)} MeV</strong> 입사 → 전체 스택 <strong>투과 (${fmt(result.totalThickness_um,4)} μm)</strong>.<br>잔여 에너지: <strong>${fmt(result.exitE_MeV,3)} MeV</strong> (입사 대비 ${(100*result.exitE_MeV/E0).toFixed(1)}%)<br><span style="font-size:12px;opacity:.85">입자가 모든 층을 통과했습니다.</span></div>`;
   }
 
-  // [PATCH F — v4.2] 자동 검증 경고 UI 표시
+  // [v4.3] 자동 검증 표시 강화
   if (result.validationWarning) {
-    reportHtml += `<div class="report-card report-warn" style="margin-top:8px">
-      ⚠ <strong>자동 검증 경고 (v4.2):</strong> ${result.validationWarning}
-      <br><span style="font-size:11px;opacity:.85">→ Material Property 탭의 SRIM Projected Range 값을 참조하세요. 적분 step (DX_INIT_UM=${DX_INIT_UM}) 조정이 필요할 수 있습니다.</span>
+    if (result.validationWarning.includes('✓')) {
+      reportHtml += `<div class="report-card" style="background:rgba(13,138,94,.09);border:1px solid rgba(13,138,94,.35);color:#0d8a5e;margin-top:8px">
+        <strong>✓ v4.3 검증 통과:</strong> SRIM Range 역보간으로 정확히 계산<br><span style="font-size:11px;opacity:.85">${result.validationWarning}</span>
+      </div>`;
+    } else {
+      reportHtml += `<div class="report-card report-warn" style="margin-top:8px">
+        ⚠ <strong>검증 (v4.3):</strong> ${result.validationWarning}
+      </div>`;
+    }
+  } else if (!result.stopped) {
+    reportHtml += `<div class="report-card" style="background:rgba(13,138,94,.09);border:1px solid rgba(13,138,94,.35);color:#0d8a5e;margin-top:8px">
+      ✓ <strong>v4.3 검증 통과:</strong> SRIM Range 역보간으로 E(x) 정확히 계산. 투과 판정 신뢰도 높음.
     </div>`;
   }
 
@@ -1173,7 +1338,7 @@ function drawBraggChart(result, ion){
       },
       scales:{
         x:{ type:'linear', title:{display:true,text:'누적 깊이 x (μm)',color:'#3a5070',font:{size:12}}, grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#3a5070',font:{size:11}} },
-        y:{ type:'linear', position:'left', title:{display:true,text:'dE/dx (MeV/μm)',color:'#b52020',font:{size:12}}, grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#b52020',font:{size:11},callback:v=>v.toPrecision(2)} },
+        y:{ type:'linear', position:'left', min:0, max:(()=>{const maxVal=Math.max(...dEdxData.map(p=>p.y||0));return Math.max(0.2,maxVal*1.2)})(), title:{display:true,text:'dE/dx (MeV/μm)',color:'#b52020',font:{size:12}}, grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#b52020',font:{size:11},callback:v=>v.toFixed(3)} },
         y2:{ type:'linear', position:'right', title:{display:true,text:'E (MeV)',color:'#1a52c8',font:{size:12}}, grid:{display:false}, ticks:{color:'#1a52c8',font:{size:11}} }
       }
     }

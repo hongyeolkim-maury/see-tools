@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HELIAS Lab — STOP v4.3: 이온 저지능 / Bragg Peak 시뮬레이터</title>
+<title>HELIAS Lab — STOP v4.4: 이온 저지능 / Bragg Peak 시뮬레이터</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -114,6 +114,14 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
 .lsum-color{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .lsum-vals{font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.5;word-break:keep-all;overflow-wrap:break-word}
 .lsum-vals .nowrap{white-space:nowrap;display:inline-block}
+
+/* ── SRIM 3-panel grid ─────────────────────────────────────────── */
+.srim-grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:900px){.srim-grid{grid-template-columns:repeat(3,1fr)}}
+.srim-sub{display:flex;flex-direction:column;gap:4px}
+.srim-title{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;padding:4px 2px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.srim-sub-label{font-weight:400;font-size:10px;color:var(--dim)}
+
 footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .ft{font-family:var(--mono);font-size:12px;color:var(--dim)}
 @media(max-width:1100px){.g2{grid-template-columns:1fr}.g3,.g4{grid-template-columns:1fr 1fr}}
@@ -132,10 +140,6 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
 }
 </style>
 
-<!-- =======================================================
-     Cloudflare Workers NIST PSTAR API 연동 v2
-     v4.2: 응답 sanity check 강화 (±25% 외 자동 거부)
-     ======================================================= -->
 <script>
 window.WORKER_API_URL = "https://stop-nist-pstar-proxy.hongyeolkim81.workers.dev";
 
@@ -188,7 +192,7 @@ window.MATERIAL_NAME_MAP = {
 <header>
   <div>
     <div class="logo-main">HELIAS<span>·LAB</span></div>
-    <div class="logo-sub">STOP v4.3 — Multi-Layer Bragg Peak Simulator (SRIM Range Inversion)</div>
+    <div class="logo-sub">STOP v4.4 — Multi-Layer Bragg Peak Simulator (SRIM Range Inversion)</div>
   </div>
   <div class="htags">
     <span class="live"></span>
@@ -212,7 +216,7 @@ window.MATERIAL_NAME_MAP = {
 <div class="g2">
 <div>
   <div class="panel">
-    <div class="ph"><div class="phdot" style="background:var(--c-se)"></div><div class="phtxt">Beam & Target</div></div>
+    <div class="ph"><div class="phdot" style="background:var(--c-se)"></div><div class="phtxt">Beam &amp; Target</div></div>
     <div class="pb">
       <div class="field"><label>입사 이온</label><select id="ion"></select></div>
       <div class="field"><label>표적 물질</label><select id="target"></select></div>
@@ -335,17 +339,44 @@ window.MATERIAL_NAME_MAP = {
     <div class="mc"><div class="mcl">잔여 에너지</div><div class="mcv" id="dpResE">—</div><div class="mcu">MeV (출구)</div></div>
     <div class="mc"><div class="mcl">상태</div><div class="mcv" id="dpStatus" style="font-size:14px">—</div><div class="mcu">투과 여부</div></div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       SRIM-Style 3-Panel Chart Panel  (v4.4 신규)
+       패널 (a) Lateral Straggling  /  (b) Ion Ranges  /  (c) Ionization
+       ══════════════════════════════════════════════════════════════ -->
   <div class="panel">
-    <div class="ph"><div class="phdot" style="background:var(--c-bragg)"></div><div class="phtxt">Energy Loss vs Depth — Bragg Curve</div></div>
-    <div class="pb">
-      <div class="chart-wrap" style="height:340px"><canvas id="braggChart"></canvas></div>
-      <div class="legend">
-        <div class="leg-item"><span class="leg-dot" style="background:var(--c-bragg)"></span>dE/dx (선형 저지능)</div>
-        <div class="leg-item"><span class="leg-dot" style="background:var(--c-se);opacity:.6"></span>잔여 에너지 E(x)</div>
-        <div class="leg-item"><span style="font-size:11px;color:var(--muted)">배경: 각 층 (색상 구분)</span></div>
+    <div class="ph">
+      <div class="phdot" style="background:var(--c-bragg)"></div>
+      <div class="phtxt">SRIM-Style Depth Analysis</div>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:8px">Highland MC · Gaussian Straggling · Bragg Ionization</span>
+    </div>
+    <div class="pb" style="padding:10px 14px">
+      <div class="srim-grid">
+        <!-- (a) Lateral -->
+        <div class="srim-sub">
+          <div class="srim-title">a) Depth vs. Y-axis <span class="srim-sub-label">(Lateral Straggling)</span></div>
+          <div class="chart-wrap" style="height:210px"><canvas id="srimLateralChart"></canvas></div>
+        </div>
+        <!-- (b) Ion Ranges -->
+        <div class="srim-sub">
+          <div class="srim-title">b) Ion Ranges <span class="srim-sub-label">(Range Distribution)</span></div>
+          <div class="chart-wrap" style="height:210px"><canvas id="srimRangeChart"></canvas></div>
+        </div>
+        <!-- (c) Ionization -->
+        <div class="srim-sub">
+          <div class="srim-title">c) Ionization <span class="srim-sub-label">(dE/dx — Bragg Curve)</span></div>
+          <div class="chart-wrap" style="height:210px"><canvas id="srimIonChart"></canvas></div>
+        </div>
+      </div>
+      <div class="legend" style="margin-top:10px">
+        <div class="leg-item"><span class="leg-dot" style="background:#c0392b"></span>이온 궤적 / 분포</div>
+        <div class="leg-item"><span class="leg-dot" style="background:var(--c-bragg)"></span>Ionization (dE/dx)</div>
+        <div class="leg-item"><span class="leg-dot" style="background:var(--c-rng);height:2px;border-top:1px dashed"></span>Mean Range / Bragg peak</div>
+        <span id="srimSummaryLeg" style="font-size:11px;color:var(--muted);margin-left:6px"></span>
       </div>
     </div>
   </div>
+
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--c-rng)"></div><div class="phtxt">시뮬레이션 리포트</div></div>
     <div class="pb">
@@ -358,8 +389,8 @@ window.MATERIAL_NAME_MAP = {
 </div>
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v4.3 — SRIM Range Inversion Multi-Layer Bragg Simulator</span>
-  <span class="ft">SRIM-2013 + Range Inverse · NIST PSTAR 2022 (ICRU-49) · ZBL (Ziegler 1985) · Jun 2003 IEEE TNS 50(6):1924</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · STOP v4.4 — SRIM 3-Panel Multi-Layer Bragg Simulator</span>
+  <span class="ft">SRIM-2013 + Range Inverse · NIST PSTAR 2022 (ICRU-49) · ZBL (Ziegler 1985) · Highland MCS · Jun 2003 IEEE TNS 50(6):1924</span>
 </footer>
 
 </div>
@@ -430,7 +461,6 @@ const _EG = [
   500.0,1000.
 ];
 
-// NIST PSTAR 2022 전자 저지능 Se [MeV·cm²/g] — ICRU-49 기반
 const _PSTAR_SE = {
   si:[2.341e+0,3.026e+0,3.453e+0,3.797e+0,4.133e+0,4.426e+0,4.929e+0,5.156e+0,5.894e+0,6.407e+0,7.090e+0,7.459e+0,7.626e+0,7.671e+0,7.581e+0,7.381e+0,6.697e+0,5.981e+0,4.809e+0,3.955e+0,3.329e+0,2.863e+0,2.209e+0,1.778e+0,1.207e+0,9.371e-1,6.411e-1,4.930e-1,4.001e-1,3.353e-1,2.530e-1,2.010e-1,1.351e-1,1.033e-1,6.956e-2,5.237e-2,4.162e-2,2.642e-2,2.121e-2,1.176e-2,5.414e-3,3.178e-3],
   al:[2.549e+0,3.294e+0,3.762e+0,4.137e+0,4.503e+0,4.824e+0,5.382e+0,5.634e+0,6.441e+0,7.001e+0,7.757e+0,8.168e+0,8.361e+0,8.411e+0,8.325e+0,8.105e+0,7.361e+0,6.581e+0,5.295e+0,4.358e+0,3.670e+0,3.158e+0,2.440e+0,1.968e+0,1.338e+0,1.040e+0,7.129e-1,5.488e-1,4.461e-1,3.745e-1,2.830e-1,2.253e-1,1.517e-1,1.161e-1,7.828e-2,5.903e-2,4.695e-2,2.984e-2,2.396e-2,1.330e-2,6.130e-3,3.603e-3],
@@ -448,7 +478,6 @@ const _PSTAR_SE = {
   aln:[2.904e+0,3.757e+0,4.298e+0,4.734e+0,5.165e+0,5.552e+0,6.221e+0,6.545e+0,7.535e+0,8.247e+0,9.249e+0,9.843e+0,1.019e+1,1.037e+1,1.044e+1,1.032e+1,9.571e+0,8.715e+0,7.177e+0,6.006e+0,5.122e+0,4.457e+0,3.492e+0,2.858e+0,1.975e+0,1.552e+0,1.081e+0,8.413e-1,6.906e-1,5.869e-1,4.504e-1,3.631e-1,2.480e-1,1.912e-1,1.306e-1,9.942e-2,7.974e-2,5.122e-2,4.134e-2,2.311e-2,1.073e-2,6.319e-3],
 };
 
-// NIST PSTAR CSDA Range [g/cm²] (단원소 검증용)
 const _PSTAR_R = {
   si:[1.050e-5,2.500e-5,4.157e-5,5.982e-5,7.935e-5,1.002e-4,1.457e-4,1.965e-4,3.340e-4,4.878e-4,8.217e-4,1.185e-3,1.572e-3,1.982e-3,2.867e-3,3.823e-3,6.382e-3,9.154e-3,1.531e-2,2.198e-2,2.899e-2,3.618e-2,5.081e-2,6.563e-2,1.043e-1,1.459e-1,2.363e-1,3.328e-1,4.338e-1,5.380e-1,7.521e-1,9.740e-1,1.576e+0,2.282e+0,3.940e+0,5.867e+0,8.034e+0,1.540e+1,2.049e+1,5.193e+1,1.568e+2,3.417e+2],
   al:[9.454e-6,2.236e-5,3.721e-5,5.355e-5,7.103e-5,8.944e-5,1.297e-4,1.749e-4,2.974e-4,4.352e-4,7.321e-4,1.058e-3,1.405e-3,1.774e-3,2.574e-3,3.457e-3,5.765e-3,8.267e-3,1.380e-2,1.976e-2,2.608e-2,3.254e-2,4.567e-2,5.897e-2,9.368e-2,1.313e-1,2.127e-1,3.000e-1,3.918e-1,4.861e-1,6.804e-1,8.797e-1,1.424e+0,2.062e+0,3.564e+0,5.313e+0,7.279e+0,1.396e+1,1.858e+1,4.711e+1,1.421e+2,3.097e+2],
@@ -470,51 +499,39 @@ _PSTAR_SE.glass  = _PSTAR_SE.sio2;  _PSTAR_R.glass  = _PSTAR_R.sio2;
 _PSTAR_SE.ge_sub = _PSTAR_SE.ge;    _PSTAR_R.ge_sub = _PSTAR_R.ge;
 _PSTAR_SE.gainp  = _PSTAR_SE.gaas;  _PSTAR_R.gainp  = _PSTAR_R.gaas;
 
-// ============================================================================
-// [PATCH A — v4.2 신규] SRIM-2013 Projected Range 테이블 (μm)
-// ============================================================================
-// 사용자 SRIM 결과와 일치시키기 위한 1순위 데이터 소스.
-// 양성자 입사 기준, 로그-로그 보간으로 임의 에너지 값 산출.
-// 출처: SRIM-2013 (default settings, lattice binding 3 eV)
 const _SRIM_PROJ_R = {
-  // 형식: { E_MeV: [...], R_um: [...] }
-  // SiC, ρ=3.21 g/cm³ ─── 사용자 보고 케이스
   sic:     { E_MeV:[0.1, 0.3, 1.0, 3.0, 6.0,  10.0, 30.0, 100.0],
              R_um: [0.7, 5.0, 24,  130, 200,  470,  3300, 28000] },
-  // GaN, ρ=6.15 g/cm³
   gan:     { E_MeV:[0.1, 0.3, 1.0, 3.0, 6.0,  10.0, 30.0, 100.0],
              R_um: [0.5, 2.7, 13,  68,  110,  250,  1700, 14500] },
-  // GaAs, ρ=5.32 g/cm³
   gaas:    { E_MeV:[0.1, 0.3, 1.0, 3.0, 6.0,  10.0, 30.0, 100.0],
              R_um: [0.6, 3.1, 15,  78,  125,  290,  1950, 16800] },
-  // Si, ρ=2.33 g/cm³
   si:      { E_MeV:[0.1, 0.3, 1.0, 3.0, 6.0,  10.0, 30.0, 100.0],
              R_um: [1.4, 7.3, 30,  170, 320,  720,  5000, 39000] },
-  // Diamond, ρ=3.515 g/cm³
   diamond: { E_MeV:[0.1, 0.3, 1.0, 3.0, 6.0,  10.0, 30.0, 100.0],
              R_um: [0.8, 4.2, 21,  115, 180,  420,  2950, 25500] },
-  // SiO₂ (커버유리), ρ=2.20 g/cm³
   sio2:    { E_MeV:[0.1, 0.3, 1.0, 3.0, 6.0,  10.0, 30.0, 100.0],
              R_um: [1.5, 7.7, 33,  185, 340,  770,  5300, 41000] },
-  // AlN, ρ=3.26 g/cm³
   aln:     { E_MeV:[0.1, 0.3, 1.0, 3.0, 6.0,  10.0, 30.0, 100.0],
              R_um: [1.0, 5.5, 26,  140, 220,  500,  3500, 30000] },
-  // Ge, ρ=5.32 g/cm³
   ge:      { E_MeV:[0.1, 0.3, 1.0, 3.0, 6.0,  10.0, 30.0, 100.0],
              R_um: [0.6, 3.2, 15,  80,  130,  300,  2000, 17500] },
-  // Al, ρ=2.70 g/cm³
   al:      { E_MeV:[0.1, 0.3, 1.0, 3.0, 6.0,  10.0, 30.0, 100.0],
              R_um: [1.2, 6.5, 27,  150, 280,  640,  4500, 35500] },
-  // Cu, ρ=8.96 g/cm³
   cu_m:    { E_MeV:[0.1, 0.3, 1.0, 3.0, 6.0,  10.0, 30.0, 100.0],
              R_um: [0.4, 2.0, 9.5, 50,  82,   190,  1300, 11000] },
 };
-// 별칭
 _SRIM_PROJ_R.glass  = _SRIM_PROJ_R.sio2;
 _SRIM_PROJ_R.ge_sub = _SRIM_PROJ_R.ge;
 _SRIM_PROJ_R.gainp  = _SRIM_PROJ_R.gaas;
 
-// [PATCH B] SRIM Range 로그-로그 보간
+const _ACCURACY = {
+  si:'A', al:'A', cu_m:'A', ge:'A', ge_sub:'A', au:'A', pb_m:'A', mo:'A',
+  diamond:'A', sio2:'A', gaas:'A', kapton:'A', gan:'A', sic:'A', aln:'A',
+  glass:'A', gainp:'B', inp:'C', hfo2:'C', perovskite:'C', cigs:'C', ito:'C', pedot:'C',
+};
+function getAccuracyGrade(matKey){ return _ACCURACY[matKey] || 'C'; }
+
 function _interpSrimRange(table, E_MeV) {
   const Es = table.E_MeV, Rs = table.R_um;
   if (E_MeV <= Es[0])             return Rs[0] * Math.pow(E_MeV / Es[0], 1.75);
@@ -528,39 +545,23 @@ function _interpSrimRange(table, E_MeV) {
   return Rs[Rs.length - 1];
 }
 
-// [v4.3 PATCH A] SRIM Range 역보간: R(E) → E (이분탐색)
 function _interpSrimRangeInverse(table, R_target_um) {
   const Es = table.E_MeV;
   const tolerance = 0.001;
   const R_at_E = (E) => _interpSrimRange(table, E);
   const R_min = R_at_E(Es[0]);
   const R_max = R_at_E(Es[Es.length-1]);
-  
   if (R_target_um <= R_min) return Es[Es.length-1];
   if (R_target_um >= R_max) return Es[0];
-  
   let E_lo = Es[0], E_hi = Es[Es.length-1];
   while (E_hi - E_lo > tolerance) {
     const E_mid = (E_lo + E_hi) / 2;
     const R_mid = R_at_E(E_mid);
-    if (R_mid > R_target_um) {
-      E_lo = E_mid;
-    } else {
-      E_hi = E_mid;
-    }
+    if (R_mid > R_target_um) { E_lo = E_mid; } else { E_hi = E_mid; }
   }
   return (E_lo + E_hi) / 2;
 }
 
-// 데이터 소스 신뢰도 등급
-const _ACCURACY = {
-  si:'A', al:'A', cu_m:'A', ge:'A', ge_sub:'A', au:'A', pb_m:'A', mo:'A',
-  diamond:'A', sio2:'A', gaas:'A', kapton:'A', gan:'A', sic:'A', aln:'A',
-  glass:'A', gainp:'B', inp:'C', hfo2:'C', perovskite:'C', cigs:'C', ito:'C', pedot:'C',
-};
-function getAccuracyGrade(matKey){ return _ACCURACY[matKey] || 'C'; }
-
-// log-log 보간 (Se, PSTAR R 공용)
 function _interpSe(arr, E){
   if(E <= _EG[0])  return arr[0] * Math.sqrt(E / _EG[0]);
   if(E >= _EG[41]) return arr[41] * Math.pow(_EG[41] / E, 0.8);
@@ -603,14 +604,6 @@ function Se(E, Z1, A1, Z2, A2, I_eV, rho, matKey){
   return Math.max(0.001, Se_p);
 }
 
-// ============================================================================
-// [PATCH C — v4.2] Range() 하이브리드: SRIM 1순위 + PSTAR fallback
-// ============================================================================
-// 화합물에 대해 SRIM Projected Range를 우선 사용 → 사용자 SRIM 결과와 일치.
-// SRIM 테이블 없는 물질은 PSTAR CSDA × Detour Factor 보정으로 추정.
-// CSDA → Projected Range Detour Factor (실험적):
-//   단원소 (Si, Al, Cu 등):  0.85~0.95
-//   화합물 (Perovskite 등):  0.80~0.90
 const _DETOUR_FACTOR = {
   si:0.95, al:0.93, cu_m:0.90, ge:0.92, au:0.88, pb_m:0.87, mo:0.91,
   diamond:0.93, sio2:0.92, gaas:0.90, kapton:0.94, gan:0.91, sic:0.92, aln:0.92,
@@ -618,28 +611,21 @@ const _DETOUR_FACTOR = {
 
 function Range(E0, Z1, A1, Z2, A2, I_eV, rho, matKey){
   const E_eff = (Z1 === 1) ? E0 : E0 / A1;
-
-  // [1순위] 양성자 + SRIM 테이블 있는 물질 → 직접 사용
   if (Z1 === 1 && _SRIM_PROJ_R[matKey]) {
     return _interpSrimRange(_SRIM_PROJ_R[matKey], E_eff);
   }
-
-  // [2순위] PSTAR 테이블 + Detour Factor
   const rTbl = matKey && _PSTAR_R[matKey];
   if (rTbl) {
     let R_gcm2 = _interpR(rTbl, E_eff);
-    if (Z1 > 1) R_gcm2 *= A1 / (Z1 * Z1);  // 중이온 근사
+    if (Z1 > 1) R_gcm2 *= A1 / (Z1 * Z1);
     const detour = _DETOUR_FACTOR[matKey] || 0.85;
     return R_gcm2 / rho * 1e4 * detour;
   }
-
-  // [3순위] Si 기반 Bragg-Kleeman 스케일링 (최후 fallback)
   const BK = Math.pow(A2 / 28.09, 0.1687);
   const R_gcm2 = _interpR(_PSTAR_R.si, E_eff) * (Z1 === 1 ? 1 : A1) * BK;
   return R_gcm2 / rho * 1e4 * 0.85;
 }
 
-// 핵 저지능 (ZBL/LSS)
 function snr(e){
   if(e <= 30) return Math.log(1 + 1.1383*e) / (2*(e + 0.01321*Math.pow(e,0.21226) + 0.19593*Math.sqrt(e)));
   return Math.log(e) / (2*e);
@@ -651,164 +637,8 @@ function Sn(E, Z1, A1, Z2, A2, rho){
 }
 
 // ============================================================================
-// SECTION 3. Bragg 시뮬레이션 엔진
+// SECTION 3. Bragg 시뮬레이션 엔진 (v4.3 — SRIM Range 역보간 기반)
 // ============================================================================
-const E_MIN_FRACTION = 0.001;
-const E_MIN_ABS = 0.001;
-const DX_INIT_UM = 0.02;
-const DX_MIN_UM = 1e-4;
-const DX_MAX_FACTOR = 0.05;
-const MAX_STEPS = 5e5;
-const FRAC_HIGH = 0.02;
-const FRAC_LOW  = 0.003;
-const GROW_RATE = 1.3;
-const ENDREGION_FACTOR = 100;
-const LOWE_DX_CAP_UM = 0.005;
-const SUBSTEP_COUNT = 8;
-
-function simulateBragg(ion, E0_MeV, layers){
-  const profile = [];
-  const layerResults = [];
-  let E = E0_MeV;
-  let xCum = 0;
-  let stopped = false;
-  let stopLayer = -1;
-  const E_floor = Math.max(E0_MeV * E_MIN_FRACTION, E_MIN_ABS);
-  let totalSteps = 0;
-
-  profile.push({ x: 0, E: E0_MeV, dEdx: 0, layer: 0 });
-
-  for(let li = 0; li < layers.length; li++){
-    const L = layers[li];
-    const tar = TARGETS[L.material];
-    if(!tar){ continue; }
-    const t_um = parseFloat(L.thickness);
-    if(!(t_um > 0)) continue;
-    const rho = parseFloat(L.density) || tar.rho;
-    const I_eV = parseFloat(L.I) || tar.I;
-
-    let xInLayer = 0;
-    let dx = Math.min(DX_INIT_UM, t_um * DX_MAX_FACTOR);
-    let entryE = E;
-    let stepsInLayer = 0;
-    let layerStopped = false;
-
-    while(xInLayer < t_um && !stopped){
-      totalSteps++;
-      if(totalSteps > MAX_STEPS){ console.warn('Bragg sim: MAX_STEPS reached'); break; }
-
-      const sMass = Se(E, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
-                  + Sn(E, ion.Z, ion.A, tar.Z, tar.A, rho);
-      const dEdx_lin = sMass * rho * 1e-4;
-
-      const inEndRegion = (E < ENDREGION_FACTOR * E_floor);
-      const dxHardCap = inEndRegion ? Math.min(LOWE_DX_CAP_UM, t_um * DX_MAX_FACTOR) : (t_um * DX_MAX_FACTOR);
-      if(dx > dxHardCap) dx = dxHardCap;
-
-      const dE_test = dEdx_lin * dx;
-      const fracLoss = dE_test / E;
-      if(fracLoss > FRAC_HIGH && dx > DX_MIN_UM * 2){ dx = Math.max(DX_MIN_UM, dx / 2); continue; }
-      if(fracLoss < FRAC_LOW && dx < dxHardCap){ dx = Math.min(dx * GROW_RATE, dxHardCap); }
-
-      const dxStep = Math.min(dx, t_um - xInLayer);
-      const dE = dEdx_lin * dxStep;
-      const newE = E - dE;
-
-      xCum += dxStep;
-      xInLayer += dxStep;
-
-      if(newE <= E_floor){
-        const x_substep_start = xCum - dxStep;
-        const dx_sub = dxStep / SUBSTEP_COUNT;
-        let E_sub = E;
-        let x_sub = x_substep_start;
-        let lastDEdx = dEdx_lin;
-        let xStop = xCum;
-
-        for(let k = 0; k < SUBSTEP_COUNT; k++){
-          if(E_sub <= E_floor){ xStop = x_sub; break; }
-          const sMass_sub = Se(E_sub, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
-                          + Sn(E_sub, ion.Z, ion.A, tar.Z, tar.A, rho);
-          const dEdx_sub = sMass_sub * rho * 1e-4;
-          lastDEdx = dEdx_sub;
-          profile.push({ x: x_sub, E: E_sub, dEdx: dEdx_sub, layer: li });
-          const dE_sub_test = dEdx_sub * dx_sub;
-          if(E_sub - dE_sub_test <= E_floor){
-            const frac = E_sub / dEdx_sub;
-            xStop = x_sub + Math.min(dx_sub, frac);
-            E_sub = 0;
-            break;
-          }
-          E_sub -= dE_sub_test;
-          x_sub += dx_sub;
-        }
-        profile.push({ x: xStop, E: 0, dEdx: lastDEdx, layer: li });
-        stopped = true; layerStopped = true; stopLayer = li; E = 0; xCum = xStop;
-        break;
-      }
-
-      E = newE;
-      profile.push({ x: xCum, E: E, dEdx: dEdx_lin, layer: li });
-      stepsInLayer++;
-    }
-
-    layerResults.push({
-      idx: li, name: L.name || tar.name, material: L.material,
-      thickness_um: t_um, entryE_MeV: entryE,
-      exitE_MeV: layerStopped ? 0 : E,
-      dE_MeV: layerStopped ? entryE : (entryE - E),
-      stopped: layerStopped, steps: stepsInLayer, dose_MeV_per_g: 0
-    });
-    if(stopped) break;
-  }
-
-  for(const lr of layerResults){
-    const tar = TARGETS[layers[lr.idx].material];
-    const rho = parseFloat(layers[lr.idx].density) || tar.rho;
-    const t_cm = lr.thickness_um * 1e-4;
-    lr.dose_MeV_per_g = lr.dE_MeV / (rho * t_cm);
-  }
-
-  const totalThickness = layers.reduce((s, l) => s + (parseFloat(l.thickness) || 0), 0);
-
-  // [PATCH E — v4.2] 자동 검증: 단일 균질층 케이스에서 적분 결과 vs Range() 비교
-  let validationWarning = null;
-  if (layers.length >= 1) {
-    const firstMat = layers[0].material;
-    const allSame = layers.every(l => l.material === firstMat);
-    if (allSame) {
-      const tar = TARGETS[firstMat];
-      const rho = parseFloat(layers[0].density) || tar.rho;
-      const R_theoretical = Range(E0_MeV, ion.Z, ion.A, tar.Z, tar.A, tar.I, rho, firstMat);
-      const simRange = stopped ? xCum : totalThickness;
-
-      if (stopped) {
-        const ratio = simRange / R_theoretical;
-        if (ratio < 0.75 || ratio > 1.33) {
-          validationWarning = `시뮬레이션 Range ${simRange.toFixed(1)} μm vs SRIM 이론값 ${R_theoretical.toFixed(1)} μm (×${ratio.toFixed(2)}) — 적분 step 점검 권장`;
-          console.warn('[STOP v4.2 Bragg val]', validationWarning);
-        }
-      } else if (totalThickness >= R_theoretical * 1.2) {
-        validationWarning = `이론 Range ${R_theoretical.toFixed(1)} μm < 스택 두께 ${totalThickness.toFixed(1)} μm 이지만 "투과"로 처리됨 — Bragg 적분 미수렴 가능성`;
-        console.warn('[STOP v4.2 Bragg val]', validationWarning);
-      }
-    }
-  }
-
-  return {
-    profile, layerResults, stopped, stopLayer,
-    range_um: stopped ? xCum : totalThickness,
-    exitE_MeV: stopped ? 0 : E,
-    E0_MeV, totalThickness_um: totalThickness,
-    validationWarning  // 신규 (v4.2)
-  };
-}
-
-// ============================================================================
-// [v4.3 PATCH B] 신규 Bragg 시뮬레이션 엔진 — SRIM Range 역보간 기반
-// ============================================================================
-// Depth Profile 탭에서 사용. Material Property와 일관성 보장.
-// 장점: (1) E(x) 정확 계산, (2) Y축 단위 명확, (3) 투과 판정 신뢰성 높음
 function simulateBragg_v43(ion, E0_MeV, layers){
   const profile = [];
   const layerResults = [];
@@ -816,9 +646,9 @@ function simulateBragg_v43(ion, E0_MeV, layers){
   let xCum = 0;
   let stopped = false;
   let stopLayer = -1;
-  
+
   profile.push({ x: 0, E: E0_MeV, dEdx: 0, layer: 0 });
-  
+
   for(let li = 0; li < layers.length; li++){
     const L = layers[li];
     const tar = TARGETS[L.material];
@@ -827,23 +657,17 @@ function simulateBragg_v43(ion, E0_MeV, layers){
     if(!(t_um > 0)) continue;
     const rho = parseFloat(L.density) || tar.rho;
     const I_eV = parseFloat(L.I) || tar.I;
-    
+
     const srimTable = (ion.Z === 1) && _SRIM_PROJ_R[L.material];
     let entryE = E;
     let exitE = E;
     let layerStopped = false;
-    
+
     if(srimTable){
       const R_entry = _interpSrimRange(srimTable, E);
-      
       if(t_um >= R_entry){
-        layerStopped = true;
-        stopped = true;
-        stopLayer = li;
-        xCum += R_entry;
-        exitE = 0;
-        E = 0;
-        
+        layerStopped = true; stopped = true; stopLayer = li;
+        xCum += R_entry; exitE = 0; E = 0;
         const steps = Math.max(1, Math.ceil(R_entry / 0.5));
         for(let step = 1; step < steps; step++){
           const x_step = step * (R_entry / steps);
@@ -859,7 +683,6 @@ function simulateBragg_v43(ion, E0_MeV, layers){
         const R_exit = R_entry - t_um;
         exitE = _interpSrimRangeInverse(srimTable, Math.max(0, R_exit));
         E = exitE;
-        
         const steps = Math.max(1, Math.ceil(t_um / 0.5));
         for(let step = 1; step < steps; step++){
           const x_step = step * (t_um / steps);
@@ -877,24 +700,17 @@ function simulateBragg_v43(ion, E0_MeV, layers){
                   + Sn(E, ion.Z, ion.A, tar.Z, tar.A, rho);
       const dEdx_lin = sMass * rho * 1e-4;
       const dE_total = dEdx_lin * t_um;
-      
       if(E - dE_total <= 0.001){
         const t_stop = E / dEdx_lin;
-        layerStopped = true;
-        stopped = true;
-        stopLayer = li;
-        xCum += t_stop;
-        exitE = 0;
-        E = 0;
+        layerStopped = true; stopped = true; stopLayer = li;
+        xCum += t_stop; exitE = 0; E = 0;
         profile.push({ x: xCum, E: 0, dEdx: dEdx_lin, layer: li });
       } else {
-        exitE = E - dE_total;
-        E = exitE;
-        xCum += t_um;
+        exitE = E - dE_total; E = exitE; xCum += t_um;
         profile.push({ x: xCum, E: E, dEdx: dEdx_lin, layer: li });
       }
     }
-    
+
     layerResults.push({
       idx: li, name: L.name || tar.name, material: L.material,
       thickness_um: t_um, entryE_MeV: entryE,
@@ -904,20 +720,17 @@ function simulateBragg_v43(ion, E0_MeV, layers){
     });
     if(stopped) break;
   }
-  
+
   for(const lr of layerResults){
     const tar = TARGETS[layers[lr.idx].material];
     const rho = parseFloat(layers[lr.idx].density) || tar.rho;
     const t_cm = lr.thickness_um * 1e-4;
     lr.dose_MeV_per_g = (t_cm > 0) ? lr.dE_MeV / (rho * t_cm) : 0;
   }
-  
+
   const totalThickness = layers.reduce((s, l) => s + (parseFloat(l.thickness) || 0), 0);
   let validationWarning = null;
-  
   if(layers.length >= 1 && stopped){
-    const tar = TARGETS[layers[0].material];
-    const rho = parseFloat(layers[0].density) || tar.rho;
     if((ion.Z === 1) && _SRIM_PROJ_R[layers[0].material]){
       const R_theoretical = _interpSrimRange(_SRIM_PROJ_R[layers[0].material], E0_MeV);
       const ratio = xCum / R_theoretical;
@@ -926,7 +739,7 @@ function simulateBragg_v43(ion, E0_MeV, layers){
       }
     }
   }
-  
+
   return {
     profile, layerResults, stopped, stopLayer,
     range_um: stopped ? xCum : totalThickness,
@@ -976,8 +789,7 @@ function fillSelects(){
 }
 
 // ============================================================================
-// [PATCH D — v4.2] SECTION 6. Material Property 탭 update()
-//   Workers API 응답 sanity check + 자동 거부 로직 추가
+// SECTION 6. Material Property 탭 update()
 // ============================================================================
 let stopChart = null;
 
@@ -1009,16 +821,13 @@ async function update(){
   const u = document.getElementById('eUnit').value;
   const E = toMeV(v, u);
 
-  // [v4.2] STEP 1: 내장 하이브리드 엔진 기준값 (SRIM 1순위 → PSTAR fallback)
   const se_local  = Se(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey);
   const rng_local = Range(E, ion.Z, ion.A, tar.Z, tar.A, tar.I, tar.rho, tarKey);
 
-  let se = se_local;
-  let rng = rng_local;
+  let se = se_local, rng = rng_local;
   let dataSource = 'SRIM/PSTAR 하이브리드 (내부)';
   let apiWarning = '';
 
-  // [v4.2] STEP 2: Workers KV 조회 + sanity check (±25%)
   if (ion.Z <= 2 && window.WORKER_API_URL && window.MATERIAL_NAME_MAP) {
     const matName = window.MATERIAL_NAME_MAP[tarKey];
     if (matName) {
@@ -1026,26 +835,18 @@ async function update(){
         fetchWorkerSe(matName, E, ion.Z),
         fetchWorkerRange(matName, E, ion.Z),
       ]);
-
-      // Range API 검증
       if (rngResult && rng_local > 0) {
         const ratio = rngResult.R_um / rng_local;
         if (ratio >= 0.75 && ratio <= 1.33) {
-          rng = rngResult.R_um;
-          dataSource = 'NIST KV (검증 통과)';
+          rng = rngResult.R_um; dataSource = 'NIST KV (검증 통과)';
         } else {
           apiWarning = `API ${rngResult.R_um.toPrecision(3)} μm vs Local ${rng_local.toPrecision(3)} μm (×${ratio.toFixed(2)}) → API 거부, Local 채택`;
-          console.warn('[STOP v4.2]', apiWarning);
           dataSource = 'SRIM/PSTAR 하이브리드 (API 거부)';
         }
       }
-
-      // Se API 검증 (±15%)
       if (seResult && se_local > 0) {
         const ratio = seResult.Se / se_local;
-        if (ratio >= 0.85 && ratio <= 1.18) {
-          se = seResult.Se;
-        }
+        if (ratio >= 0.85 && ratio <= 1.18) { se = seResult.Se; }
       }
     }
   }
@@ -1063,7 +864,6 @@ async function update(){
   const bragg = findBraggPeak(ion, tar, tarKey);
   document.getElementById('mBragg').textContent = fmt(bragg);
 
-  // 검증 카드
   const b = beta(E, ion.A);
   let validity;
   if(b < 0.01)       validity = '⚠ 너무 저속 (LSS 영역)';
@@ -1075,7 +875,6 @@ async function update(){
   mv.className = 'mcv';
   if (apiWarning) mv.title = apiWarning;
 
-  // NIEL/TNID
   const dur = parseFloat(document.getElementById('dur').value) || 1;
   const logFlux = parseFloat(document.getElementById('logFlux').value) || 10;
   const flux = Math.pow(10, logFlux);
@@ -1138,9 +937,8 @@ function drawStopChart(ion, tar, currentE, tarKey){
 }
 
 // ============================================================================
-// SECTION 7. 모드 2 — Multi-Layer Bragg Peak (Depth Profile)
+// SECTION 7. 모드 2 — Multi-Layer Bragg (Depth Profile)
 // ============================================================================
-let braggChart = null;
 let layers = [];
 
 const PRESETS = {
@@ -1261,7 +1059,8 @@ function runDepthSim(){
     document.getElementById('dpStatus').textContent='층 없음';
     document.getElementById('dpReport').innerHTML='<div class="mnote">층을 추가하거나 프리셋을 선택하세요.</div>';
     document.getElementById('dpLayerSummary').innerHTML='';
-    if(braggChart){ braggChart.destroy(); braggChart=null; }
+    [srimLateralChart,srimRangeChart,srimIonChart].forEach(c=>{if(c)c.destroy()});
+    srimLateralChart=srimRangeChart=srimIonChart=null;
     return;
   }
 
@@ -1280,24 +1079,15 @@ function runDepthSim(){
   } else {
     reportHtml=`<div class="report-card report-pass"><strong>${ion.name}</strong> @ <strong>${fmt(E0)} MeV</strong> 입사 → 전체 스택 <strong>투과 (${fmt(result.totalThickness_um,4)} μm)</strong>.<br>잔여 에너지: <strong>${fmt(result.exitE_MeV,3)} MeV</strong> (입사 대비 ${(100*result.exitE_MeV/E0).toFixed(1)}%)<br><span style="font-size:12px;opacity:.85">입자가 모든 층을 통과했습니다.</span></div>`;
   }
-
-  // [v4.3] 자동 검증 표시 강화
   if (result.validationWarning) {
     if (result.validationWarning.includes('✓')) {
-      reportHtml += `<div class="report-card" style="background:rgba(13,138,94,.09);border:1px solid rgba(13,138,94,.35);color:#0d8a5e;margin-top:8px">
-        <strong>✓ v4.3 검증 통과:</strong> SRIM Range 역보간으로 정확히 계산<br><span style="font-size:11px;opacity:.85">${result.validationWarning}</span>
-      </div>`;
+      reportHtml += `<div class="report-card" style="background:rgba(13,138,94,.09);border:1px solid rgba(13,138,94,.35);color:#0d8a5e;margin-top:8px"><strong>✓ v4.3 검증 통과:</strong> SRIM Range 역보간으로 정확히 계산<br><span style="font-size:11px;opacity:.85">${result.validationWarning}</span></div>`;
     } else {
-      reportHtml += `<div class="report-card report-warn" style="margin-top:8px">
-        ⚠ <strong>검증 (v4.3):</strong> ${result.validationWarning}
-      </div>`;
+      reportHtml += `<div class="report-card report-warn" style="margin-top:8px">⚠ <strong>검증 (v4.3):</strong> ${result.validationWarning}</div>`;
     }
   } else if (!result.stopped) {
-    reportHtml += `<div class="report-card" style="background:rgba(13,138,94,.09);border:1px solid rgba(13,138,94,.35);color:#0d8a5e;margin-top:8px">
-      ✓ <strong>v4.3 검증 통과:</strong> SRIM Range 역보간으로 E(x) 정확히 계산. 투과 판정 신뢰도 높음.
-    </div>`;
+    reportHtml += `<div class="report-card" style="background:rgba(13,138,94,.09);border:1px solid rgba(13,138,94,.35);color:#0d8a5e;margin-top:8px">✓ <strong>v4.3 검증 통과:</strong> SRIM Range 역보간으로 E(x) 정확히 계산. 투과 판정 신뢰도 높음.</div>`;
   }
-
   document.getElementById('dpReport').innerHTML=reportHtml;
 
   const summary=result.layerResults.map((lr,i) => {
@@ -1306,47 +1096,244 @@ function runDepthSim(){
     return `<div class="lsum-card"><div class="lsum-name"><span class="lsum-color" style="background:var(--c-l${ci})"></span><strong>L${lr.idx+1}: ${lr.name}</strong></div><div class="lsum-vals"><span class="nowrap">ΔE = ${fmt(lr.dE_MeV,3)} MeV</span> <span class="nowrap">(${lossPct}%)</span><br><span class="nowrap">D = ${fmt(dose,3)} MeV·cm²/g</span><br>${lr.stopped?'<span style="color:var(--warn)">⚠ 이 층에서 정지</span>':'<span class="nowrap">진입 '+fmt(lr.entryE_MeV,3)+' MeV</span> → <span class="nowrap">출구 '+fmt(lr.exitE_MeV,3)+' MeV</span>'}</div></div>`;
   }).join('');
   document.getElementById('dpLayerSummary').innerHTML=summary;
-  drawBraggChart(result, ion);
-}
 
-function drawBraggChart(result, ion){
-  const ctx=document.getElementById('braggChart').getContext('2d');
-  if(braggChart) braggChart.destroy();
-  const dEdxData=result.profile.map(p=>({x:p.x,y:p.dEdx}));
-  const eData=result.profile.map(p=>({x:p.x,y:p.E}));
-  const layerAnnotations={};
-  let xCum=0;
-  layers.forEach((l,i)=>{
-    const t=parseFloat(l.thickness)||0, ci=(i%8)+1;
-    const colorVar=getComputedStyle(document.documentElement).getPropertyValue('--c-l'+ci).trim();
-    layerAnnotations['box'+i]={ type:'box', xMin:xCum, xMax:xCum+t, backgroundColor:colorVar, borderColor:'transparent', borderWidth:0, drawTime:'beforeDatasetsDraw', label:{display:true,content:'L'+(i+1),position:{x:'start',y:'start'},font:{family:'Space Mono',size:9,weight:'700'},color:'#3a5070',backgroundColor:'transparent',padding:{top:3,left:5}} };
-    xCum+=t;
-  });
-  if(result.stopped){ layerAnnotations.stopLine={ type:'line', xMin:result.range_um, xMax:result.range_um, borderColor:'#b52020', borderWidth:1.5, borderDash:[6,4] }; }
-
-  braggChart=new Chart(ctx,{
-    type:'line',
-    data:{ datasets:[
-      { label:'dE/dx', data:dEdxData, borderColor:'#b52020', backgroundColor:'rgba(181,32,32,.14)', borderWidth:2, pointRadius:0, fill:true, tension:0.15, yAxisID:'y' },
-      { label:'E(x)',  data:eData,    borderColor:'rgba(26,82,200,.6)', borderWidth:1.5, pointRadius:0, fill:false, tension:0.15, borderDash:[3,3], yAxisID:'y2' }
-    ]},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{ legend:{display:false}, annotation:{annotations:layerAnnotations},
-        tooltip:{callbacks:{ title:c=>'x = '+c[0].parsed.x.toFixed(3)+' μm', label:c=>c.dataset.label==='dE/dx'?'dE/dx = '+c.parsed.y.toExponential(2)+' MeV/μm':'E = '+c.parsed.y.toFixed(3)+' MeV' }}
-      },
-      scales:{
-        x:{ type:'linear', title:{display:true,text:'누적 깊이 x (μm)',color:'#3a5070',font:{size:12}}, grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#3a5070',font:{size:11}} },
-        y:{ type:'linear', position:'left', min:0, max:(()=>{const maxVal=Math.max(...dEdxData.map(p=>p.y||0));return Math.max(0.2,maxVal*1.2)})(), title:{display:true,text:'dE/dx (MeV/μm)',color:'#b52020',font:{size:12}}, grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#b52020',font:{size:11},callback:v=>v.toFixed(3)} },
-        y2:{ type:'linear', position:'right', title:{display:true,text:'E (MeV)',color:'#1a52c8',font:{size:12}}, grid:{display:false}, ticks:{color:'#1a52c8',font:{size:11}} }
-      }
-    }
-  });
+  // ─── SRIM 3-Panel 차트 ───────────────────────────────────────────────────
+  drawSrimCharts(result, ion);
 }
 
 // ============================================================================
-// SECTION 8. 모드 전환
+// SECTION 8. SRIM 3-Panel Chart Engine  (v4.4 신규)
+// ============================================================================
+// 패널 (a) Lateral Straggling  Highland MCS 25-track MC
+// 패널 (b) Ion Range Distribution  Bohr-straggling Gaussian
+// 패널 (c) Ionization (Bragg curve)  dE/dx vs depth, 단위 eV/Å
+
+let srimLateralChart = null, srimRangeChart = null, srimIonChart = null;
+
+// Box-Muller 정규 난수
+function randGauss(mu, sigma) {
+  const u1 = Math.random() + 1e-15, u2 = Math.random();
+  return mu + sigma * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+
+// 복합층 면적가중 방사길이 X₀ [μm]
+function estimateX0(lyrs, totalR_um) {
+  const X0g = { si:21.82, al:24.01, cu_m:12.86, ge:12.25, ge_sub:12.25,
+                sio2:27.05, glass:27.05, gaas:12.61, gainp:12.5,
+                gan:16.7, sic:22.0, aln:23.0, diamond:42.0,
+                kapton:31.0, pb_m:6.37, au:6.46, mo:9.8,
+                ito:11.0, pedot:33.0, perovskite:10.0 };
+  let wSum = 0, x0Sum = 0;
+  for (const l of lyrs) {
+    const t = parseFloat(l.thickness) || 0;
+    const tar = TARGETS[l.material];
+    if (!tar || t <= 0) continue;
+    const rho = parseFloat(l.density) || tar.rho;
+    const x0um = ((X0g[l.material] || 20) / rho) * 1e4;
+    wSum += rho * t; x0Sum += rho * t * x0um;
+  }
+  return wSum > 0 ? x0Sum / wSum : 93700;
+}
+
+// Highland MCS 궤적 (25개)
+function generateTracks(ion, E0_MeV, result, lyrs) {
+  const tracks = [], nTracks = 25, nSteps = 80;
+  const totalR = result.range_um;
+  if (totalR <= 0) return tracks;
+  const avgX0 = estimateX0(lyrs, totalR);
+
+  for (let t = 0; t < nTracks; t++) {
+    const pts = [{ x: 0, y: 0 }];
+    let curY = 0, angleAcc = 0;
+    for (let s = 1; s <= nSteps; s++) {
+      const xFrac = s / nSteps;
+      const dx = totalR / nSteps;
+      const remainFrac = Math.max(0, 1 - xFrac);
+      const E_approx = Math.max(E0_MeV * Math.pow(remainFrac, 0.55), 0.001);
+      const b = beta(E_approx, ion.A);
+      const p = ion.A * 938.272 * b / Math.sqrt(1 - b * b + 1e-30);
+      const xX0 = dx / avgX0;
+      const theta0 = xX0 > 0
+        ? Math.abs((13.6 / (b * p)) * ion.Z * Math.sqrt(xX0) * (1 + 0.038 * Math.log(xX0 + 1e-15)))
+        : 0;
+      angleAcc += randGauss(0, theta0);
+      curY += dx * Math.sin(angleAcc) * (ion.Z === 1 ? 0.15 : 0.45);
+      pts.push({ x: xFrac * totalR, y: curY });
+    }
+    tracks.push(pts);
+  }
+  return tracks;
+}
+
+// Bohr straggling Gaussian range 분포
+function computeRangeDistribution(range_um, E0_MeV) {
+  const sigma = range_um * (0.012 + 0.008 / Math.sqrt(E0_MeV + 0.1));
+  const nBins = 100;
+  const xMin = Math.max(0, range_um - 4.5 * sigma);
+  const xMax = range_um + 4.5 * sigma;
+  const dx = (xMax - xMin) / nBins;
+  const xs = [], ys = [];
+  const norm = sigma * Math.sqrt(2 * Math.PI);
+  for (let i = 0; i <= nBins; i++) {
+    const x = xMin + i * dx;
+    xs.push(x);
+    ys.push(Math.exp(-0.5 * Math.pow((x - range_um) / sigma, 2)) / norm);
+  }
+  return { xs, ys, sigma, mean: range_um };
+}
+
+function drawSrimCharts(result, ion) {
+  // 정리
+  [srimLateralChart, srimRangeChart, srimIonChart].forEach(c => { if (c) c.destroy(); });
+  srimLateralChart = srimRangeChart = srimIonChart = null;
+
+  const range_um = result.range_um;
+  const E0 = result.E0_MeV;
+
+  // ── (a) Lateral Straggling ─────────────────────────────────────────────────
+  const tracks = generateTracks(ion, E0, result, layers);
+  const lateralDs = tracks.map(pts => ({
+    data: pts.map(p => ({ x: p.x, y: p.y })),
+    borderColor: 'rgba(192,57,43,0.50)',
+    borderWidth: 0.9,
+    pointRadius: 0,
+    fill: false,
+    tension: 0.35,
+    showLine: true,
+  }));
+
+  const ctxA = document.getElementById('srimLateralChart').getContext('2d');
+  srimLateralChart = new Chart(ctxA, {
+    type: 'scatter',
+    data: { datasets: lateralDs },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 300 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+        annotation: {
+          annotations: {
+            stopLine: result.stopped ? {
+              type: 'line', xMin: range_um, xMax: range_um,
+              borderColor: 'rgba(192,57,43,0.6)', borderWidth: 1.5, borderDash: [5,4]
+            } : {},
+            zeroLine: { type:'line', yMin:0, yMax:0, borderColor:'rgba(0,0,0,.15)', borderWidth:1 }
+          }
+        }
+      },
+      scales: {
+        x: { type:'linear', title:{display:true,text:'Depth (μm)',color:'#3a5070',font:{size:10}},
+             grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#3a5070',font:{size:9},maxTicksLimit:6} },
+        y: { title:{display:true,text:'Lateral dist. (μm)',color:'#3a5070',font:{size:10}},
+             grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#3a5070',font:{size:9},maxTicksLimit:5} }
+      }
+    }
+  });
+
+  // ── (b) Ion Range Distribution ─────────────────────────────────────────────
+  const dist = computeRangeDistribution(range_um, E0);
+  const ctxB = document.getElementById('srimRangeChart').getContext('2d');
+  srimRangeChart = new Chart(ctxB, {
+    type: 'line',
+    data: { datasets: [{
+      data: dist.xs.map((x,i) => ({ x, y: dist.ys[i] })),
+      borderColor: '#c0392b', backgroundColor: 'rgba(192,57,43,0.18)',
+      borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4,
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 300 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          title: c => 'x = ' + c[0].parsed.x.toFixed(2) + ' μm',
+          label: c => 'f(x) = ' + c[0].parsed.y.toExponential(2)
+        }},
+        annotation: { annotations: {
+          meanLine: {
+            type:'line', xMin:dist.mean, xMax:dist.mean,
+            borderColor:'#b86e00', borderWidth:2, borderDash:[6,3],
+            label:{ display:true, content:`Range = ${dist.mean.toFixed(1)} μm  |  σ = ${dist.sigma.toFixed(2)} μm`,
+                    position:'start', yAdjust:-10,
+                    font:{family:'Space Mono',size:8}, color:'#b86e00',
+                    backgroundColor:'rgba(255,255,255,0.7)', padding:{top:2,bottom:2,left:4,right:4} }
+          },
+          sigmaBox: {
+            type:'box', xMin:dist.mean-dist.sigma, xMax:dist.mean+dist.sigma,
+            backgroundColor:'rgba(184,110,0,0.07)', borderColor:'rgba(184,110,0,0.3)', borderWidth:1
+          }
+        }}
+      },
+      scales: {
+        x: { type:'linear', title:{display:true,text:'Target depth (μm)',color:'#3a5070',font:{size:10}},
+             grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#3a5070',font:{size:9},maxTicksLimit:6} },
+        y: { title:{display:true,text:'(Atoms/cm³)/(Atoms/cm²)',color:'#3a5070',font:{size:10}},
+             grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#3a5070',font:{size:9},maxTicksLimit:5,
+             callback: v => v.toExponential(0)} }
+      }
+    }
+  });
+
+  // ── (c) Ionization dE/dx ──────────────────────────────────────────────────
+  const dEdxData = result.profile.filter(p=>p.dEdx>0).map(p=>({ x:p.x, y:p.dEdx*1e5 })); // MeV/μm → eV/Å
+
+  const layerAnno = {};
+  let xc = 0;
+  layers.forEach((l,i)=>{
+    const t=parseFloat(l.thickness)||0, ci=(i%8)+1;
+    const cv = getComputedStyle(document.documentElement).getPropertyValue('--c-l'+ci).trim();
+    layerAnno['b'+i]={ type:'box', xMin:xc, xMax:xc+t, backgroundColor:cv, borderColor:'transparent',
+      borderWidth:0, drawTime:'beforeDatasetsDraw',
+      label:{ display:true, content:'L'+(i+1), position:{x:'start',y:'start'},
+              font:{family:'Space Mono',size:8,weight:'700'}, color:'#3a5070',
+              backgroundColor:'transparent', padding:{top:2,left:3} } };
+    xc+=t;
+  });
+  if(result.stopped){
+    layerAnno.stop={ type:'line', xMin:range_um, xMax:range_um,
+      borderColor:'#b52020', borderWidth:1.5, borderDash:[6,4] };
+  }
+
+  const maxDE = Math.max(...dEdxData.map(p=>p.y||0), 0.001);
+
+  const ctxC = document.getElementById('srimIonChart').getContext('2d');
+  srimIonChart = new Chart(ctxC, {
+    type: 'line',
+    data: { datasets: [{
+      data: dEdxData,
+      borderColor: '#c0392b', backgroundColor: 'rgba(192,57,43,0.18)',
+      borderWidth: 2, pointRadius: 0, fill: true, tension: 0.2,
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 300 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          title: c => 'x = ' + c[0].parsed.x.toFixed(3) + ' μm',
+          label: c => 'dE/dx = ' + c[0].parsed.y.toFixed(3) + ' eV/Å'
+        }},
+        annotation: { annotations: layerAnno }
+      },
+      scales: {
+        x: { type:'linear', title:{display:true,text:'Target depth (μm)',color:'#3a5070',font:{size:10}},
+             grid:{color:'rgba(0,0,0,.05)'}, ticks:{color:'#3a5070',font:{size:9},maxTicksLimit:6} },
+        y: { min:0, max:maxDE*1.25,
+             title:{display:true,text:'Energy Loss (eV/Å)',color:'#c0392b',font:{size:10}},
+             grid:{color:'rgba(0,0,0,.05)'},
+             ticks:{color:'#c0392b',font:{size:9},maxTicksLimit:5,callback:v=>v.toFixed(2)} }
+      }
+    }
+  });
+
+  // Legend 요약 업데이트
+  const legEl = document.getElementById('srimSummaryLeg');
+  if(legEl) legEl.textContent = `Ion Range = ${dist.mean.toFixed(1)} μm  |  Straggle σ = ${dist.sigma.toFixed(2)} μm`;
+}
+
+// ============================================================================
+// SECTION 9. 모드 전환
 // ============================================================================
 function switchMode(mode){
   const matBtn=document.getElementById('modeMatBtn'), dpBtn=document.getElementById('modeDepthBtn');
@@ -1365,7 +1352,7 @@ function switchMode(mode){
 }
 
 // ============================================================================
-// SECTION 9. Chart.js Annotation Plugin
+// SECTION 10. Chart.js Annotation Plugin
 // ============================================================================
 function loadAnnotationPlugin(callback){
   const s=document.createElement('script');
@@ -1376,7 +1363,7 @@ function loadAnnotationPlugin(callback){
 }
 
 // ============================================================================
-// SECTION 10. 초기화
+// SECTION 11. 초기화
 // ============================================================================
 function onTargetChange(){ const t=TARGETS[document.getElementById('target').value]; if(t) update(); }
 

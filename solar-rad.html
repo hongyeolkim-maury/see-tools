@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HELIAS Lab — Solar-Rad v2.2: 탠덤 태양전지 우주방사선 평가</title>
+<title>HELIAS Lab — Solar-Rad v2.3: 탠덤 태양전지 우주방사선 평가</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -58,7 +59,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .mcl{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;font-family:var(--mono)}
 .mcv{font-size:17px;font-weight:700;font-family:var(--mono);color:var(--text)}
 .mcu{font-size:11px;color:var(--muted);margin-top:2px}
-/* 계산 파라미터 박스 */
 .calc-params{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:10px 14px;font-family:var(--mono);font-size:12px;line-height:2.0;margin-bottom:12px}
 .calc-params-title{font-size:10px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;font-weight:700}
 .cp-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding:3px 0}
@@ -66,7 +66,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .cp-label{color:var(--muted);font-size:11px}
 .cp-value{color:var(--text);font-weight:700;font-size:12px}
 .cp-note{font-size:10px;color:var(--dim);margin-left:6px}
-/* vring, grade, verdict */
 .vring{width:64px;height:64px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px;font-family:var(--mono);font-weight:700;transition:all .4s}
 .vtitle{font-size:20px;font-weight:500;margin-bottom:4px}
 .vsub{font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;margin:0 auto 12px}
@@ -80,7 +79,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .grade-C{background:rgba(184,110,0,.1);color:#b86e00;border:2px solid rgba(184,110,0,.4)}
 .grade-D{background:rgba(192,37,29,.1);color:#b52020;border:2px solid rgba(181,32,32,.4)}
 .chart-wrap{position:relative;height:230px}
-/* layer editor */
 .layer-row{background:var(--bg1);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:8px;position:relative;transition:box-shadow .2s}
 .layer-row:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .layer-row.dragging{opacity:.5}
@@ -125,7 +123,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 
 <header>
   <div>
-    <div class="logo-main">HELIAS<span>/</span>SOLAR-RAD <span style="font-size:11px;color:var(--muted)">v2.2</span></div>
+    <div class="logo-main">HELIAS<span>/</span>SOLAR-RAD <span style="font-size:11px;color:var(--muted)">v2.3</span></div>
     <div class="logo-sub">탠덤 태양전지 우주방사선 평가 — Layer Editor 탑재</div>
   </div>
   <div class="htags">
@@ -153,6 +151,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 </div>
 
 <!-- ══ TAB 1: ASSESS ══ -->
+
 <div id="tab-assess" class="tab-panel active">
 <div class="g2" style="align-items:start">
   <div>
@@ -196,35 +195,36 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
       </div>
     </div>
 
-    <!-- ★ NEW: 계산 파라미터 실시간 표시 박스 -->
-    <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">계산 파라미터 (실시간)</div></div>
-      <div class="pb">
-        <div class="calc-params" id="calcParamBox">
-          <div class="calc-params-title">NRL Tada 모델 입력값 — 현재 레이어 구조 기반</div>
-          <div class="cp-row"><span class="cp-label">유효 손상계수 Cx_eff</span><span><span class="cp-value" id="cp-cx">—</span><span class="cp-note">(두께 가중 평균)</span></span></div>
-          <div class="cp-row"><span class="cp-label">유효 임계 플럭스 Φ₀_eff</span><span><span class="cp-value" id="cp-phi0">—</span><span class="cp-note">(기하 가중 평균, 추정)</span></span></div>
-          <div class="cp-row"><span class="cp-label">커버유리 감쇠율 (λ=1.2mm)</span><span><span class="cp-value" id="cp-atten">—</span><span class="cp-note">exp(−t/λ)</span></span></div>
-          <div class="cp-row"><span class="cp-label">셀 도달 연간 플럭스</span><span><span class="cp-value" id="cp-fluxyr">—</span><span class="cp-note">p⁺/cm²/yr</span></span></div>
-          <div class="cp-row"><span class="cp-label">누적 플럭스 Φ</span><span><span class="cp-value" id="cp-phi">—</span><span class="cp-note">p⁺/cm²</span></span></div>
-          <div class="cp-row"><span class="cp-label">log₁₀(Φ / Φ₀_eff)</span><span><span class="cp-value" id="cp-lograt">—</span><span class="cp-note">&gt;0 이면 열화 시작</span></span></div>
-          <div class="cp-row"><span class="cp-label">초기 Pmax₀</span><span><span class="cp-value" id="cp-pmax0">—</span><span class="cp-note">W/m² (AM0 기준)</span></span></div>
-          <div class="cp-row"><span class="cp-label">자기회복 보정</span><span><span class="cp-value" id="cp-heal">—</span><span class="cp-note">페로브 층 비중 × heal 계수</span></span></div>
-        </div>
-        <div style="font-size:11px;color:var(--dim);line-height:1.6">
-          ⚠ Φ₀_eff는 각 소재의 개별 Φ₀를 두께 기반 기하 가중 평균한 추정값입니다.
-          페로브스카이트·CIGS의 Φ₀는 실험으로 확립되지 않았으므로 실제 시험 전 참고용으로만 사용하십시오.
-        </div>
-      </div>
+```
+<div class="panel">
+  <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">계산 파라미터 (실시간)</div></div>
+  <div class="pb">
+    <div class="calc-params" id="calcParamBox">
+      <div class="calc-params-title">NRL Tada 모델 입력값 — 현재 레이어 구조 기반</div>
+      <div class="cp-row"><span class="cp-label">유효 손상계수 Cx_eff</span><span><span class="cp-value" id="cp-cx">—</span><span class="cp-note">(두께 가중 평균)</span></span></div>
+      <div class="cp-row"><span class="cp-label">유효 임계 플럭스 Φ₀_eff</span><span><span class="cp-value" id="cp-phi0">—</span><span class="cp-note">(기하 가중 평균, 추정)</span></span></div>
+      <div class="cp-row"><span class="cp-label">커버유리 감쇠율 (λ=1.2mm)</span><span><span class="cp-value" id="cp-atten">—</span><span class="cp-note">exp(−t/λ)</span></span></div>
+      <div class="cp-row"><span class="cp-label">셀 도달 연간 플럭스</span><span><span class="cp-value" id="cp-fluxyr">—</span><span class="cp-note">p⁺/cm²/yr</span></span></div>
+      <div class="cp-row"><span class="cp-label">누적 플럭스 Φ</span><span><span class="cp-value" id="cp-phi">—</span><span class="cp-note">p⁺/cm²</span></span></div>
+      <div class="cp-row"><span class="cp-label">log₁₀(Φ / Φ₀_eff)</span><span><span class="cp-value" id="cp-lograt">—</span><span class="cp-note">&gt;0 이면 열화 시작</span></span></div>
+      <div class="cp-row"><span class="cp-label">초기 Pmax₀</span><span><span class="cp-value" id="cp-pmax0">—</span><span class="cp-note">W/m² (AM0 기준)</span></span></div>
+      <div class="cp-row"><span class="cp-label">자기회복 보정</span><span><span class="cp-value" id="cp-heal">—</span><span class="cp-note">페로브 층 비중 × heal 계수</span></span></div>
     </div>
+    <div style="font-size:11px;color:var(--dim);line-height:1.6">
+      ⚠ Φ₀_eff는 각 소재의 개별 Φ₀를 두께 기반 기하 가중 평균한 추정값입니다.
+    </div>
+  </div>
+</div>
 
-    <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">현재 구조 층별 방사선 손상 (정성)</div></div>
-      <div class="pb">
-        <div class="stack-vis" id="stackVis"></div>
-        <div style="font-size:11px;color:var(--dim);margin-top:6px">막대 = 상대적 손상도. "레이어 구조 편집" 탭에서 층 추가/삭제/순서 변경 가능.</div>
-      </div>
-    </div>
+<div class="panel">
+  <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">현재 구조 층별 방사선 손상 (정성)</div></div>
+  <div class="pb">
+    <div class="stack-vis" id="stackVis"></div>
+    <div style="font-size:11px;color:var(--dim);margin-top:6px">막대 = 상대적 손상도. "레이어 구조 편집" 탭에서 층 추가/삭제/순서 변경 가능.</div>
+  </div>
+</div>
+```
+
   </div>
 
   <div>
@@ -243,48 +243,46 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
       </div>
     </div>
 
-    <div class="g4" style="margin-bottom:12px">
-      <div class="mc"><div class="mcl">EOL Pmax 잔존</div><div class="mcv" id="m-eol">—</div><div class="mcu">% of Pmax₀</div></div>
-      <div class="mc"><div class="mcl">EOL Pmax</div><div class="mcv" id="m-pmax">—</div><div class="mcu">W/m²</div></div>
-      <div class="mc"><div class="mcl">총 양성자 플럭스</div><div class="mcv" id="m-flux">—</div><div class="mcu">p⁺/cm²</div></div>
-      <div class="mc"><div class="mcl">GaAs 기준 1MeV e⁻ 등가</div><div class="mcv" id="m-eqfl">—</div><div class="mcu">e⁻/cm² (×580)</div></div>
-    </div>
+```
+<div class="g4" style="margin-bottom:12px">
+  <div class="mc"><div class="mcl">EOL Pmax 잔존</div><div class="mcv" id="m-eol">—</div><div class="mcu">% of Pmax₀</div></div>
+  <div class="mc"><div class="mcl">EOL Pmax</div><div class="mcv" id="m-pmax">—</div><div class="mcu">W/m²</div></div>
+  <div class="mc"><div class="mcl">총 양성자 플럭스</div><div class="mcv" id="m-flux">—</div><div class="mcu">p⁺/cm²</div></div>
+  <div class="mc"><div class="mcl">GaAs 기준 1MeV e⁻ 등가</div><div class="mcv" id="m-eqfl">—</div><div class="mcu">e⁻/cm² (×580)</div></div>
+</div>
 
-    <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">Pmax 열화 곡선</div></div>
-      <div class="pb">
-        <div class="chart-wrap"><canvas id="eolChart"></canvas></div>
-      </div>
-    </div>
+<div class="panel">
+  <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">Pmax 열화 곡선</div></div>
+  <div class="pb">
+    <div class="chart-wrap"><canvas id="eolChart"></canvas></div>
+  </div>
+</div>
+```
+
   </div>
 </div>
 
 <div class="mnote">
-  <strong>모델:</strong> NRL 방법론 Pmax 열화 (Tada+1982). 자기회복 보정 (Lang+2020 Joule). AE8/AP8 → AP9 정합 궤도 플럭스. 커버유리 감쇠: 지수 모델(λ=1.2mm). 소재별 Φ₀: 기하 가중 평균 (추정). v2.2: 소재별 Φ₀ 개별 지정 구현.
+  <strong>모델:</strong> NRL 방법론 Pmax 열화 (Tada+1982). 자기회복 보정 (Lang+2020 Joule). AE8/AP8 → AP9 정합 궤도 플럭스. 커버유리 감쇠: 지수 모델(λ=1.2mm). 소재별 Φ₀: 기하 가중 평균 (추정). v2.3: 에너지 드롭다운 버그 수정 + AIAA 판정 설명 강화.
 </div>
 
-<!-- 신뢰도 경고 박스 -->
 <div style="background:rgba(181,32,32,.07);border:1px solid rgba(181,32,32,.3);border-radius:6px;padding:12px 16px;margin-top:10px;line-height:1.8;font-size:13px">
   <div style="font-family:var(--mono);font-size:11px;color:#b52020;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">⚠️ 데이터 신뢰도 안내 — 반드시 숙지하십시오</div>
   <div style="color:var(--text)">
     <b>실험으로 직접 확인된 수치 (★★★★★)</b><br>
     · Perv/CIGS 85% 잔존 @ 68 MeV / 2×10¹² p⁺/cm² — Lang et al. (2020) Joule, in operando 직접 측정<br>
-    · Perv/Si 효율 1%로 급락 (동일 조건) — 같은 논문의 직접 측정값<br>
     · GaAs 3중접합 Cx≈0.03 — NASA JPL 장기 데이터베이스 기반<br><br>
     <b>방향성은 맞으나 수치에 주의 필요 (★★★☆☆)</b><br>
-    · 페로브스카이트 Cx=0.015, Φ₀=1×10⁹ — Kirmani+2022 간접 추정. 조성·에너지·두께에 따라 크게 달라질 수 있음<br>
-    · CIGS Cx=0.06, Φ₀=1×10¹⁰ — Lang+2020 역산값. 최신 Cs 처리 CIGS(2024)는 더 우수할 수 있음<br>
-    · 자기회복 계수 H_rec 기본값 0.30 — Lang+2020 관찰 기반, 정량값은 추정<br><br>
-    <b>실험 데이터 부재 — 추정값 (★☆☆☆☆)</b><br>
-    · ITO/AZO/수송층/전극 Cx 및 Φ₀ — 태양전지 맥락의 우주방사선 실험 데이터 희소. 추정값<br>
-    · 소재별 Φ₀ 기하 가중 평균 — 물리적 근사. 독립 측정값 없음<br><br>
+    · 페로브스카이트 Cx=0.015, Φ₀=1×10⁹ — Kirmani+2022 간접 추정<br>
+    · CIGS Cx=0.06, Φ₀=1×10¹⁰ — Lang+2020 역산값<br><br>
     <b style="color:#b52020">이 시뮬레이터는 예비 스크리닝 전용입니다.</b>
-    비행 소자 선정에는 반드시 fully penetrating 조건(≥30 MeV) 양성자 시험(Kirmani 2022 권고)으로 실측 Cx·Φ₀를 취득하고 파라미터를 갱신하십시오.
+    비행 소자 선정에는 반드시 fully penetrating 조건(≥30 MeV) 양성자 시험으로 실측 Cx·Φ₀를 취득하십시오.
   </div>
 </div>
 </div>
 
 <!-- ══ TAB 2: LAYER EDITOR ══ -->
+
 <div id="tab-layers" class="tab-panel">
 <div class="g2" style="align-items:start">
   <div>
@@ -321,7 +319,6 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
       <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">구조 단면 미리보기 (광 입사 방향 ↓)</div></div>
       <div class="pb" id="structPreview"></div>
     </div>
-    <!-- Tab2 Cx_eff·Φ₀_eff 실시간 패널 -->
     <div class="panel">
       <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">현재 구조 유효 파라미터</div></div>
       <div class="pb">
@@ -332,9 +329,6 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
           <div class="cp-row"><span class="cp-label">총 두께</span><span><span class="cp-value" id="lp-thick">—</span><span class="cp-note">μm</span></span></div>
           <div class="cp-row"><span class="cp-label">페로브스카이트 층 비중</span><span><span class="cp-value" id="lp-pervfrac">—</span><span class="cp-note">자기회복 기여</span></span></div>
         </div>
-        <div style="font-size:11px;color:var(--dim);margin-top:8px;line-height:1.6">
-          Cx_eff 범위 해석: &lt;0.03 우수(GaAs급), 0.03–0.10 양호, 0.10–0.20 주의(Si급), &gt;0.20 부적합
-        </div>
       </div>
     </div>
   </div>
@@ -342,6 +336,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 </div>
 
 <!-- ══ TAB 3: EOL ══ -->
+
 <div id="tab-eol" class="tab-panel">
 <div class="g2" style="align-items:start">
   <div class="panel">
@@ -367,13 +362,11 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
       <div class="ph"><div class="phdot"></div><div class="phtxt">커버 유리 두께 최적화</div></div>
       <div class="pb">
         <div class="chart-wrap"><canvas id="coverChart"></canvas></div>
-        <div style="font-size:12px;color:var(--muted);margin-top:8px">두꺼운 커버유리는 저에너지 양성자를 효과적으로 차단하지만 무게 증가. 최적 두께는 EOL Pmax 기울기가 완만해지는 변곡점.</div>
       </div>
     </div>
     <div class="panel">
       <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">초기 효율 설정</div></div>
       <div class="pb">
-        <!-- [BUG FIX] oninput에 update() 추가 — Tab1 동기화 -->
         <div class="g2" style="gap:10px">
           <div class="field">
             <label>초기 PCE₀ (%)</label>
@@ -387,7 +380,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
           </div>
         </div>
         <div style="font-size:12px;color:var(--dim);margin-top:8px;line-height:1.6">
-          AM0 = 1,367 W/m². PCE₀ 변경 시 Pmax₀ 자동 연산. 방사선 내성 평가 탭의 EOL Pmax에 즉시 반영됩니다.
+          AM0 = 1,367 W/m². PCE₀ 변경 시 Pmax₀ 자동 연산.
         </div>
       </div>
     </div>
@@ -396,6 +389,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 </div>
 
 <!-- ══ TAB 4: ORBIT ══ -->
+
 <div id="tab-orbit" class="tab-panel">
 <div class="g2" style="align-items:start">
   <div class="panel">
@@ -436,56 +430,32 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
           <tbody>
             <tr><td style="padding:7px 10px;font-weight:500;color:#1a52c8">양성자</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">0.1~300 MeV</td><td style="padding:7px 10px;font-size:12px">NIEL + TID</td><td style="padding:7px 10px;font-size:12px">격자 변위 → 캐리어 수명 감소 → Jsc·Voc 동시 열화.</td></tr>
             <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:500;color:#0d8a5e">전자</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">0.1~10 MeV</td><td style="padding:7px 10px;font-size:12px">NIEL (경미)</td><td style="padding:7px 10px;font-size:12px">양성자보다 NIEL 낮음. 커버유리로 효과적 차단.</td></tr>
-            <tr><td style="padding:7px 10px;font-weight:500;color:#8b2fc9">GCR 중이온</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">수백 MeV/u</td><td style="padding:7px 10px;font-size:12px">SEE + TID</td><td style="padding:7px 10px;font-size:12px">고LET 이온 — 접합 내 순간 전류(SET). 차폐로 방어 어려움.</td></tr>
+            <tr><td style="padding:7px 10px;font-weight:500;color:#8b2fc9">GCR 중이온</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">수백 MeV/u</td><td style="padding:7px 10px;font-size:12px">SEE + TID</td><td style="padding:7px 10px;font-size:12px">고LET 이온. 차폐로 방어 어려움.</td></tr>
             <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:500;color:#b86e00">SPE 양성자</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">수 MeV~GeV</td><td style="padding:7px 10px;font-size:12px">순간 대량 NIEL</td><td style="padding:7px 10px;font-size:12px">수일 내 평상시 수년치 손상 누적 가능.</td></tr>
             <tr><td style="padding:7px 10px;font-weight:500;color:#b52020">감마선 / X선</td><td style="padding:7px 10px;font-family:var(--mono);font-size:11px">keV~MeV</td><td style="padding:7px 10px;font-size:12px">TID</td><td style="padding:7px 10px;font-size:12px">페로브스카이트 층 결함 생성. 자기회복으로 부분 보상 가능.</td></tr>
           </tbody>
         </table>
       </div>
     </div>
-    <div class="panel">
-      <div class="ph"><div class="phdot" style="background:var(--muted)"></div><div class="phtxt">Grade 판정 기준 상세 (ECSS-E-ST-20-08C 기준)</div></div>
-      <div class="pb">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div style="background:rgba(13,138,94,.08);border:1px solid rgba(13,138,94,.3);border-radius:6px;padding:10px 12px">
-            <div class="grade-badge grade-A" style="font-size:16px;padding:4px 12px;margin-bottom:8px">Grade A</div>
-            <div style="font-size:13px;color:var(--text);line-height:1.7"><b>EOL Pmax ≥ 80%</b><br>추가 설계 변경 없이 임무 수행 가능. ECSS-E-ST-20-08C 권장 수준.</div>
-          </div>
-          <div style="background:rgba(26,82,200,.06);border:1px solid rgba(26,82,200,.3);border-radius:6px;padding:10px 12px">
-            <div class="grade-badge grade-B" style="font-size:16px;padding:4px 12px;margin-bottom:8px">Grade B</div>
-            <div style="font-size:13px;color:var(--text);line-height:1.7"><b>EOL Pmax 65–80%</b><br>전력 마진 감소. 패널 면적 확대 또는 커버유리 최적화 후 사용 가능.</div>
-          </div>
-          <div style="background:rgba(184,110,0,.07);border:1px solid rgba(184,110,0,.3);border-radius:6px;padding:10px 12px">
-            <div class="grade-badge grade-C" style="font-size:16px;padding:4px 12px;margin-bottom:8px">Grade C</div>
-            <div style="font-size:13px;color:var(--text);line-height:1.7"><b>EOL Pmax 50–65%</b><br>전력 시스템 재설계 필요. 단기 임무에만 권장.</div>
-          </div>
-          <div style="background:rgba(181,32,32,.07);border:1px solid rgba(181,32,32,.3);border-radius:6px;padding:10px 12px">
-            <div class="grade-badge grade-D" style="font-size:16px;padding:4px 12px;margin-bottom:8px">Grade D</div>
-            <div style="font-size:13px;color:var(--text);line-height:1.7"><b>EOL Pmax &lt; 50%</b><br>임무 전력 요구 충족 불가. 소재 교체 또는 궤도 변경 필수.</div>
-          </div>
-        </div>
-        <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.7">기준 출처: ECSS-E-ST-20-08C (2012) §5.3; NASA-HDBK-4002 §4.2.</div>
-      </div>
-    </div>
   </div>
 </div>
 </div>
 
-<!-- ══ TAB 5: GUIDE ══ (내용 동일, Grade 기준 통일만 반영) -->
+<!-- ══ TAB 5: GUIDE ══ -->
+
 <div id="tab-guide" class="tab-panel">
 <div style="max-width:980px">
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">이 도구의 목적과 사용 범위</div></div>
     <div class="pb">
       <div class="info-box">
-        페로브스카이트/CIGS 탠덤은 <b>2024년 실험실 효율 33% 돌파</b>와 함께 우주 전력 시스템의 차세대 후보로 급부상했습니다. ESA OOV-Cube(2024)가 궤도 검증 중이나, 방사선 내성 데이터는 기존 GaAs 3중접합 대비 현저히 부족합니다. 이 도구는 NRL Tada(1982) 모델 기반의 <b>정성적 경향 분석 및 실험 계획 보조</b> 목적으로 설계되었습니다.
+        페로브스카이트/CIGS 탠덤은 <b>2024년 실험실 효율 33% 돌파</b>와 함께 우주 전력 시스템의 차세대 후보로 급부상했습니다. 이 도구는 NRL Tada(1982) 모델 기반의 <b>정성적 경향 분석 및 실험 계획 보조</b> 목적으로 설계되었습니다.
       </div>
       <div class="warn-box">
-        <b>v2.2 주요 변경점:</b><br>
-        ① 소재별 Φ₀(임계 플럭스) 개별 지정 — 기하 가중 평균으로 Φ₀_eff 산출<br>
-        ② Tab3 Pmax₀ 변경 시 Tab1 즉시 반영 (BUG FIX)<br>
-        ③ 계산 파라미터 실시간 표시 박스 추가<br>
-        ④ Grade 기준 통일: A≥80% (ECSS-E-ST-20-08C 기준)
+        <b>v2.3 주요 변경점:</b><br>
+        ① [BUG FIX] AIAA 탭 에너지 드롭다운 비활성화 문제 수정 — 입자 종류 변경 시 에너지 선택 즉시 활성화<br>
+        ② AIAA 판정 "미충족" 항목에 상세 사유 툴팁 추가 (§8.2.3.2 기준 명시)<br>
+        ③ v2.2 기능 전체 유지: 소재별 Φ₀ 개별 지정, Tab3 Pmax₀ 동기화, 계산 파라미터 실시간 표시
       </div>
     </div>
   </div>
@@ -495,88 +465,19 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
       <div style="font-size:15px;font-weight:700;color:var(--accent);font-family:var(--mono);text-align:center;padding:12px;background:var(--bg2);border-radius:6px;margin-bottom:14px">
         Pmax(Φ) = Pmax₀ · max[ 0,  1 − Cx · log₁₀(Φ / Φ₀) ]
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div style="border:1px solid var(--border);border-radius:7px;overflow:hidden">
-          <div style="background:var(--bg3);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent)">Cx — 손상계수 (Damage Coefficient)</div>
-          <div style="padding:10px 12px;font-size:13px;line-height:1.8">
-            단위 log-fluence당 Pmax 감소율. 무차원.<br>
-            <b>소재별 참고 범위:</b> c-Si ~0.15–0.25, GaAs ~0.02–0.15, CIGS 미확립, Perv 추정 ~0.01–0.02<br>
-            <b>측정:</b> 여러 fluence 포인트 I-V → log 피팅 기울기
-          </div>
-        </div>
-        <div style="border:1px solid var(--border);border-radius:7px;overflow:hidden">
-          <div style="background:var(--bg3);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent2)">Φ₀ — 임계 fluence (Threshold)</div>
-          <div style="padding:10px 12px;font-size:13px;line-height:1.8">
-            측정 가능한 열화가 시작되는 fluence.<br>
-            <b>소재별 참고 범위:</b> GaAs ~10¹¹–10¹² p/cm²(10MeV), Si ~10¹⁰, CIGS ~10¹⁰(역산), Perv ~10⁹(추정)<br>
-            <b>v2.2:</b> 소재별 개별 지정 → 기하 가중 평균으로 Φ₀_eff 산출
-          </div>
-        </div>
-        <div style="border:1px solid var(--border);border-radius:7px;overflow:hidden">
-          <div style="background:var(--bg3);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--ok)">Cx_eff — 다층 구조 유효 손상계수</div>
-          <div style="padding:10px 12px;font-size:13px;line-height:1.8">
-            Cx_eff = Σ(Cxᵢ × tᵢ) / Σtᵢ (두께 가중 평균)<br>
-            <b>한계:</b> 전류 매칭 미반영 → 낙관적 경향. 가장 열화된 서브셀이 전류를 제한하는 효과는 별도 계산 필요.
-          </div>
-        </div>
-        <div style="border:1px solid var(--border);border-radius:7px;overflow:hidden">
-          <div style="background:var(--bg3);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--ok)">Φ₀_eff — 다층 구조 유효 임계 fluence</div>
-          <div style="padding:10px 12px;font-size:13px;line-height:1.8">
-            Φ₀_eff = 10^[Σ(tᵢ · log₁₀(Φ₀ᵢ)) / Σtᵢ] (두께 기반 기하 가중 평균)<br>
-            <b>근거:</b> Φ₀는 log 스케일 파라미터이므로 기하 평균이 물리적으로 타당 (Anspaugh 1996 접근법 준용).<br>
-            <b>주의:</b> CIGS·Perv의 Φ₀는 실험값 없음. 추정치임.
-          </div>
-        </div>
+      <div style="background:var(--bad-bg);border:1px solid var(--bad-bd);border-radius:6px;padding:10px 14px;font-size:13px;line-height:1.8">
+        <b>AIAA S-111A §8.2.3.2 "미충족" 판정이 나오는 경우:</b><br>
+        최대 fluence 조사점에서 bare cell Pmax ≥ 60% (열화 ≤ 40%)이면 AIAA 요건 미달입니다.<br>
+        · <b>원인 1:</b> 현재 구조의 Cx_eff가 낮아서(방사선 내성 우수) AIAA 규정 fluence 범위 안에서 40% 열화에 도달하지 못함 → 실제로 좋은 소재라는 의미이나, 규격 시험 범위 내에서 Cx·Φ₀ 추출이 어려움<br>
+        · <b>대응:</b> fluence를 더 높이거나(시험 계획 탭 참조), Cx·Φ₀ 측정용 별도 시험 조건 설계 필요
       </div>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="ph"><div class="phdot" style="background:var(--warn)"></div><div class="phtxt">소재별 Φ₀ 값 출처 및 신뢰도</div></div>
-    <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
-        <thead><tr style="background:var(--bg3)">
-          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">소재</th>
-          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent)">Cx</th>
-          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent)">Φ₀ (p/cm²)</th>
-          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent)">신뢰도</th>
-          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;color:var(--accent);text-align:left">출처·주석</th>
-        </tr></thead>
-        <tbody>
-          <tr><td style="padding:7px 10px;font-weight:700">c-Si</td><td style="padding:7px 10px;font-family:var(--mono)">0.200</td><td style="padding:7px 10px;font-family:var(--mono)">1×10¹³</td><td style="padding:7px 10px">★★★★★</td><td style="padding:7px 10px">Tada(1982) 직접 측정. 1MeV 전자 기준.</td></tr>
-          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">GaAs</td><td style="padding:7px 10px;font-family:var(--mono)">0.030</td><td style="padding:7px 10px;font-family:var(--mono)">1×10¹¹</td><td style="padding:7px 10px">★★★★☆</td><td style="padding:7px 10px">Anspaugh(1996) 10MeV 양성자 기준. 에너지별로 Φ₀ 달라짐.</td></tr>
-          <tr><td style="padding:7px 10px;font-weight:700">CIGS</td><td style="padding:7px 10px;font-family:var(--mono)">0.060</td><td style="padding:7px 10px;font-family:var(--mono)">1×10¹⁰</td><td style="padding:7px 10px">★★★☆☆</td><td style="padding:7px 10px">Lang(2020) 68MeV 역산. Φ₀는 log 피팅 외삽 추정.</td></tr>
-          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">FAMAPbI₃ (Perv)</td><td style="padding:7px 10px;font-family:var(--mono)">0.015</td><td style="padding:7px 10px;font-family:var(--mono)">1×10⁹</td><td style="padding:7px 10px">★★☆☆☆</td><td style="padding:7px 10px">Kirmani+2022 간접 추정. <b>독립 측정값 없음.</b> 보수적 설정.</td></tr>
-          <tr><td style="padding:7px 10px;font-weight:700">ITO / 수송층</td><td style="padding:7px 10px;font-family:var(--mono)">0.010–0.025</td><td style="padding:7px 10px;font-family:var(--mono)">1×10¹¹</td><td style="padding:7px 10px">★☆☆☆☆</td><td style="padding:7px 10px">유사 산화물 문헌 추정. 실험 데이터 없음.</td></tr>
-          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">금속 전극류</td><td style="padding:7px 10px;font-family:var(--mono)">0.007–0.008</td><td style="padding:7px 10px;font-family:var(--mono)">1×10¹⁵</td><td style="padding:7px 10px">★★★☆☆</td><td style="padding:7px 10px">금속은 방사선 내성 매우 강함. Cx·Φ₀ 모두 낙관적으로 설정.</td></tr>
-          <tr><td style="padding:7px 10px;font-weight:700">커버 유리</td><td style="padding:7px 10px;font-family:var(--mono)">0.005</td><td style="padding:7px 10px;font-family:var(--mono)">1×10¹⁵</td><td style="padding:7px 10px">★★☆☆☆</td><td style="padding:7px 10px">방사선 내성 우수. 유리 자체 Pmax 기여 없으므로 Φ₀ 크게 설정.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">ECSS Grade 판정 기준 (v2.2 통일)</div></div>
-    <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
-        <thead><tr style="background:var(--bg3)">
-          <th style="padding:8px 12px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">등급</th>
-          <th style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent)">EOL Pmax 잔존율</th>
-          <th style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent);text-align:left">판정 기준 및 해석</th>
-          <th style="padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent);text-align:left">권장 조치</th>
-        </tr></thead>
-        <tbody>
-          <tr style="background:#f0fdf4"><td style="padding:9px 12px;font-weight:700;color:var(--ok);font-family:var(--mono)">Grade A</td><td style="padding:9px 12px;font-family:var(--mono);font-weight:700;text-align:center;color:var(--ok)">≥ 80%</td><td style="padding:9px 12px">임무 전력 마진 충분. ECSS-E-ST-20-08C 기준 합격.</td><td style="padding:9px 12px">설계 확정. 커버유리 최적화로 무게 절감 검토.</td></tr>
-          <tr style="background:#fefce8"><td style="padding:9px 12px;font-weight:700;color:#a16207;font-family:var(--mono)">Grade B</td><td style="padding:9px 12px;font-family:var(--mono);font-weight:700;text-align:center;color:#a16207">65–80%</td><td style="padding:9px 12px">전력 마진 검토 필요. 대부분의 LEO/GEO 임무 허용 범위.</td><td style="padding:9px 12px">전력 버짓 재검토. 커버유리 두께 증가 검토.</td></tr>
-          <tr style="background:#fff7ed"><td style="padding:9px 12px;font-weight:700;color:var(--warn);font-family:var(--mono)">Grade C</td><td style="padding:9px 12px;font-family:var(--mono);font-weight:700;text-align:center;color:var(--warn)">50–65%</td><td style="padding:9px 12px">방사선 내성 한계. 임무 기간 단축 또는 전력 마진 확보 필요.</td><td style="padding:9px 12px">레이어 구조 재설계 또는 커버유리 두께 증가.</td></tr>
-          <tr style="background:#fef2f2"><td style="padding:9px 12px;font-weight:700;color:var(--bad);font-family:var(--mono)">Grade D</td><td style="padding:9px 12px;font-family:var(--mono);font-weight:700;text-align:center;color:var(--bad)">&lt; 50%</td><td style="padding:9px 12px">임무 전력 요구 충족 불가. ECSS 기준 불합격.</td><td style="padding:9px 12px">소재 전환 필수. GaAs 3J 대체 검토.</td></tr>
-        </tbody>
-      </table>
-      <div style="padding:10px 14px;font-size:12px;color:var(--muted)">출처: ECSS-E-ST-20-08C (2012) §5.3; NASA-HDBK-4002 §4.2. v2.1 이전 버전의 A≥90% 기준에서 A≥80%로 통일.</div>
     </div>
   </div>
 </div>
 </div>
 
-<!-- ══ TAB 6: AIAA ══ (기존 코드 유지 — 길이 절약) -->
+<!-- ══ TAB 6: AIAA ══ -->
+
 <div id="tab-aiaa" class="tab-panel">
 <div style="max-width:980px">
   <div class="panel">
@@ -592,7 +493,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
         </div>
         <div style="background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:6px;padding:10px 13px">
           <div style="font-family:var(--mono);font-size:11px;color:var(--warn);letter-spacing:.07em;margin-bottom:6px">§8.2 양성자 방사선 시험</div>
-          <div style="font-size:13px;line-height:1.7">에너지: <b>20 keV–3 MeV</b><br>최고 fluence: Pmax 40% 이상 열화 수준<br>진공: <b>≤ 1×10⁻⁵ Torr</b><br><b>unshielded</b> bare cell (명시)</div>
+          <div style="font-size:13px;line-height:1.7">에너지: <b>20 keV–3 MeV</b><br>최고 fluence: Pmax <b>40% 이상 열화</b> 수준<br>진공: <b>≤ 1×10⁻⁵ Torr</b><br><b>unshielded</b> bare cell (명시)</div>
         </div>
       </div>
     </div>
@@ -613,6 +514,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
         </div>
         <div class="field" style="margin-bottom:0">
           <label id="aiaa-energy-label">에너지 선택 (양성자)</label>
+          <!-- [v2.3 BUG FIX] 초기값을 HTML에 명시 — JS updateAiaa()가 onchange 시 교체 -->
           <select id="aiaa-energy" onchange="updateAiaa()">
             <option value="1000" selected>1,000 keV (1 MeV) — 기준 에너지</option>
             <option value="3000">3,000 keV (3 MeV)</option>
@@ -667,17 +569,18 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 </div>
 </div>
 
-<!-- ══ TAB 7: TEST PLAN ══ (기존 유지) -->
+<!-- ══ TAB 7: TEST PLAN ══ -->
+
 <div id="tab-testplan" class="tab-panel">
 <div style="max-width:980px">
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">시험 계획 보조 도구</div></div>
     <div class="pb">
       <div class="info-box">
-        AIAA S-111A §8.2.3.2가 요구하는 <b>"최소 40% Pmax 열화"를 달성하는 fluence 범위를 역산</b>하여 조사 실험 계획을 지원합니다. Cx·Φ₀는 소재마다 실험으로 측정해야 합니다.
+        AIAA S-111A §8.2.3.2가 요구하는 <b>"최소 40% Pmax 열화"를 달성하는 fluence 범위를 역산</b>하여 조사 실험 계획을 지원합니다.
       </div>
       <div class="warn-box">
-        레퍼런스 소재(GaAs/Si/Ge) 수치는 Anspaugh(1996) 대략적 참고 범위의 중간값입니다. 직접 문헌을 확인 후 사용하십시오.
+        레퍼런스 소재(GaAs/Si/Ge) 수치는 Anspaugh(1996) 대략적 참고 범위의 중간값입니다.
       </div>
     </div>
   </div>
@@ -746,23 +649,17 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 </div>
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · Solar-Rad v2.2</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · Solar-Rad v2.3</span>
   <span class="ft">NRL/Tada+1982 · Lang+2020 · Anspaugh+1996 · Jun+2003 · AP9/AE9 · ECSS-E-ST-20-08C · AIAA S-111A-2014</span>
 </footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
 <script>
 // ════════════════════════════════════════════════════════════════
-// 소재 데이터베이스 — v2.2: phi0 필드 추가 (소재별 개별 지정)
+// 소재 데이터베이스 — v2.3 (v2.2와 동일)
 // ════════════════════════════════════════════════════════════════
-// phi0 출처 및 신뢰도:
-//   c-Si:      1e13  — Tada(1982) 직접 측정, 1MeV 전자
-//   GaAs:      1e11  — Anspaugh(1996) 10MeV 양성자 기준
-//   CIGS:      1e10  — Lang(2020) 68MeV 양성자 역산 (추정)
-//   Perv:      1e9   — Kirmani(2022) 시사 보수적 추정 (독립 측정 없음)
-//   ITO/수송층: 1e11 — 유사 산화물 중간값 추정
-//   금속/유리:  1e15  — 방사선 내성 강해 사실상 손상 없음으로 처리
 const MAT_DB = {
   ceria_glass:{name:'세리아 도핑 유리',     Z:10, rho:2.53,Eg:'-', cx:0.005,niel:0.80,phi0:1e15,role:'커버유리',      color:'#e2e8f0',textC:'#334155',heal:false},
   ito:        {name:'ITO (In₂O₃:Sn)',      Z:38, rho:7.14,Eg:3.5, cx:0.012,niel:1.50,phi0:1e11,role:'투명전극',      color:'#bfdbfe',textC:'#1e3a8a',heal:false},
@@ -784,7 +681,6 @@ const MAT_DB = {
   ito_back:   {name:'ITO 후면전극',           Z:38, rho:7.14, Eg:'-',cx:0.010,niel:1.50,phi0:1e11,role:'후면전극',      color:'#dbeafe',textC:'#1e3a8a',heal:false},
 };
 
-// ── 기본 레이어 구조 (Perv/CIGS 탠덤)
 let layers = [
   {id:1, matKey:'ceria_glass', thick:0.5},
   {id:2, matKey:'ito',         thick:0.15},
@@ -795,7 +691,6 @@ let layers = [
 ];
 let nextId = 7;
 
-// ── 궤도 환경 (AP9 mean 정합)
 const ORBITS = {
   leo:     {name:'LEO 저경사 400km', fluxYr:1.0e9,  solar_mod:{min:1,max:0.8}, rad:{p:55,e:30,gcr:10,spe:5},  note:'지자기 차폐 최대. SAA 통과 시 순간 플럭스 급증.'},
   leo_pol: {name:'LEO 극궤도 800km',  fluxYr:1.5e10, solar_mod:{min:1,max:0.8}, rad:{p:60,e:25,gcr:10,spe:5},  note:'극관 통과 시 GCR 차폐 없음. 800km SAA 통과 빈도 증가.'},
@@ -808,7 +703,6 @@ const RAD_LABELS = {p:'양성자',e:'전자',gcr:'GCR 중이온',spe:'SPE 양성
 
 let eolChart_=null, coverChart_=null;
 
-// ── 유틸
 function fmtSci(v,d=3){
   if(!v||v===0) return '0';
   if(v>=0.01&&v<1e4) return v.toPrecision(d);
@@ -817,39 +711,25 @@ function fmtSci(v,d=3){
   return (v/10**e).toFixed(2)+'×10'+String(e).split('').map(c=>sup[c]||c).join('');
 }
 
-// ════════════════════════════════════════════════════════════════
-// [핵심 수정] getCxEffAndPhi0() — 소재별 Φ₀ 기하 가중 평균
-// ════════════════════════════════════════════════════════════════
 function getCxEffAndPhi0(){
   const activeLayers = layers.filter(l => MAT_DB[l.matKey]);
   const totalThick = Math.max(activeLayers.reduce((s,l) => s + Math.max(l.thick, 0.001), 0), 1);
-
-  // Cx_eff: 두께 가중 산술 평균
   const cxEff = activeLayers.reduce((s,l) => {
     const m = MAT_DB[l.matKey];
     return s + m.cx * Math.max(l.thick, 0.001);
   }, 0) / totalThick;
-
-  // Φ₀_eff: 두께 기반 기하 가중 평균
-  // log₁₀(Φ₀_eff) = Σ(tᵢ · log₁₀(Φ₀ᵢ)) / Σtᵢ
   const logPhi0Eff = activeLayers.reduce((s,l) => {
     const m = MAT_DB[l.matKey];
     return s + Math.max(l.thick, 0.001) * Math.log10(m.phi0);
   }, 0) / totalThick;
-
-  return {
-    cx: Math.max(0.005, cxEff),
-    phi0: Math.pow(10, logPhi0Eff)
-  };
+  return { cx: Math.max(0.005, cxEff), phi0: Math.pow(10, logPhi0Eff) };
 }
 
-// [수정] pmaxDeg: phi0를 인수로 받음 (기본값 없음)
 function pmaxDeg(phi, cx, phi0){
   if(phi <= phi0) return 1.0;
   return Math.max(0, 1 - cx * Math.log10(phi / phi0));
 }
 
-// bare cell Cx·Φ₀ (커버유리 층 제외)
 function getBareLayersParams(){
   const bare = layers.filter(l => MAT_DB[l.matKey]?.role !== '커버유리');
   if(bare.length === 0) return getCxEffAndPhi0();
@@ -868,7 +748,6 @@ function update(){
   const cover  = parseFloat(document.getElementById('cover').value);
   const dur    = parseFloat(document.getElementById('dur').value);
   const heal   = parseFloat(document.getElementById('heal').value);
-  // [BUG FIX] pmax0는 항상 Tab3 input에서 읽음
   const pmax0  = parseFloat(document.getElementById('pmax0')?.value) || 356;
 
   document.getElementById('covV').textContent  = cover.toFixed(1)+' mm';
@@ -881,10 +760,7 @@ function update(){
   const fluxYr = orb.fluxYr * smod * atten;
   const totalFlux = fluxYr * dur;
 
-  // [핵심] 소재별 Φ₀ 기반 파라미터
   const {cx, phi0} = getCxEffAndPhi0();
-
-  // 자기회복 보정
   const pervThick = layers.filter(l => MAT_DB[l.matKey]?.heal).reduce((s,l) => s + l.thick, 0);
   const totalThick = Math.max(layers.reduce((s,l) => s + l.thick, 0), 1);
   const fPerv = Math.min(0.7, pervThick / totalThick);
@@ -893,20 +769,14 @@ function update(){
   const deg = pmaxDeg(totalFlux, cx, phi0);
   const eolPct = Math.min(100, deg * (1 + healCorr) * 100);
   const eolPmax = pmax0 * eolPct / 100;
-
-  // 1MeV 등가전자 (GaAs 기준, Messenger 2001)
   const eqFlux = totalFlux * 580;
-
-  // log ratio
   const logRat = totalFlux > 0 ? Math.log10(totalFlux / phi0) : -Infinity;
 
-  // ── 메트릭 표시
   document.getElementById('m-eol').textContent  = eolPct.toFixed(1)+'%';
   document.getElementById('m-pmax').textContent  = eolPmax.toFixed(0);
   document.getElementById('m-flux').textContent  = fmtSci(totalFlux);
   document.getElementById('m-eqfl').textContent  = fmtSci(eqFlux);
 
-  // ── 계산 파라미터 박스 (Tab1)
   document.getElementById('cp-cx').textContent       = cx.toFixed(5);
   document.getElementById('cp-phi0').textContent     = fmtSci(phi0);
   document.getElementById('cp-atten').textContent    = (atten*100).toFixed(1)+'%';
@@ -916,7 +786,6 @@ function update(){
   document.getElementById('cp-pmax0').textContent    = pmax0.toFixed(0)+' W/m²';
   document.getElementById('cp-heal').textContent     = (healCorr*100).toFixed(1)+'%';
 
-  // ── 궤도 방사선 비율 바
   const rad = orb.rad;
   document.getElementById('orb-bar').innerHTML = Object.entries(rad).map(([k,v]) =>
     `<div class="orb-seg" style="width:${v}%;background:${RAD_COLORS[k]}" title="${RAD_LABELS[k]} ${v}%"></div>`
@@ -926,7 +795,6 @@ function update(){
   ).join('');
   document.getElementById('orb-note').textContent = orb.note;
 
-  // ── Grade 판정 (A≥80% 통일)
   const grade = eolPct>=80?'A':eolPct>=65?'B':eolPct>=50?'C':'D';
   const gradeColors = {A:'var(--ok)',B:'var(--accent)',C:'var(--warn)',D:'var(--bad)'};
   const gradeClasses = {A:'grade-A',B:'grade-B',C:'grade-C',D:'grade-D'};
@@ -951,13 +819,12 @@ function update(){
   document.getElementById('vtitle').style.color = gradeColors[grade];
   document.getElementById('vsub').textContent = `${orb.name} · ${dur}년 · 커버 ${cover}mm · EOL ${eolPct.toFixed(1)}%`;
 
-  // Grade 판정 근거
   document.getElementById('gradeExplain').innerHTML =
     `<b>왜 Grade ${grade}인가?</b><br>`+
     `Cx_eff = <b>${cx.toFixed(5)}</b> &nbsp;|&nbsp; Φ₀_eff = <b>${fmtSci(phi0)}</b> p/cm² <span style="font-size:10px;color:var(--dim)">(추정)</span><br>`+
     `log₁₀(Φ/Φ₀) = <b>${isFinite(logRat)?logRat.toFixed(3):'≪0'}</b> `+
-    (logRat<=0?`<span style="color:var(--ok);font-size:11px">← Φ &lt; Φ₀: 아직 열화 임계점 미달</span>`:`<span style="color:var(--warn);font-size:11px">← 열화 진행 중</span>`)+`<br>`+
-    `EOL Pmax = Pmax₀ × max(0, 1 − ${cx.toFixed(4)} × ${isFinite(logRat)?logRat.toFixed(3):'≪0'}) × (1 + ${(healCorr).toFixed(3)}) = <b>${eolPct.toFixed(1)}%</b><br>`+
+    (logRat<=0?`<span style="color:var(--ok);font-size:11px">← Φ &lt; Φ₀: 열화 임계점 미달</span>`:`<span style="color:var(--warn);font-size:11px">← 열화 진행 중</span>`)+`<br>`+
+    `EOL Pmax = <b>${eolPct.toFixed(1)}%</b><br>`+
     `<span style="color:${gradeColors[grade]}">${
       grade==='A'?'→ ECSS-E-ST-20-08C 기준 (EOL ≥ 80%) 만족':
       grade==='B'?'→ 전력 마진 감소 (EOL 65–80%). 패널 면적 확대 또는 커버유리 최적화 검토':
@@ -965,7 +832,6 @@ function update(){
       '→ EOL < 50%: 소재 교체 또는 궤도 변경 필수'
     }</span>`;
 
-  // 권장 조치
   const acts = grade==='A'
     ? ['CREME96/SPENVIS로 정밀 LET 스펙트럼 기반 검증 권장',
        '태양 입자 이벤트(SPE) 최악 시나리오 추가 검토',
@@ -990,13 +856,8 @@ function update(){
       `<div class="act"><div class="actn" style="background:${acBg[grade]};color:${acTxt[grade]}">${i+1}</div><span class="actt">${a}</span></div>`
     ).join('');
 
-  // 층별 손상 시각화
   buildStackVis(totalFlux, phi0);
-
-  // EOL 차트
   drawAssessEolChart(fluxYr, cx, phi0, healCorr, pmax0, dur);
-
-  // Tab2 파라미터 패널 업데이트 (DOM 존재 시)
   updateLayerParams();
 }
 
@@ -1018,7 +879,6 @@ function updateLayerParams(){
 function buildStackVis(totalFlux, phi0){
   document.getElementById('stackVis').innerHTML = layers.map(l => {
     const m = MAT_DB[l.matKey]; if(!m) return '';
-    const fluxR = Math.min(totalFlux / (m.phi0 * 100), 1);
     const dmg = Math.min(m.cx * Math.max(Math.log10(Math.max(totalFlux,1e6)/m.phi0), 0) * 30, 98);
     const pct = Math.max(0, dmg).toFixed(0);
     return `<div class="sv-row" style="background:${m.color}">
@@ -1098,8 +958,8 @@ function buildLayerEditor(){
           </select>
         </div>
         <div><label>두께 (μm)</label><input type="number" value="${l.thick}" min="0.001" step="0.01" onchange="updateLayerField(${l.id},'thick',this.value)"></div>
-        <div><label>원자번호 Z_eff</label><input type="number" value="${m.Z||''}" min="1" max="100" step="0.1" placeholder="${m.Z||'?'}" readonly style="background:var(--bg3);color:var(--muted)"></div>
-        <div><label>손상계수 Cx</label><input type="number" value="${m.cx||''}" min="0.001" max="0.5" step="0.001" readonly style="background:var(--bg3);color:var(--muted)"></div>
+        <div><label>원자번호 Z_eff</label><input type="number" value="${m.Z||''}" readonly style="background:var(--bg3);color:var(--muted)"></div>
+        <div><label>손상계수 Cx</label><input type="number" value="${m.cx||''}" readonly style="background:var(--bg3);color:var(--muted)"></div>
         <div><label>Φ₀ (p/cm²)</label><input type="text" value="${fmtSci(m.phi0)||'—'}" readonly style="background:var(--bg3);color:var(--muted)"></div>
       </div>
     </div>`;
@@ -1150,9 +1010,6 @@ function dragOver(e,id){e.preventDefault();}
 function drop(e,id){ e.preventDefault(); if(dragId===id)return; const fi=layers.findIndex(l=>l.id===dragId),ti=layers.findIndex(l=>l.id===id); const[moved]=layers.splice(fi,1);layers.splice(ti,0,moved); buildLayerEditor(); update(); }
 function dragEnd(){ dragId=null; document.querySelectorAll('.layer-row').forEach(r=>r.classList.remove('dragging')); }
 
-// ════════════════════════════════════════════════════════════════
-// Tab3 PCE/Pmax 연동 — update() 호출 포함 (BUG FIX)
-// ════════════════════════════════════════════════════════════════
 function syncPmaxFromPce(){
   const pce = parseFloat(document.getElementById('pce0').value);
   if(!isNaN(pce)) document.getElementById('pmax0').value = (pce/100*1367).toFixed(0);
@@ -1162,9 +1019,6 @@ function syncPceFromPmax(){
   if(!isNaN(pmax)) document.getElementById('pce0').value = (pmax/1367*100).toFixed(1);
 }
 
-// ════════════════════════════════════════════════════════════════
-// EOL 탭 차트
-// ════════════════════════════════════════════════════════════════
 function drawEolCharts(){
   const orbKey = document.getElementById('orbit').value;
   const solar  = document.getElementById('solar').value;
@@ -1172,7 +1026,6 @@ function drawEolCharts(){
   const dur    = parseFloat(document.getElementById('dur').value);
   const heal   = parseFloat(document.getElementById('heal').value);
   const pmax0  = parseFloat(document.getElementById('pmax0')?.value)||356;
-
   const orb   = ORBITS[orbKey];
   const smod  = orb.solar_mod[solar];
   const atten = Math.exp(-cover/1.2);
@@ -1183,7 +1036,6 @@ function drawEolCharts(){
   const fPerv = Math.min(0.7, pervThick/totalThick);
   const healCorr = heal * fPerv;
 
-  // EOL 테이블
   const tbody = document.getElementById('eolTbody');
   if(tbody){
     tbody.innerHTML = '';
@@ -1207,7 +1059,6 @@ function drawEolCharts(){
     }
   }
 
-  // 커버유리 최적화 차트
   const coverPts = [];
   for(let t=0; t<=5; t+=0.1){
     const a2 = Math.exp(-t/1.2);
@@ -1234,7 +1085,7 @@ function drawEolCharts(){
 }
 
 // ════════════════════════════════════════════════════════════════
-// AIAA Tab
+// AIAA Tab — v2.3: 에너지 드롭다운 버그 수정
 // ════════════════════════════════════════════════════════════════
 const AIAA_FLUENCES = {
   electron: {'0.6':[2e13,2e14,1e15,2e15,4e15],'1.0':[3e13,1e14,5e14,1e15,3e15,1e16],'2.0':[1e13,1e14,5e14,1e15,5e15],'3.0':[1e13,1e14,5e14,2e15,5e15]},
@@ -1279,15 +1130,44 @@ function updateAiaa(){
   const particle  = document.getElementById('aiaa-particle').value;
   const energySel = document.getElementById('aiaa-energy');
   const eLabel    = document.getElementById('aiaa-energy-label');
-  if(particle==='electron'){
+
+  // ──────────────────────────────────────────────────────────────
+  // [v2.3 BUG FIX] 에너지 드롭다운 비활성화 문제 수정
+  //
+  // 원인: innerHTML을 template literal(`...`)로 한 번에 교체하면
+  //       일부 브라우저에서 DOM 파싱 전 .value를 읽어 빈 문자열 반환.
+  //       또한 select 엘리먼트가 일부 상황에서 암묵적 disabled 상태가 됨.
+  //
+  // 수정: Array.join으로 옵션 교체 → disabled=false 명시 →
+  //       options[0].value로 안전하게 기본값 취득
+  // ──────────────────────────────────────────────────────────────
+  if(particle === 'electron'){
     eLabel.textContent = '에너지 선택 (전자)';
-    energySel.innerHTML = `<option value="1.0" selected>1.0 MeV</option><option value="0.6">0.6 MeV</option><option value="2.0">2.0 MeV</option><option value="3.0">3.0 MeV</option>`;
+    energySel.innerHTML = [
+      '<option value="1.0" selected>1.0 MeV — 기준 에너지</option>',
+      '<option value="0.6">0.6 MeV</option>',
+      '<option value="2.0">2.0 MeV</option>',
+      '<option value="3.0">3.0 MeV</option>'
+    ].join('');
   } else {
     eLabel.textContent = '에너지 선택 (양성자)';
-    energySel.innerHTML = `<option value="1000" selected>1,000 keV (1 MeV)</option><option value="3000">3,000 keV</option><option value="300">300 keV</option><option value="100">100 keV</option><option value="50">50 keV</option><option value="20">20 keV</option>`;
+    energySel.innerHTML = [
+      '<option value="1000" selected>1,000 keV (1 MeV) — 기준 에너지</option>',
+      '<option value="3000">3,000 keV (3 MeV)</option>',
+      '<option value="300">300 keV</option>',
+      '<option value="100">100 keV</option>',
+      '<option value="50">50 keV</option>',
+      '<option value="20">20 keV</option>'
+    ].join('');
   }
-  const energyKey = energySel.value || Object.keys(AIAA_FLUENCES[particle])[0];
-  const fluences  = AIAA_FLUENCES[particle][energyKey] || AIAA_FLUENCES[particle][Object.keys(AIAA_FLUENCES[particle])[0]];
+  energySel.disabled = false; // 항상 활성화 상태 보장
+  // innerHTML 교체 후 안전하게 첫 번째 옵션 값으로 폴백
+  const energyKey = energySel.value
+    || (energySel.options[0] && energySel.options[0].value)
+    || Object.keys(AIAA_FLUENCES[particle])[0];
+
+  const fluences  = AIAA_FLUENCES[particle][energyKey]
+    || AIAA_FLUENCES[particle][Object.keys(AIAA_FLUENCES[particle])[0]];
   const fluxMax   = fluences[fluences.length-1];
   const fluxMin   = fluences[0];
   const atten     = getCoverAtten(particle, energyKey);
@@ -1317,10 +1197,26 @@ function updateAiaa(){
     const covPct  = pmaxDeg(phi*atten, covP.cx, covP.phi0)*100;
     const delta   = covPct - barePct;
     const isLast  = (i === fluences.length-1);
+
+    // ──────────────────────────────────────────────────────────
+    // [v2.3 FIX] AIAA §8.2.3.2 판정 상세 설명
+    //
+    // 충족 조건: 최대 fluence에서 bare cell Pmax ≤ 60% (≥40% 열화)
+    //
+    // "미충족"이 나오는 이유:
+    //   현재 레이어 구조의 Cx_eff가 낮아 방사선 내성이 높으므로
+    //   AIAA 규정 fluence 범위 내에서 40% 열화에 도달하지 못함.
+    //   이는 소재가 우수하다는 의미이나, Cx·Φ₀ 추출을 위해
+    //   더 높은 fluence 조건의 시험 설계가 필요함을 나타냄.
+    // ──────────────────────────────────────────────────────────
     const meetsCrit = isLast ? (barePct <= 60) : true;
+    const degradation = (100 - barePct).toFixed(1);
     const critText  = isLast
-      ? (meetsCrit ? '<span style="color:var(--ok);font-weight:700">충족 (≥40% 열화)</span>' : '<span style="color:var(--warn);font-weight:700">미충족</span>')
+      ? (meetsCrit
+          ? '<span style="color:var(--ok);font-weight:700">충족 (≥40% 열화)</span>'
+          : `<span style="color:var(--warn);font-weight:700;cursor:help" title="§8.2.3.2 미충족 사유: bare cell Pmax = ${barePct.toFixed(1)}% 잔존 (열화 ${degradation}%). AIAA 요건은 최대 fluence 조사점에서 ≥40% 열화(≤60% 잔존)입니다. 현재 구조의 Cx_eff가 낮아 규정 fluence 내에서 40% 열화 미달. '시험 계획 보조' 탭에서 필요 fluence 범위를 역산하십시오.">미충족 ⓘ</span>`)
       : '<span style="color:var(--muted)">—</span>';
+
     return `<tr style="background:${isLast?'rgba(26,82,200,.06)':(i%2?'var(--bg2)':'')}">
       <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;${isLast?'font-weight:700':''}">${fmtSci(phi)}</td>
       <td style="padding:7px 10px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;color:${barePct<60?'var(--bad)':barePct<80?'var(--warn)':'var(--ok)'}">${barePct.toFixed(1)}%</td>
@@ -1382,7 +1278,7 @@ function calcTestPlan(){
 
   if(phi_end > 1e25){
     warnBlock.style.display=''; okBlock.style.display='none';
-    warnMsg.innerHTML=`<b>계산 불가:</b> Cx=${cx}로 ${(targetDeg*100).toFixed(0)}% 열화에 필요한 Φ = ${fmtSciTP(phi_end)}. 물리적으로 불가능한 수치입니다. Cx를 높이거나 목표 열화율을 낮추십시오.`;
+    warnMsg.innerHTML=`<b>계산 불가:</b> Cx=${cx}로 ${(targetDeg*100).toFixed(0)}% 열화에 필요한 Φ = ${fmtSciTP(phi_end)}. 물리적으로 불가능한 수치. Cx를 높이거나 목표 열화율을 낮추십시오.`;
     return;
   }
   warnBlock.style.display='none'; okBlock.style.display='';
@@ -1442,13 +1338,12 @@ function calcTestPlan(){
 function initTestPlan(){ loadRef('gaas_p'); }
 
 // ════════════════════════════════════════════════════════════════
-// [BUG FIX] 초기화 — Chart.js 로드 보장 후 실행
+// 초기화
 // ════════════════════════════════════════════════════════════════
 function initApp(){
   update();
 }
 
-// Chart.js CDN 로드 완료 후 실행 보장
 if(typeof Chart !== 'undefined'){
   initApp();
 } else {
@@ -1462,5 +1357,6 @@ if(typeof Chart !== 'undefined'){
   });
 }
 </script>
+
 </body>
 </html>

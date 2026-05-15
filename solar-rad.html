@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HELIAS Lab — Solar-Rad v2.3: 탠덤 태양전지 우주방사선 평가</title>
+<title>HELIAS Lab — Solar-Rad v2.4: 탠덤 태양전지 우주방사선 평가</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -507,15 +507,16 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
       <div class="g2" style="gap:12px;margin-bottom:14px">
         <div class="field" style="margin-bottom:0">
           <label>입자 종류</label>
-          <select id="aiaa-particle" onchange="updateAiaa()">
+          <!-- onchange: 입자 변경 시 에너지 옵션 리셋 후 계산 -->
+          <select id="aiaa-particle" onchange="onAiaaParticleChange()">
             <option value="electron">전자 (§8.1 Electron Radiation)</option>
             <option value="proton" selected>양성자 (§8.2 Proton Radiation)</option>
           </select>
         </div>
         <div class="field" style="margin-bottom:0">
           <label id="aiaa-energy-label">에너지 선택 (양성자)</label>
-          <!-- [v2.3 BUG FIX] 초기값을 HTML에 명시 — JS updateAiaa()가 onchange 시 교체 -->
-          <select id="aiaa-energy" onchange="updateAiaa()">
+          <!-- onchange: 에너지만 변경 — innerHTML 리셋 없이 계산만 재실행 -->
+          <select id="aiaa-energy" onchange="runAiaaCalc()">
             <option value="1000" selected>1,000 keV (1 MeV) — 기준 에너지</option>
             <option value="3000">3,000 keV (3 MeV)</option>
             <option value="300">300 keV</option>
@@ -649,7 +650,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 </div>
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · Solar-Rad v2.3</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · Solar-Rad v2.4</span>
   <span class="ft">NRL/Tada+1982 · Lang+2020 · Anspaugh+1996 · Jun+2003 · AP9/AE9 · ECSS-E-ST-20-08C · AIAA S-111A-2014</span>
 </footer>
 </div>
@@ -1126,54 +1127,60 @@ function buildAiaaStackVis(containerId, fluxMax, params, isBare){
   }).join('');
 }
 
-function updateAiaa(){
+// ════════════════════════════════════════════════════════════════
+// AIAA Tab — v2.4 핵심 버그 수정
+//
+// [버그 원인]
+// 기존: aiaa-energy의 onchange도 updateAiaa()를 호출
+//       → updateAiaa() 내부에서 항상 energySel.innerHTML 교체
+//       → 사용자가 에너지를 선택하는 순간 innerHTML이 리셋되어
+//         선택값이 즉시 사라짐 (무한 리셋 루프)
+//
+// [해결]
+// onAiaaParticleChange(): 입자 변경 시에만 호출 → 에너지 옵션 리셋 → 계산
+// runAiaaCalc():          에너지 변경 시에만 호출 → innerHTML 건드리지 않음 → 계산
+// updateAiaa():           탭 진입 시 초기화용 (두 함수 조합)
+// ════════════════════════════════════════════════════════════════
+
+function onAiaaParticleChange(){
+  // 입자가 바뀔 때만 에너지 옵션을 교체
   const particle  = document.getElementById('aiaa-particle').value;
   const energySel = document.getElementById('aiaa-energy');
   const eLabel    = document.getElementById('aiaa-energy-label');
 
-  // ──────────────────────────────────────────────────────────────
-  // [v2.3 BUG FIX] 에너지 드롭다운 비활성화 문제 수정
-  //
-  // 원인: innerHTML을 template literal(`...`)로 한 번에 교체하면
-  //       일부 브라우저에서 DOM 파싱 전 .value를 읽어 빈 문자열 반환.
-  //       또한 select 엘리먼트가 일부 상황에서 암묵적 disabled 상태가 됨.
-  //
-  // 수정: Array.join으로 옵션 교체 → disabled=false 명시 →
-  //       options[0].value로 안전하게 기본값 취득
-  // ──────────────────────────────────────────────────────────────
   if(particle === 'electron'){
     eLabel.textContent = '에너지 선택 (전자)';
-    energySel.innerHTML = [
-      '<option value="1.0" selected>1.0 MeV — 기준 에너지</option>',
-      '<option value="0.6">0.6 MeV</option>',
-      '<option value="2.0">2.0 MeV</option>',
-      '<option value="3.0">3.0 MeV</option>'
-    ].join('');
+    // 기존 옵션 전체 제거 후 새 옵션 추가 (innerHTML 대신 DOM API 사용)
+    while(energySel.options.length > 0) energySel.remove(0);
+    [['1.0','1.0 MeV — 기준 에너지'],['0.6','0.6 MeV'],['2.0','2.0 MeV'],['3.0','3.0 MeV']].forEach(([v,t],i)=>{
+      const o = new Option(t, v, i===0, i===0);
+      energySel.add(o);
+    });
   } else {
     eLabel.textContent = '에너지 선택 (양성자)';
-    energySel.innerHTML = [
-      '<option value="1000" selected>1,000 keV (1 MeV) — 기준 에너지</option>',
-      '<option value="3000">3,000 keV (3 MeV)</option>',
-      '<option value="300">300 keV</option>',
-      '<option value="100">100 keV</option>',
-      '<option value="50">50 keV</option>',
-      '<option value="20">20 keV</option>'
-    ].join('');
+    while(energySel.options.length > 0) energySel.remove(0);
+    [['1000','1,000 keV (1 MeV) — 기준 에너지'],['3000','3,000 keV (3 MeV)'],['300','300 keV'],['100','100 keV'],['50','50 keV'],['20','20 keV']].forEach(([v,t],i)=>{
+      const o = new Option(t, v, i===0, i===0);
+      energySel.add(o);
+    });
   }
-  energySel.disabled = false; // 항상 활성화 상태 보장
-  // innerHTML 교체 후 안전하게 첫 번째 옵션 값으로 폴백
-  const energyKey = energySel.value
-    || (energySel.options[0] && energySel.options[0].value)
-    || Object.keys(AIAA_FLUENCES[particle])[0];
+  runAiaaCalc();
+}
 
-  const fluences  = AIAA_FLUENCES[particle][energyKey]
+function runAiaaCalc(){
+  // innerHTML 건드리지 않고 현재 선택값으로만 계산
+  const particle  = document.getElementById('aiaa-particle').value;
+  const energySel = document.getElementById('aiaa-energy');
+  const energyKey = energySel.value || Object.keys(AIAA_FLUENCES[particle])[0];
+
+  const fluences = AIAA_FLUENCES[particle][energyKey]
     || AIAA_FLUENCES[particle][Object.keys(AIAA_FLUENCES[particle])[0]];
-  const fluxMax   = fluences[fluences.length-1];
-  const fluxMin   = fluences[0];
-  const atten     = getCoverAtten(particle, energyKey);
+  const fluxMax = fluences[fluences.length-1];
+  const fluxMin = fluences[0];
+  const atten   = getCoverAtten(particle, energyKey);
 
-  const bareP  = getBareLayersParams();
-  const covP   = getCxEffAndPhi0();
+  const bareP = getBareLayersParams();
+  const covP  = getCxEffAndPhi0();
 
   document.getElementById('aiaa-bare-cx').textContent = bareP.cx.toFixed(4);
   document.getElementById('aiaa-cov-cx').textContent  = covP.cx.toFixed(4);
@@ -1198,24 +1205,33 @@ function updateAiaa(){
     const delta   = covPct - barePct;
     const isLast  = (i === fluences.length-1);
 
-    // ──────────────────────────────────────────────────────────
-    // [v2.3 FIX] AIAA §8.2.3.2 판정 상세 설명
-    //
-    // 충족 조건: 최대 fluence에서 bare cell Pmax ≤ 60% (≥40% 열화)
-    //
-    // "미충족"이 나오는 이유:
-    //   현재 레이어 구조의 Cx_eff가 낮아 방사선 내성이 높으므로
-    //   AIAA 규정 fluence 범위 내에서 40% 열화에 도달하지 못함.
-    //   이는 소재가 우수하다는 의미이나, Cx·Φ₀ 추출을 위해
-    //   더 높은 fluence 조건의 시험 설계가 필요함을 나타냄.
-    // ──────────────────────────────────────────────────────────
+    // AIAA §8.2.3.2 충족 조건: 최대 fluence에서 bare cell ≤60% (≥40% 열화)
     const meetsCrit = isLast ? (barePct <= 60) : true;
     const degradation = (100 - barePct).toFixed(1);
-    const critText  = isLast
+    const rowId = `aiaa-row-info-${i}`;
+
+    // 미충족 시: 클릭하면 해당 행 바로 아래에 인라인 설명 패널 토글
+    const critText = isLast
       ? (meetsCrit
           ? '<span style="color:var(--ok);font-weight:700">충족 (≥40% 열화)</span>'
-          : `<span style="color:var(--warn);font-weight:700;cursor:help" title="§8.2.3.2 미충족 사유: bare cell Pmax = ${barePct.toFixed(1)}% 잔존 (열화 ${degradation}%). AIAA 요건은 최대 fluence 조사점에서 ≥40% 열화(≤60% 잔존)입니다. 현재 구조의 Cx_eff가 낮아 규정 fluence 내에서 40% 열화 미달. '시험 계획 보조' 탭에서 필요 fluence 범위를 역산하십시오.">미충족 ⓘ</span>`)
+          : `<span style="color:var(--warn);font-weight:700;cursor:pointer;text-decoration:underline dotted"
+               onclick="toggleAiaaInfo('${rowId}', '${barePct.toFixed(1)}', '${degradation}')">미충족 ⓘ</span>`)
       : '<span style="color:var(--muted)">—</span>';
+
+    const infoRow = (!isLast || meetsCrit) ? '' :
+      `<tr id="${rowId}" style="display:none">
+        <td colspan="5" style="padding:0">
+          <div style="background:rgba(184,110,0,.12);border-left:4px solid var(--warn);padding:10px 14px;font-size:12px;line-height:1.8">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--warn);font-weight:700;margin-bottom:6px">§8.2.3.2 미충족 — 상세 사유</div>
+            <b>판정 기준:</b> 최대 fluence 조사점에서 bare cell Pmax ≤ 60% (열화 ≥40%) 이어야 충족<br>
+            <b>현재 결과:</b> bare cell Pmax = ${barePct.toFixed(1)}% 잔존 → 열화 = ${degradation}% → <span style="color:var(--warn)">기준 미달</span><br>
+            <b>원인:</b> 현재 레이어 구조의 Cx_eff(=${bareP.cx.toFixed(4)})가 낮아 방사선 내성이 높음.
+            AIAA 규정 fluence 범위(최대 ${fmtSci(fluxMax)}) 내에서 40% 열화에 도달하지 못함.<br>
+            <b>조치:</b> "시험 계획 보조" 탭에서 40% 열화에 필요한 fluence 범위를 역산하여 시험 조건을 재설계하십시오.
+            <div style="margin-top:6px;text-align:right"><button onclick="toggleAiaaInfo('${rowId}')" style="font-family:var(--mono);font-size:11px;padding:2px 10px;border:1px solid var(--warn-bd);background:transparent;color:var(--warn);border-radius:3px;cursor:pointer">닫기 ✕</button></div>
+          </div>
+        </td>
+      </tr>`;
 
     return `<tr style="background:${isLast?'rgba(26,82,200,.06)':(i%2?'var(--bg2)':'')}">
       <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;${isLast?'font-weight:700':''}">${fmtSci(phi)}</td>
@@ -1223,8 +1239,21 @@ function updateAiaa(){
       <td style="padding:7px 10px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;color:${covPct<60?'var(--bad)':covPct<80?'var(--warn)':'var(--ok)'}">${covPct.toFixed(1)}%</td>
       <td style="padding:7px 10px;font-family:var(--mono);font-size:12px;text-align:center;color:${delta>5?'var(--ok)':delta>0?'var(--muted)':'var(--dim)'}">${delta>=0?'+':''}${delta.toFixed(1)}%p</td>
       <td style="padding:7px 10px;font-size:12px;text-align:center">${critText}</td>
-    </tr>`;
+    </tr>${infoRow}`;
   }).join('');
+}
+
+// 미충족 ⓘ 클릭 시 인라인 설명 토글
+function toggleAiaaInfo(rowId){
+  const row = document.getElementById(rowId);
+  if(!row) return;
+  row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+
+// 탭 진입 시 초기 실행 (기존 updateAiaa 역할 유지)
+function updateAiaa(){
+  // 현재 particle에 맞는 에너지 옵션이 이미 HTML에 있으므로 onchange 없이 바로 계산
+  runAiaaCalc();
 }
 
 // ════════════════════════════════════════════════════════════════

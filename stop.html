@@ -706,30 +706,33 @@ function simulateBragg_v45(ion, E0_MeV, layers){
         const dx = Math.min(adaptiveDx(E), t_um - xInLayer);
         if(dx <= 0) break;
 
-        // 현재 에너지에서 dE/dx 계산 (Se + Sn, 선형 저지능 단위 MeV/μm)
+        // 현재 에너지에서 dE/dx 계산
         const sMass = Se(E, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
                     + Sn(E, ion.Z, ion.A, tar.Z, tar.A, rho);
-        const dEdx_lin = sMass * rho * 1e-4; // MeV/μm
+        const dEdx_lin = sMass * rho * 1e-4;
 
-        // RK2 (중간점 법): 더 정확한 에너지 손실 계산
+        // RK2: 중간점 에너지에서 재계산
         const E_mid_approx = Math.max(E - dEdx_lin * dx * 0.5, 1e-6);
         const sMass_mid = Se(E_mid_approx, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
                         + Sn(E_mid_approx, ion.Z, ion.A, tar.Z, tar.A, rho);
         const dEdx_mid = sMass_mid * rho * 1e-4;
         const dE = dEdx_mid * dx;
 
-        // profile 기록 (현재 위치)
-        profile.push({ x: xCum + xInLayer, E, dEdx: dEdx_lin, layer: li, layerName });
+        // profile에 현재 위치 기록 (dEdx_mid 사용 → 더 정확한 Bragg curve)
+        profile.push({ x: xCum + xInLayer, E, dEdx: dEdx_mid, layer: li, layerName });
 
         if(E - dE <= 0.0005){
-          // 이 스텝 내에서 정지
           const t_stop = E / dEdx_lin;
           xInLayer += t_stop;
           xCum += xInLayer;
           totalEnergyDeposited += E;
           E = 0; exitE = 0;
           layerStopped = true; stopped = true; stopLayer = li;
-          profile.push({ x: xCum, E: 0, dEdx: dEdx_lin * 1.5, layer: li, layerName }); // Bragg peak 표시
+          // Bragg peak: 정지 직전의 peak dEdx는 현재보다 훨씬 크게 표시
+          const sMass_peak = Se(0.001, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
+                           + Sn(0.001, ion.Z, ion.A, tar.Z, tar.A, rho);
+          const dEdx_peak = sMass_peak * rho * 1e-4;
+          profile.push({ x: xCum, E: 0, dEdx: Math.max(dEdx_peak, dEdx_lin * 2.5), layer: li, layerName });
           break;
         }
 
@@ -1174,8 +1177,12 @@ let srimLateralChart = null, srimRangeChart = null, srimIonChart = null;
 
 // Box-Muller 정규 난수
 function randGauss(mu=0, sigma=1) {
-  const u1 = Math.random() + 1e-15, u2 = Math.random();
-  return mu + sigma * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  let u1, u2;
+  do { u1 = Math.random(); } while (u1 === 0);
+  do { u2 = Math.random(); } while (u2 === 0);
+  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  if (!isFinite(z)) return mu;
+  return mu + sigma * z;
 }
 
 // 복합층 면적가중 방사길이 X₀ [μm]
@@ -1256,7 +1263,10 @@ function generateTracks(ion, E0_MeV, result, lyrs) {
 
       pts.push({ x: xFrac * totalR, y: curY });
     }
-    tracks.push(pts);
+// NaN/Infinity 트랙 제거
+    if (pts.every(p => isFinite(p.x) && isFinite(p.y))) {
+      tracks.push(pts);
+    }
   }
   return tracks;
 }

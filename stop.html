@@ -681,8 +681,12 @@ function simulateBragg_v45(ion, E0_MeV, layers){
         const R_exit = R_entry - t_um;
         exitE = _interpSrimRangeInverse(srimTable, Math.max(0, R_exit));
         E = exitE;
-        const steps = Math.max(20, Math.ceil(t_um / 0.3));
-        for(let step = 1; step < steps; step++){
+        const steps = Math.max(60, Math.ceil(t_um / 0.1));
+        // 층 진입점 먼저 기록
+        const sMass_entry = Se(E, ion.Z, ion.A, tar.Z, tar.A, I_eV, rho, L.material)
+                          + Sn(E, ion.Z, ion.A, tar.Z, tar.A, rho);
+        profile.push({ x: xCum, E, dEdx: sMass_entry * rho * 1e-4, layer: li, layerName });
+        for(let step = 1; step <= steps; step++){
           const x_step = step * (t_um / steps);
           const R_remain = R_entry - x_step;
           const E_at_x = _interpSrimRangeInverse(srimTable, Math.max(0, R_remain));
@@ -1259,10 +1263,14 @@ function generateTracks(ion, E0_MeV, result, lyrs) {
       }
 
       // y 측방 변위: 투영된 실제 산란 (x방향 주 이동 가정)
-      curY += dx * Math.tan(theta_y);
+// theta_y를 ±π/2 미만으로 클램프 → tan() 발산 방지
+      const theta_y_clamped = Math.max(-1.4, Math.min(1.4, theta_y));
+      curY += dx * Math.tan(theta_y_clamped);
+
+      // curY 범위 이탈 트랙 조기 종료
+      if (!isFinite(curY) || Math.abs(curY) > totalR * 5) break;
 
       pts.push({ x: xFrac * totalR, y: curY });
-    }
 // NaN/Infinity 트랙 제거
     if (pts.every(p => isFinite(p.x) && isFinite(p.y))) {
       tracks.push(pts);

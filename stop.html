@@ -1268,14 +1268,16 @@ function generateTracks(ion, E0_MeV, result, lyrs) {
       curY += dx * Math.tan(theta_y_clamped);
 
       // curY 범위 이탈 트랙 조기 종료
-      if (!isFinite(curY) || Math.abs(curY) > totalR * 5) break;
+     if (!isFinite(curY) || Math.abs(curY) > totalR * 5) break;
 
       pts.push({ x: xFrac * totalR, y: curY });
-// NaN/Infinity 트랙 제거
+    }  // ← for (let s ...) 루프 닫기
+
+    // NaN/Infinity 트랙 제거
     if (pts.every(p => isFinite(p.x) && isFinite(p.y))) {
       tracks.push(pts);
     }
-  }
+  }  // ← for (let t ...) 루프 닫기
   return tracks;
 }
 

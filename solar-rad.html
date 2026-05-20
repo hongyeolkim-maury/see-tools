@@ -148,6 +148,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
   <div class="tab" onclick="sw('guide',this)">평가 항목 해설</div>
   <div class="tab" onclick="sw('aiaa',this)">AIAA S-111A 시험 조건</div>
   <div class="tab" onclick="sw('testplan',this)">시험 계획 보조</div>
+  <div class="tab" onclick="sw('ebridge',this)">효율 저하 브릿지</div>
 </div>
 
 <!-- ══ TAB 1: ASSESS ══ -->
@@ -649,6 +650,339 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 </div>
 </div>
 
+<div id="tab-ebridge" class="tab-panel" style="display:none">
+ 
+  <!-- ── 페이지 헤더 배너 ── -->
+  <div style="background:linear-gradient(135deg,rgba(26,82,200,.08) 0%,rgba(124,58,237,.06) 50%,rgba(13,138,94,.06) 100%);
+              border:1px solid var(--border2);border-radius:10px;padding:16px 20px;margin-bottom:18px;
+              display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">
+        ⚡ Efficiency Bridge — Fluence → PCE 저하 브릿지 모델
+      </div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:700px">
+        STOP 시뮬레이터의 물리 데미지 데이터를 기반으로 누적 방사선 조사량(Fluence)에 따른
+        탠덤 태양전지의 광전환 효율(PCE) 저하를 실시간 예측합니다.
+        슬라이더로 소재 상수를 튜닝하면 그래프가 즉시 재연산됩니다.
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--ok);background:var(--ok-bg);border:1px solid var(--ok-bd);padding:3px 9px;border-radius:3px">Reactive ● LIVE</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--dim)">Messenger-Clawson 기반 · Current-Matching 병목 모델</span>
+    </div>
+  </div>
+ 
+  <div class="g2" style="align-items:start;gap:16px">
+ 
+    <!-- ════════════════════════════════
+         좌측: 파라미터 조절 패널
+         ════════════════════════════════ -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+ 
+      <!-- ── 글로벌 설정 ── -->
+      <div class="panel">
+        <div class="ph">
+          <div class="phdot" style="background:var(--accent)"></div>
+          <div class="phtxt">글로벌 설정</div>
+        </div>
+        <div class="pb">
+ 
+          <!-- 초기 탠덤 효율 -->
+          <div class="srow">
+            <div class="shdr">
+              <span class="sname">초기 탠덤 통합 효율 η_tandem₀ (%)</span>
+              <span class="sval" id="eb-tandem0-v">26.0 %</span>
+            </div>
+            <input type="range" id="eb-tandem0" min="15" max="40" step="0.5" value="26"
+              oninput="eb_markDirty('tandem0');eb_updateSliderLabel('eb-tandem0','eb-tandem0-v','%',1)">
+          </div>
+ 
+          <!-- Fluence 범위 -->
+          <div class="field" style="margin-bottom:8px">
+            <label>Fluence 표시 범위 (로그)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="font-family:var(--mono);font-size:12px;color:var(--muted)">10^</span>
+              <input type="number" id="eb-phi-min" value="10" min="8" max="13" step="1"
+                style="width:60px" oninput="eb_markDirty('range')">
+              <span style="color:var(--dim)">~</span>
+              <span style="font-family:var(--mono);font-size:12px;color:var(--muted)">10^</span>
+              <input type="number" id="eb-phi-max" value="15" min="12" max="18" step="1"
+                style="width:60px" oninput="eb_markDirty('range')">
+            </div>
+          </div>
+ 
+          <!-- 데이터 포인트 수 -->
+          <div class="field" style="margin-bottom:0">
+            <label>연산 포인트 수 (로그 등분)</label>
+            <select id="eb-npts" onchange="eb_markDirty('npts')">
+              <option value="60">60 pts — 빠른 미리보기</option>
+              <option value="120" selected>120 pts — 기본</option>
+              <option value="300">300 pts — 고해상도</option>
+            </select>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- ── 페로브스카이트 (Top Cell) ── -->
+      <div class="panel" style="border-top:3px solid var(--perv)">
+        <div class="ph">
+          <div class="phdot" style="background:var(--perv)"></div>
+          <div class="phtxt" style="color:var(--perv)">페로브스카이트 (Top Cell)</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--perv);margin-left:auto;background:rgba(124,58,237,.1);padding:2px 7px;border-radius:3px">자기회복 가능</span>
+        </div>
+        <div class="pb">
+ 
+          <div class="srow">
+            <div class="shdr">
+              <span class="sname">초기 효율 η₀ (%)</span>
+              <span class="sval" id="eb-perv-eta0-v" style="color:var(--perv)">18.0 %</span>
+            </div>
+            <input type="range" id="eb-perv-eta0" min="5" max="35" step="0.5" value="18"
+              oninput="eb_markDirty('perv');eb_updateSliderLabel('eb-perv-eta0','eb-perv-eta0-v','%',1)">
+          </div>
+ 
+          <div class="srow">
+            <div class="shdr">
+              <span class="sname">결함 생성율 K_d (cm⁻¹)</span>
+              <span class="sval" id="eb-perv-kd-v" style="color:var(--perv)">0.0120</span>
+            </div>
+            <input type="range" id="eb-perv-kd" min="0.001" max="0.15" step="0.001" value="0.012"
+              oninput="eb_markDirty('perv');eb_updateSliderLabel('eb-perv-kd','eb-perv-kd-v','',4)">
+          </div>
+ 
+          <div class="srow">
+            <div class="shdr">
+              <span class="sname">손상 감도 계수 C</span>
+              <span class="sval" id="eb-perv-C-v" style="color:var(--perv)">0.0500</span>
+            </div>
+            <input type="range" id="eb-perv-C" min="0.005" max="0.30" step="0.005" value="0.05"
+              oninput="eb_markDirty('perv');eb_updateSliderLabel('eb-perv-C','eb-perv-C-v','',4)">
+          </div>
+ 
+          <div class="srow" style="margin-bottom:0">
+            <div class="shdr">
+              <span class="sname">임계 플루언스 Φ₀ (지수 log₁₀)</span>
+              <span class="sval" id="eb-perv-phi0-v" style="color:var(--perv)">10^11.0</span>
+            </div>
+            <input type="range" id="eb-perv-phi0" min="8" max="14" step="0.25" value="11"
+              oninput="eb_markDirty('perv');eb_updatePhi0Label('eb-perv-phi0','eb-perv-phi0-v')">
+          </div>
+ 
+          <!-- 실시간 물성 표시 -->
+          <div style="background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.2);border-radius:5px;padding:8px 11px;margin-top:10px;font-size:11px;font-family:var(--mono);line-height:1.9">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">τ₀ (초기 수명)</span><span style="color:var(--perv)">100 ns</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">캐리어 수명 τ(EOL)</span><span id="eb-perv-tau" style="color:var(--perv)">—</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">확산 거리 L(EOL)</span><span id="eb-perv-L" style="color:var(--perv)">—</span></div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- ── CIGS (Bottom Cell) ── -->
+      <div class="panel" style="border-top:3px solid var(--cigs)">
+        <div class="ph">
+          <div class="phdot" style="background:var(--cigs)"></div>
+          <div class="phtxt" style="color:var(--cigs)">CIGS (Bottom Cell)</div>
+        </div>
+        <div class="pb">
+ 
+          <div class="srow">
+            <div class="shdr">
+              <span class="sname">초기 효율 η₀ (%)</span>
+              <span class="sval" id="eb-cigs-eta0-v" style="color:var(--cigs)">20.0 %</span>
+            </div>
+            <input type="range" id="eb-cigs-eta0" min="5" max="35" step="0.5" value="20"
+              oninput="eb_markDirty('cigs');eb_updateSliderLabel('eb-cigs-eta0','eb-cigs-eta0-v','%',1)">
+          </div>
+ 
+          <div class="srow">
+            <div class="shdr">
+              <span class="sname">결함 생성율 K_d (cm⁻¹)</span>
+              <span class="sval" id="eb-cigs-kd-v" style="color:var(--cigs)">0.0450</span>
+            </div>
+            <input type="range" id="eb-cigs-kd" min="0.001" max="0.20" step="0.001" value="0.045"
+              oninput="eb_markDirty('cigs');eb_updateSliderLabel('eb-cigs-kd','eb-cigs-kd-v','',4)">
+          </div>
+ 
+          <div class="srow">
+            <div class="shdr">
+              <span class="sname">손상 감도 계수 C</span>
+              <span class="sval" id="eb-cigs-C-v" style="color:var(--cigs)">0.0800</span>
+            </div>
+            <input type="range" id="eb-cigs-C" min="0.005" max="0.40" step="0.005" value="0.08"
+              oninput="eb_markDirty('cigs');eb_updateSliderLabel('eb-cigs-C','eb-cigs-C-v','',4)">
+          </div>
+ 
+          <div class="srow" style="margin-bottom:0">
+            <div class="shdr">
+              <span class="sname">임계 플루언스 Φ₀ (지수 log₁₀)</span>
+              <span class="sval" id="eb-cigs-phi0-v" style="color:var(--cigs)">10^10.7</span>
+            </div>
+            <input type="range" id="eb-cigs-phi0" min="8" max="14" step="0.25" value="10.699"
+              oninput="eb_markDirty('cigs');eb_updatePhi0Label('eb-cigs-phi0','eb-cigs-phi0-v')">
+          </div>
+ 
+          <div style="background:rgba(13,138,94,.07);border:1px solid rgba(13,138,94,.2);border-radius:5px;padding:8px 11px;margin-top:10px;font-size:11px;font-family:var(--mono);line-height:1.9">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">τ₀ (초기 수명)</span><span style="color:var(--cigs)">100 ns</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">캐리어 수명 τ(EOL)</span><span id="eb-cigs-tau" style="color:var(--cigs)">—</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">확산 거리 L(EOL)</span><span id="eb-cigs-L" style="color:var(--cigs)">—</span></div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- ── ITO 투명전극층 ── -->
+      <div class="panel" style="border-top:3px solid #1a8fb8">
+        <div class="ph">
+          <div class="phdot" style="background:#1a8fb8"></div>
+          <div class="phtxt" style="color:#1a8fb8">ITO (투명전극층)</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:auto">간접 영향</span>
+        </div>
+        <div class="pb">
+ 
+          <div class="srow">
+            <div class="shdr">
+              <span class="sname">결함 생성율 K_d (cm⁻¹)</span>
+              <span class="sval" id="eb-ito-kd-v" style="color:#1a8fb8">0.0080</span>
+            </div>
+            <input type="range" id="eb-ito-kd" min="0.001" max="0.10" step="0.001" value="0.008"
+              oninput="eb_markDirty('ito');eb_updateSliderLabel('eb-ito-kd','eb-ito-kd-v','',4)">
+          </div>
+ 
+          <div class="srow">
+            <div class="shdr">
+              <span class="sname">손상 감도 계수 C</span>
+              <span class="sval" id="eb-ito-C-v" style="color:#1a8fb8">0.0200</span>
+            </div>
+            <input type="range" id="eb-ito-C" min="0.001" max="0.15" step="0.002" value="0.02"
+              oninput="eb_markDirty('ito');eb_updateSliderLabel('eb-ito-C','eb-ito-C-v','',4)">
+          </div>
+ 
+          <div class="srow" style="margin-bottom:0">
+            <div class="shdr">
+              <span class="sname">임계 플루언스 Φ₀ (지수 log₁₀)</span>
+              <span class="sval" id="eb-ito-phi0-v" style="color:#1a8fb8">10^12.0</span>
+            </div>
+            <input type="range" id="eb-ito-phi0" min="9" max="15" step="0.25" value="12"
+              oninput="eb_markDirty('ito');eb_updatePhi0Label('eb-ito-phi0','eb-ito-phi0-v')">
+          </div>
+        </div>
+      </div>
+ 
+      <!-- ── 리셋 버튼 ── -->
+      <button onclick="eb_resetDefaults()"
+        style="width:100%;padding:9px;background:var(--bg2);border:1px solid var(--border2);
+               border-radius:6px;color:var(--muted);font-family:var(--mono);font-size:12px;
+               cursor:pointer;letter-spacing:.04em;transition:all .2s"
+        onmouseover="this.style.background='var(--accent)';this.style.color='#fff'"
+        onmouseout="this.style.background='var(--bg2)';this.style.color='var(--muted)'">
+        ↺ 기본값으로 초기화
+      </button>
+    </div>
+ 
+    <!-- ════════════════════════════════
+         우측: 차트 + 요약 리포트
+         ════════════════════════════════ -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+ 
+      <!-- ── 메인 효율 저하 차트 ── -->
+      <div class="panel">
+        <div class="ph" style="justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="phdot" style="background:var(--accent)"></div>
+            <div class="phtxt">Fluence vs. PCE 저하 곡선 (X축: 로그 스케일)</div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center">
+            <span style="font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:5px">
+              <span style="display:inline-block;width:20px;height:2px;background:var(--perv);vertical-align:middle"></span>페로브스카이트
+            </span>
+            <span style="font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:5px">
+              <span style="display:inline-block;width:20px;height:2px;background:var(--cigs);vertical-align:middle"></span>CIGS
+            </span>
+            <span style="font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:5px">
+              <span style="display:inline-block;width:20px;height:3px;background:var(--accent);vertical-align:middle;border-top:1px dashed var(--accent)"></span>탠덤 (병목)
+            </span>
+          </div>
+        </div>
+        <div class="pb">
+          <div style="position:relative;height:320px">
+            <canvas id="eb-chart"></canvas>
+          </div>
+          <!-- X축 로그 눈금 시각 보조 -->
+          <div style="display:flex;justify-content:space-between;padding:4px 8px 0;font-family:var(--mono);font-size:10px;color:var(--dim)">
+            <span id="eb-xaxis-labels"></span>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- ── 캐리어 수명 / 확산 거리 서브 차트 ── -->
+      <div class="panel">
+        <div class="ph">
+          <div class="phdot" style="background:var(--warn)"></div>
+          <div class="phtxt">캐리어 수명 τ 및 확산 거리 L vs. Fluence</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:auto">Step 1–2 중간 결과 시각화</span>
+        </div>
+        <div class="pb">
+          <div style="position:relative;height:180px">
+            <canvas id="eb-tau-chart"></canvas>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- ── 실시간 요약 리포트 ── -->
+      <div class="panel">
+        <div class="ph">
+          <div class="phdot" style="background:var(--ok)"></div>
+          <div class="phtxt">실시간 요약 리포트</div>
+          <span id="eb-bottleneck-badge" style="font-family:var(--mono);font-size:11px;margin-left:auto;
+                padding:2px 9px;border-radius:3px;border:1px solid transparent">—</span>
+        </div>
+        <div class="pb">
+ 
+          <!-- 병목 셀 표시기 -->
+          <div id="eb-bottleneck-bar" style="border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:13px;line-height:1.7">
+            계산 중...
+          </div>
+ 
+          <!-- 5개 주요 플루언스 포인트 표 -->
+          <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px">
+            <thead>
+              <tr style="background:var(--accent)">
+                <th style="padding:6px 9px;color:#fff;font-family:var(--mono);font-size:11px;text-align:left">Φ (p⁺/cm²)</th>
+                <th style="padding:6px 9px;color:#fff;font-family:var(--mono);font-size:11px;text-align:center">Perv η</th>
+                <th style="padding:6px 9px;color:#fff;font-family:var(--mono);font-size:11px;text-align:center">CIGS η</th>
+                <th style="padding:6px 9px;color:#fff;font-family:var(--mono);font-size:11px;text-align:center">탠덤 η</th>
+                <th style="padding:6px 9px;color:#fff;font-family:var(--mono);font-size:11px;text-align:center">병목</th>
+              </tr>
+            </thead>
+            <tbody id="eb-summary-table"></tbody>
+          </table>
+ 
+          <!-- 4-Step 파이프라인 수식 요약 -->
+          <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:11px 14px;font-size:12px;line-height:1.9;font-family:var(--mono)">
+            <div style="font-size:10px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;font-weight:700">4-Step 물리 파이프라인 (현재 입력값 기준)</div>
+            <div style="color:var(--muted)">Step 1</div>
+            <div id="eb-formula1" style="color:var(--text);margin-bottom:6px">Nₜ = K_d × Φ</div>
+            <div style="color:var(--muted)">Step 2</div>
+            <div id="eb-formula2" style="color:var(--text);margin-bottom:6px">1/τ = 1/τ₀ + σ·v_th·Nₜ</div>
+            <div style="color:var(--muted)">Step 3</div>
+            <div id="eb-formula3" style="color:var(--text);margin-bottom:6px">η(Φ) = η₀·[1 − C·ln(1 + Φ/Φ₀)]</div>
+            <div style="color:var(--muted)">Step 4</div>
+            <div id="eb-formula4" style="color:var(--text)">η_tandem = η₀_tandem·min(η_top/η_top₀, η_bot/η_bot₀)</div>
+          </div>
+ 
+        </div>
+      </div>
+ 
+      <!-- ── 데이터 신뢰도 안내 ── -->
+      <div class="mnote">
+        <strong>모델 참고:</strong> Messenger-Clawson 스케일링 · Bourgoin-Corbett 결함 이론 기반 τ 계산 (σ=10⁻¹⁵ cm², v_th=10⁷ cm/s, D=0.1 cm²/s, τ₀=100 ns 고정).
+        <strong>Φ₀, C, K_d 값은 실험 데이터 미확보 소재의 추정 범위입니다.</strong>
+        실제 비행 부품 선정에는 AIAA S-111A § 8.2 조건의 양성자 시험으로 직접 도출하십시오.
+      </div>
+    </div>
+ 
+  </div><!-- /g2 -->
+</div><!-- /tab-ebridge -->
+  
 <footer>
   <span class="ft">HELIAS Laboratory · heliaslab.com · Solar-Rad v2.4</span>
   <span class="ft">NRL/Tada+1982 · Lang+2020 · Anspaugh+1996 · Jun+2003 · AP9/AE9 · ECSS-E-ST-20-08C · AIAA S-111A-2014</span>
@@ -1384,8 +1718,403 @@ if(typeof Chart !== 'undefined'){
       }
     }, 50);
   });
-}
+}  
 </script>
-
+<script id="eb-script-block">
+// ════════════════════════════════════════════════════════════════════
+// Efficiency Bridge — 바닐라 JS  (Dirty-Flag + rAF 기반 최적화)
+//
+// 설계 원칙:
+//   1. Dirty Flag: 슬라이더 이벤트 → eb_dirtyFlags 에 플래그만 세팅
+//   2. requestAnimationFrame(eb_flush): 다음 프레임에 딱 한 번 연산
+//   3. 파라미터 해시 비교: 동일 파라미터면 차트 업데이트 생략
+//   4. 연산 배열 생성: Float64Array로 타입화 → GC 부담 최소화
+// ════════════════════════════════════════════════════════════════════
+ 
+(function () {
+  'use strict';
+ 
+  // ── 상수 (Bourgoin-Corbett 물성 — 고정값) ──────────────────────
+  const TAU0   = 1e-7;   // s   (초기 캐리어 수명 100 ns)
+  const SIGMA  = 1e-15;  // cm² (포획 단면적)
+  const VTH    = 1e7;    // cm/s (열속도)
+  const D_COEF = 0.1;    // cm²/s (확산계수)
+ 
+  // ── Dirty Flag 시스템 ───────────────────────────────────────────
+  const eb_dirtyFlags = { perv: true, cigs: true, ito: true, tandem0: true, range: true, npts: true };
+  let eb_rafId = null;
+  let eb_lastParamHash = null;
+ 
+  // ── 차트 인스턴스 ────────────────────────────────────────────────
+  let eb_mainChart = null;
+  let eb_tauChart  = null;
+ 
+  // ── 공개 API (inline event handlers에서 호출) ───────────────────
+  window.eb_markDirty = function (flag) {
+    eb_dirtyFlags[flag] = true;
+    if (!eb_rafId) eb_rafId = requestAnimationFrame(eb_flush);
+  };
+ 
+  window.eb_updateSliderLabel = function (sliderId, labelId, suffix, decimals) {
+    const v = parseFloat(document.getElementById(sliderId).value);
+    document.getElementById(labelId).textContent = v.toFixed(decimals) + (suffix ? ' ' + suffix : '');
+  };
+ 
+  window.eb_updatePhi0Label = function (sliderId, labelId) {
+    const exp = parseFloat(document.getElementById(sliderId).value);
+    document.getElementById(labelId).textContent = '10^' + exp.toFixed(2);
+  };
+ 
+  window.eb_resetDefaults = function () {
+    const defaults = {
+      'eb-tandem0': 26, 'eb-phi-min': 10, 'eb-phi-max': 15, 'eb-npts': '120',
+      'eb-perv-eta0': 18, 'eb-perv-kd': 0.012, 'eb-perv-C': 0.05, 'eb-perv-phi0': 11,
+      'eb-cigs-eta0': 20, 'eb-cigs-kd': 0.045, 'eb-cigs-C': 0.08, 'eb-cigs-phi0': 10.699,
+      'eb-ito-kd': 0.008, 'eb-ito-C': 0.02, 'eb-ito-phi0': 12,
+    };
+    Object.entries(defaults).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+    // 레이블 갱신
+    [['eb-tandem0','eb-tandem0-v','%',1],['eb-perv-eta0','eb-perv-eta0-v','%',1],
+     ['eb-perv-kd','eb-perv-kd-v','',4],['eb-perv-C','eb-perv-C-v','',4],
+     ['eb-cigs-eta0','eb-cigs-eta0-v','%',1],['eb-cigs-kd','eb-cigs-kd-v','',4],
+     ['eb-cigs-C','eb-cigs-C-v','',4],['eb-ito-kd','eb-ito-kd-v','',4],
+     ['eb-ito-C','eb-ito-C-v','',4]].forEach(([s,l,sf,d]) => eb_updateSliderLabel(s,l,sf,d));
+    ['eb-perv-phi0','eb-cigs-phi0','eb-ito-phi0'].forEach((s, i) => {
+      eb_updatePhi0Label(s, ['eb-perv-phi0-v','eb-cigs-phi0-v','eb-ito-phi0-v'][i]);
+    });
+    Object.keys(eb_dirtyFlags).forEach(k => eb_dirtyFlags[k] = true);
+    eb_lastParamHash = null;
+    if (!eb_rafId) eb_rafId = requestAnimationFrame(eb_flush);
+  };
+ 
+  // ── 파라미터 수집 ───────────────────────────────────────────────
+  function eb_getParams() {
+    function v(id) { return parseFloat(document.getElementById(id)?.value ?? 0) || 0; }
+    function s(id) { return document.getElementById(id)?.value ?? ''; }
+    return {
+      tandem0 : v('eb-tandem0'),
+      phiMinExp: v('eb-phi-min'),
+      phiMaxExp: v('eb-phi-max'),
+      npts    : parseInt(s('eb-npts')) || 120,
+      perv: { eta0: v('eb-perv-eta0'), kd: v('eb-perv-kd'), C: v('eb-perv-C'), phi0: Math.pow(10, v('eb-perv-phi0')) },
+      cigs: { eta0: v('eb-cigs-eta0'), kd: v('eb-cigs-kd'), C: v('eb-cigs-C'), phi0: Math.pow(10, v('eb-cigs-phi0')) },
+      ito : { kd: v('eb-ito-kd'),  C: v('eb-ito-C'),  phi0: Math.pow(10, v('eb-ito-phi0')) },
+    };
+  }
+ 
+  function eb_hashParams(p) {
+    return JSON.stringify(p);
+  }
+ 
+  // ── 핵심 물리 파이프라인 ─────────────────────────────────────────
+  // Step 1: Nₜ = K_d × Φ
+  // Step 2: 1/τ = 1/τ₀ + σ·v_th·Nₜ  →  L = sqrt(D·τ)
+  // Step 3: η(Φ) = η₀·[1 − C·ln(1 + Φ/Φ₀)]  (Messenger-Clawson)
+  // Step 4: η_tandem = η₀_tandem·min(η_top/η_top₀, η_bot/η_bot₀)
+ 
+  function eb_calcPoint(phi, mat) {
+    // Step 1
+    const Nt = mat.kd * phi;
+    // Step 2
+    const tau  = 1 / (1 / TAU0 + SIGMA * VTH * Nt);
+    const L    = Math.sqrt(D_COEF * tau) * 1e4;  // cm → μm 변환 (* 1e4)
+    // Step 3 (Messenger-Clawson, 하한 0)
+    const etaRel = Math.max(0, 1 - mat.C * Math.log(1 + phi / mat.phi0));
+    return { Nt, tau, L, etaRel };
+  }
+ 
+  function eb_compute(p) {
+    const { npts, phiMinExp, phiMaxExp, perv, cigs, tandem0 } = p;
+    const logStep = (phiMaxExp - phiMinExp) / (npts - 1);
+ 
+    // Float64Array로 타입화 배열 — 힙 할당 최소화
+    const phiArr     = new Float64Array(npts);
+    const eta_perv   = new Float64Array(npts);
+    const eta_cigs   = new Float64Array(npts);
+    const eta_tandem = new Float64Array(npts);
+    const tau_perv   = new Float64Array(npts);
+    const tau_cigs   = new Float64Array(npts);
+    const L_perv     = new Float64Array(npts);
+    const L_cigs     = new Float64Array(npts);
+ 
+    for (let i = 0; i < npts; i++) {
+      const logPhi = phiMinExp + i * logStep;
+      const phi    = Math.pow(10, logPhi);
+      phiArr[i]    = phi;
+ 
+      const rPerv = eb_calcPoint(phi, perv);
+      const rCigs = eb_calcPoint(phi, cigs);
+ 
+      eta_perv[i]   = perv.eta0 * rPerv.etaRel;
+      eta_cigs[i]   = cigs.eta0 * rCigs.etaRel;
+      tau_perv[i]   = rPerv.tau * 1e9;  // s → ns
+      tau_cigs[i]   = rCigs.tau * 1e9;
+      L_perv[i]     = rPerv.L;
+      L_cigs[i]     = rCigs.L;
+ 
+      // Step 4: Current-Matching 병목 — 정규화 저하율의 min
+      const ratioPerv = rPerv.etaRel;   // η_top / η_top₀
+      const ratioCigs = rCigs.etaRel;   // η_bot / η_bot₀
+      eta_tandem[i] = tandem0 * Math.min(ratioPerv, ratioCigs);
+    }
+ 
+    return { phiArr, eta_perv, eta_cigs, eta_tandem, tau_perv, tau_cigs, L_perv, L_cigs };
+  }
+ 
+  // ── 차트 업데이트 ────────────────────────────────────────────────
+  function eb_updateCharts(result, p) {
+    const { phiArr, eta_perv, eta_cigs, eta_tandem, tau_perv, tau_cigs } = result;
+    const npts = phiArr.length;
+ 
+    // Chart.js용 데이터 변환 (log x축을 linear 인덱스로 매핑)
+    // Chart.js 4.x는 log scale을 지원하나, x 값으로 log10(phi)를 직접 넘겨서 처리
+    const logPhi = Array.from({ length: npts }, (_, i) => p.phiMinExp + i * (p.phiMaxExp - p.phiMinExp) / (npts - 1));
+ 
+    const dsPerv   = { label: '페로브스카이트 (Top)', data: Array.from(eta_perv),   borderColor: '#7c3aed', borderWidth: 2, pointRadius: 0, tension: 0.3 };
+    const dsCigs   = { label: 'CIGS (Bottom)',        data: Array.from(eta_cigs),   borderColor: '#0d8a5e', borderWidth: 2, pointRadius: 0, tension: 0.3 };
+    const dsTandem = { label: '탠덤 통합',             data: Array.from(eta_tandem), borderColor: '#1a52c8', borderWidth: 2.5, pointRadius: 0, tension: 0.3, borderDash: [6, 3] };
+ 
+    // X축 눈금 레이블 생성
+    const tickLabels = [];
+    for (let e = Math.ceil(p.phiMinExp); e <= Math.floor(p.phiMaxExp); e++) {
+      tickLabels.push({ x: e, label: `10^${e}` });
+    }
+ 
+    const chartEl = document.getElementById('eb-chart');
+    if (!chartEl) return;
+ 
+    if (!eb_mainChart) {
+      eb_mainChart = new Chart(chartEl, {
+        type: 'line',
+        data: { labels: logPhi, datasets: [dsPerv, dsCigs, dsTandem] },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => `Φ = 10^${parseFloat(items[0].label).toFixed(2)} p⁺/cm²`,
+                label: (item) => `${item.dataset.label}: ${parseFloat(item.raw).toFixed(2)} %`,
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'linear',
+              title: { display: true, text: 'log₁₀(Φ)  [p⁺/cm²]', color: '#3a5070', font: { size: 12, family: 'IBM Plex Mono' } },
+              grid: { color: 'rgba(0,0,0,.06)' },
+              ticks: {
+                color: '#3a5070', font: { size: 11, family: 'IBM Plex Mono' },
+                callback: (v) => `10^${v.toFixed(0)}`,
+                maxTicksLimit: 8,
+              }
+            },
+            y: {
+              title: { display: true, text: 'PCE η (%)', color: '#3a5070', font: { size: 12 } },
+              min: 0, max: 32,
+              grid: { color: 'rgba(0,0,0,.06)' },
+              ticks: { color: '#3a5070', font: { size: 11 }, callback: (v) => v + ' %' }
+            }
+          }
+        }
+      });
+    } else {
+      eb_mainChart.data.labels = logPhi;
+      eb_mainChart.data.datasets[0].data = Array.from(eta_perv);
+      eb_mainChart.data.datasets[1].data = Array.from(eta_cigs);
+      eb_mainChart.data.datasets[2].data = Array.from(eta_tandem);
+      eb_mainChart.update('none');
+    }
+ 
+    // ── 서브 차트: τ (log scale) ─────────────────────────────────
+    const tauEl = document.getElementById('eb-tau-chart');
+    const dsTauPerv = { label: 'τ Perovskite (ns)', data: Array.from(tau_perv), borderColor: '#7c3aed', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'yTau' };
+    const dsTauCigs = { label: 'τ CIGS (ns)',        data: Array.from(tau_cigs), borderColor: '#0d8a5e', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'yTau' };
+ 
+    if (!eb_tauChart) {
+      eb_tauChart = new Chart(tauEl, {
+        type: 'line',
+        data: { labels: logPhi, datasets: [dsTauPerv, dsTauCigs] },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          plugins: {
+            legend: { display: true, position: 'top',
+              labels: { font: { size: 11, family: 'IBM Plex Mono' }, color: '#3a5070', boxWidth: 14 } },
+            tooltip: { callbacks: { title: (i) => `10^${parseFloat(i[0].label).toFixed(2)} p⁺/cm²` } }
+          },
+          scales: {
+            x: { type: 'linear', ticks: { color: '#8fa0b8', font: { size: 10 }, callback: (v) => `10^${v.toFixed(0)}`, maxTicksLimit: 6 }, grid: { color: 'rgba(0,0,0,.05)' } },
+            yTau: { type: 'logarithmic', title: { display: true, text: 'τ (ns)', color: '#3a5070', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,.06)' }, ticks: { color: '#8fa0b8', font: { size: 10 } } }
+          }
+        }
+      });
+    } else {
+      eb_tauChart.data.labels = logPhi;
+      eb_tauChart.data.datasets[0].data = Array.from(tau_perv);
+      eb_tauChart.data.datasets[1].data = Array.from(tau_cigs);
+      eb_tauChart.update('none');
+    }
+  }
+ 
+  // ── 요약 테이블 + 리포트 업데이트 ───────────────────────────────
+  function eb_updateReport(result, p) {
+    const { phiArr, eta_perv, eta_cigs, eta_tandem, tau_perv, tau_cigs, L_perv, L_cigs } = result;
+    const npts = phiArr.length;
+ 
+    // EOL (마지막 포인트) 기준
+    const last = npts - 1;
+    const eolPerv   = eta_perv[last];
+    const eolCigs   = eta_cigs[last];
+    const eolTandem = eta_tandem[last];
+    const eolTauP   = tau_perv[last];
+    const eolTauC   = tau_cigs[last];
+    const eolLP     = L_perv[last];
+    const eolLC     = L_cigs[last];
+ 
+    // 물성 카드 업데이트
+    function nsStr(v) { return v < 1 ? (v * 1000).toFixed(2) + ' ps' : v.toFixed(3) + ' ns'; }
+    function umStr(v) { return v < 1 ? (v * 1000).toFixed(1) + ' nm' : v.toFixed(2) + ' μm'; }
+    document.getElementById('eb-perv-tau').textContent = nsStr(eolTauP);
+    document.getElementById('eb-perv-L').textContent   = umStr(eolLP);
+    document.getElementById('eb-cigs-tau').textContent = nsStr(eolTauC);
+    document.getElementById('eb-cigs-L').textContent   = umStr(eolLC);
+ 
+    // 병목 판단
+    const pervRatio = eolPerv / p.perv.eta0;
+    const cigsRatio = eolCigs / p.cigs.eta0;
+    const bottleneck = pervRatio <= cigsRatio ? 'Perovskite' : 'CIGS';
+    const btnColor   = bottleneck === 'Perovskite' ? '#7c3aed' : '#0d8a5e';
+    const badge = document.getElementById('eb-bottleneck-badge');
+    badge.textContent = `병목: ${bottleneck}`;
+    badge.style.cssText = `font-family:var(--mono);font-size:11px;margin-left:auto;padding:2px 9px;border-radius:3px;background:${btnColor}20;color:${btnColor};border:1px solid ${btnColor}50`;
+ 
+    const bar = document.getElementById('eb-bottleneck-bar');
+    bar.style.cssText = `border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:13px;line-height:1.8;background:${btnColor}10;border:1px solid ${btnColor}30`;
+    bar.innerHTML = `
+      <b style="color:${btnColor}">병목 셀: ${bottleneck}</b>  ←  탠덤 전류 정합(Current Matching)에 의한 효율 제한<br>
+      <span style="font-family:var(--mono);font-size:12px">
+        Perv 잔존율 <b style="color:#7c3aed">${(pervRatio * 100).toFixed(1)}%</b>
+        &nbsp;|&nbsp;
+        CIGS 잔존율 <b style="color:#0d8a5e">${(cigsRatio * 100).toFixed(1)}%</b>
+        &nbsp;|&nbsp;
+        탠덤 EOL η <b style="color:#1a52c8">${eolTandem.toFixed(2)}%</b>
+      </span>`;
+ 
+    // 요약 표: 5개 대표 플루언스 포인트 (로그 등간격)
+    const sampleIdxs = [0,
+      Math.floor(npts * 0.25), Math.floor(npts * 0.5),
+      Math.floor(npts * 0.75), last];
+    const tbody = document.getElementById('eb-summary-table');
+    if (!tbody) return;
+ 
+    function sciStr(v) {
+      if (v <= 0) return '0';
+      const e = Math.floor(Math.log10(v));
+      const sup = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+      return (v / Math.pow(10, e)).toFixed(1) + '×10' + String(e).split('').map(c => sup[c] || c).join('');
+    }
+ 
+    tbody.innerHTML = sampleIdxs.map((idx, ri) => {
+      const phi    = phiArr[idx];
+      const ep     = eta_perv[idx].toFixed(2);
+      const ec     = eta_cigs[idx].toFixed(2);
+      const et     = eta_tandem[idx].toFixed(2);
+      const botHere = (eta_perv[idx] / p.perv.eta0) <= (eta_cigs[idx] / p.cigs.eta0) ? 'Perv' : 'CIGS';
+      const bc = botHere === 'Perv' ? '#7c3aed' : '#0d8a5e';
+      return `<tr style="background:${ri % 2 ? 'var(--bg2)' : ''}">
+        <td style="padding:6px 9px;font-family:var(--mono);font-size:12px">${sciStr(phi)}</td>
+        <td style="padding:6px 9px;font-family:var(--mono);font-size:12px;text-align:center;color:#7c3aed">${ep}%</td>
+        <td style="padding:6px 9px;font-family:var(--mono);font-size:12px;text-align:center;color:#0d8a5e">${ec}%</td>
+        <td style="padding:6px 9px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;color:#1a52c8">${et}%</td>
+        <td style="padding:6px 9px;text-align:center">
+          <span style="font-family:var(--mono);font-size:11px;color:${bc};background:${bc}15;padding:1px 6px;border-radius:3px">${botHere}</span>
+        </td>
+      </tr>`;
+    }).join('');
+ 
+    // 수식 박스: 마지막 포인트 값 주입
+    const phiEol = phiArr[last];
+    const NtPerv = (p.perv.kd * phiEol).toExponential(3);
+    document.getElementById('eb-formula1').textContent =
+      `Nₜ(Perv, EOL) = ${p.perv.kd.toFixed(4)} × ${sciStr(phiEol)} = ${NtPerv} cm⁻³`;
+    document.getElementById('eb-formula2').textContent =
+      `τ(EOL) ≈ ${nsStr(eolTauP)}  →  L = √(D·τ) = ${umStr(eolLP)}`;
+    document.getElementById('eb-formula3').textContent =
+      `η_perv(EOL) = ${p.perv.eta0}% × [1 − ${p.perv.C}·ln(1 + Φ/Φ₀)] = ${eolPerv.toFixed(2)}%`;
+    document.getElementById('eb-formula4').textContent =
+      `η_tandem(EOL) = ${p.tandem0}% × min(${(pervRatio * 100).toFixed(1)}%, ${(cigsRatio * 100).toFixed(1)}%) = ${eolTandem.toFixed(2)}%`;
+ 
+    function nsStr(v) { return v < 1 ? (v * 1000).toFixed(2) + ' ps' : v.toFixed(3) + ' ns'; }
+    function umStr(v) { return v < 1 ? (v * 1000).toFixed(1) + ' nm' : v.toFixed(2) + ' μm'; }
+  }
+ 
+  // ── 메인 플러시 함수 (rAF에서 호출) ─────────────────────────────
+  function eb_flush() {
+    eb_rafId = null;
+ 
+    // 탭이 비활성이면 건너뜀 (불필요한 연산 방지)
+    const panel = document.getElementById('tab-ebridge');
+    if (!panel || !panel.classList.contains('active')) {
+      // 다음 sw() 호출 시 재연산되도록 모든 플래그 유지
+      return;
+    }
+ 
+    const p    = eb_getParams();
+    const hash = eb_hashParams(p);
+ 
+    // ── 파라미터 변동 없으면 스킵 (핵심 최적화) ──────────────────
+    if (hash === eb_lastParamHash) return;
+    eb_lastParamHash = hash;
+ 
+    // 연산 실행
+    const result = eb_compute(p);
+ 
+    // 차트 + 리포트 업데이트
+    eb_updateCharts(result, p);
+    eb_updateReport(result, p);
+ 
+    // 플래그 초기화
+    Object.keys(eb_dirtyFlags).forEach(k => eb_dirtyFlags[k] = false);
+  }
+ 
+  // ── sw() 함수 패치: 탭 전환 시 ebridge 초기화 ───────────────────
+  // 기존 sw()를 래핑하여 ebridge 탭 진입 시 강제 재연산
+  const _origSw = window.sw;
+  window.sw = function (id, el) {
+    _origSw(id, el);
+    if (id === 'ebridge') {
+      // 탭이 활성화된 후 프레임 1개 딜레이로 canvas 크기가 확정된 후 렌더
+      eb_lastParamHash = null;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(eb_flush);
+      });
+    }
+  };
+ 
+  // ── 초기화: DOMContentLoaded 후 또는 즉시 ───────────────────────
+  function eb_init() {
+    // 초기 레이블 동기화
+    [['eb-perv-phi0','eb-perv-phi0-v'],['eb-cigs-phi0','eb-cigs-phi0-v'],['eb-ito-phi0','eb-ito-phi0-v']].forEach(([s,l]) => {
+      if (document.getElementById(s)) eb_updatePhi0Label(s, l);
+    });
+    // 탭이 처음부터 활성이면 즉시 연산 (페이지 로드 시 기본 탭은 assess이므로 보통 해당 없음)
+    if (document.getElementById('tab-ebridge')?.classList.contains('active')) {
+      requestAnimationFrame(eb_flush);
+    }
+  }
+ 
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', eb_init);
+  } else {
+    eb_init();
+  }
+ 
+})(); // IIFE — 전역 오염 최소화
+</script>
+  
 </body>
 </html>

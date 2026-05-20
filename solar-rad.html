@@ -145,10 +145,10 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
   <div class="tab" onclick="sw('layers',this)">레이어 구조 편집</div>
   <div class="tab" onclick="sw('eol',this)">EOL 출력 예측</div>
   <div class="tab" onclick="sw('orbit',this)">궤도 환경 상세</div>
-  <div class="tab" onclick="sw('guide',this)">평가 항목 해설</div>
   <div class="tab" onclick="sw('aiaa',this)">AIAA S-111A 시험 조건</div>
   <div class="tab" onclick="sw('testplan',this)">시험 계획 보조</div>
   <div class="tab" onclick="sw('ebridge',this)">효율 저하 브릿지</div>
+  <div class="tab" onclick="sw('guide',this)">평가 항목 해설</div>
 </div>
 
 <!-- ══ TAB 1: ASSESS ══ -->
@@ -446,6 +446,8 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 
 <div id="tab-guide" class="tab-panel">
 <div style="max-width:980px">
+
+  <!-- ── 도구 목적 ── -->
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">이 도구의 목적과 사용 범위</div></div>
     <div class="pb">
@@ -453,27 +455,226 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
         페로브스카이트/CIGS 탠덤은 <b>2024년 실험실 효율 33% 돌파</b>와 함께 우주 전력 시스템의 차세대 후보로 급부상했습니다. 이 도구는 NRL Tada(1982) 모델 기반의 <b>정성적 경향 분석 및 실험 계획 보조</b> 목적으로 설계되었습니다.
       </div>
       <div class="warn-box">
-        <b>v2.3 주요 변경점:</b><br>
+        <b>v2.4 주요 변경점:</b><br>
         ① [BUG FIX] AIAA 탭 에너지 드롭다운 비활성화 문제 수정 — 입자 종류 변경 시 에너지 선택 즉시 활성화<br>
         ② AIAA 판정 "미충족" 항목에 상세 사유 툴팁 추가 (§8.2.3.2 기준 명시)<br>
         ③ v2.2 기능 전체 유지: 소재별 Φ₀ 개별 지정, Tab3 Pmax₀ 동기화, 계산 파라미터 실시간 표시
       </div>
     </div>
   </div>
+
+  <!-- ── NRL Tada 모델 ── -->
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">NRL Tada 모델 — 수식·변수·측정 방법</div></div>
     <div class="pb">
       <div style="font-size:15px;font-weight:700;color:var(--accent);font-family:var(--mono);text-align:center;padding:12px;background:var(--bg2);border-radius:6px;margin-bottom:14px">
         Pmax(Φ) = Pmax₀ · max[ 0,  1 − Cx · log₁₀(Φ / Φ₀) ]
       </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px">
+        <thead><tr style="background:var(--accent)">
+          <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px;text-align:left">변수</th>
+          <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px">단위</th>
+          <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px;text-align:left">의미 및 측정 방법</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:7px 10px;font-family:var(--mono);font-weight:700">Pmax₀</td><td style="padding:7px 10px;font-family:var(--mono);font-size:12px;text-align:center">W/m²</td><td style="padding:7px 10px;font-size:13px">BOL(Beginning of Life) 최대 출력. AM0 조건(1,367 W/m²)에서 I-V 커브 측정. PCE₀ × 1,367.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-family:var(--mono);font-weight:700">Cx</td><td style="padding:7px 10px;font-family:var(--mono);font-size:12px;text-align:center">무차원</td><td style="padding:7px 10px;font-size:13px">손상계수(Degradation Coefficient). 소재 고유 방사선 민감도. 최소 5개 fluence 포인트에서 Pmax를 측정한 후 선형 회귀로 도출. GaAs ≈ 0.03, Si ≈ 0.20, Perv ≈ 0.015 (참고치).</td></tr>
+          <tr><td style="padding:7px 10px;font-family:var(--mono);font-weight:700">Φ₀</td><td style="padding:7px 10px;font-family:var(--mono);font-size:12px;text-align:center">p⁺/cm²</td><td style="padding:7px 10px;font-size:13px">임계 플럭스(Threshold Fluence). 열화가 시작되는 플럭스. Φ &lt; Φ₀이면 Pmax ≈ Pmax₀ 유지. 동일 I-V 측정 시 y절편에서 역산.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-family:var(--mono);font-weight:700">Φ</td><td style="padding:7px 10px;font-family:var(--mono);font-size:12px;text-align:center">p⁺/cm²</td><td style="padding:7px 10px;font-size:13px">누적 플럭스. 궤도·임무 기간·커버유리 두께로부터 AP9/AE9 모델 기반 산출. 이 도구는 지수 감쇠 모델(λ=1.2mm)로 커버유리 차폐를 근사.</td></tr>
+        </tbody>
+      </table>
       <div style="background:var(--bad-bg);border:1px solid var(--bad-bd);border-radius:6px;padding:10px 14px;font-size:13px;line-height:1.8">
         <b>AIAA S-111A §8.2.3.2 "미충족" 판정이 나오는 경우:</b><br>
         최대 fluence 조사점에서 bare cell Pmax ≥ 60% (열화 ≤ 40%)이면 AIAA 요건 미달입니다.<br>
-        · <b>원인 1:</b> 현재 구조의 Cx_eff가 낮아서(방사선 내성 우수) AIAA 규정 fluence 범위 안에서 40% 열화에 도달하지 못함 → 실제로 좋은 소재라는 의미이나, 규격 시험 범위 내에서 Cx·Φ₀ 추출이 어려움<br>
+        · <b>원인 1:</b> 현재 구조의 Cx_eff가 낮아서(방사선 내성 우수) AIAA 규정 fluence 범위 안에서 40% 열화에 도달하지 못함<br>
         · <b>대응:</b> fluence를 더 높이거나(시험 계획 탭 참조), Cx·Φ₀ 측정용 별도 시험 조건 설계 필요
       </div>
     </div>
   </div>
+
+  <!-- ── TAB 1 해설: 방사선 내성 평가 ── -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">① 방사선 내성 평가 탭 해설</div></div>
+    <div class="pb">
+      <div class="info-box">
+        <b>이 탭의 핵심 목적:</b> 선택한 궤도·임무 기간에서 탠덤 구조의 EOL Pmax 잔존율을 실시간 계산하고, Grade A–D로 종합 판정합니다.
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:10px 0">
+        <thead><tr style="background:var(--bg3)">
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">항목</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">설명</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:7px 10px;font-weight:700">커버유리 두께</td><td style="padding:7px 10px;font-size:13px">지수 감쇠 모델(λ=1.2mm) 적용. 0.5mm → 감쇠율 ≈65%, 3mm → ≈9%. 두께 증가 시 질량 패널티와 트레이드오프 필요. 통신위성 일반적 사양: 0.5–1.0mm 세리아 유리.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">태양 활동 조건</td><td style="padding:7px 10px;font-size:13px"><b>극소기(Solar Minimum):</b> GCR(은하우주선) 플럭스 최대. 저에너지 차폐 어려움. <b>극대기(Solar Maximum):</b> SPE(태양 입자 이벤트) 위험 최대. 단기 대량 손상 가능. 설계 시 두 조건의 최악값 포락(Envelope) 사용 권장.</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">페로브스카이트 자기회복</td><td style="padding:7px 10px;font-size:13px">Lang et al. (2020, Joule): 68MeV 양성자 조사 후 상온 암실 조건에서 이온 이동(Ion Migration) 기반 격자 재배열로 Pmax의 최대 80%까지 회복 확인. 슬라이더 값 = 회복 계수(0=완전 비회복 / 0.8=최대회복). <b>실측 없이 0.3 이상 설정 시 과대 추정 위험.</b></td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">Grade 기준</td><td style="padding:7px 10px;font-size:13px">A(≥80%): ECSS-E-ST-20-08C 충족. B(65–80%): 전력 마진 보완 필요. C(50–65%): 임무 재설계 검토. D(&lt;50%): 소재/궤도 변경 필수.</td></tr>
+        </tbody>
+      </table>
+      <div class="mnote">
+        <strong>Cx_eff 계산법:</strong> 두께 가중 평균. Cx_eff = Σ(Cx_i × t_i) / Σt_i. Φ₀_eff는 기하 가중 평균(로그 스케일). 이 방법은 단순화된 추정이며, 실제 탠덤 구조의 광 흡수 깊이 프로파일과 NIEL 깊이 분포를 반영하지 않습니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 2 해설: 레이어 편집기 ── -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">② 레이어 구조 편집 탭 해설</div></div>
+    <div class="pb">
+      <div class="info-box">
+        탠덤 구조의 각 층을 자유롭게 추가·삭제·순서 변경하여 Cx_eff와 Φ₀_eff를 실시간으로 확인할 수 있습니다. 층 순서는 <b>위 = 광 입사면(전면), 아래 = 후면전극</b> 기준입니다.
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:10px 0">
+        <thead><tr style="background:var(--bg3)">
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">층 종류</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">방사선 특성 및 설계 고려사항</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:7px 10px;font-weight:700">커버유리<br><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">(세리아 유리)</span></td><td style="padding:7px 10px;font-size:13px">Cx ≈ 0.005 — 매우 낮음. 방사선에 강하나 두꺼울수록 질량·광 투과율 패널티. 세리아(CeO₂) 첨가로 자외선 차폐 및 방사선 내성 향상. 비방사선 손실인 UV 흑화(Darkening) 방지 목적도 겸함.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">ITO/AZO/FTO<br><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">(투명전극)</span></td><td style="padding:7px 10px;font-size:13px">Cx ≈ 0.010–0.012. 방사선 조사 시 캐리어 농도 감소 → 면저항 증가 → 직렬저항 Rs 상승 → FF(Fill Factor) 열화가 주요 경로. ITO는 In₂O₃:Sn계로 AZO 대비 방사선 내성 약간 우수(문헌별 편차 큼).</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">페로브스카이트<br><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">(흡수층 상부)</span></td><td style="padding:7px 10px;font-size:13px">Cx ≈ 0.012–0.015, Φ₀ ≈ 10⁹. 방사선 조사 시 Pb-I 결함 클러스터 형성 → 비발광 재결합 증가 → Voc 열화 지배적. 자기회복(Ion Migration) 가능 소재로 표시됨. <b>전무기(CsPbI₂Br)는 열안정성 우수하나 Eg≈1.9eV로 전류 정합 불리.</b></td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">CIGS<br><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">(흡수층 하부)</span></td><td style="padding:7px 10px;font-size:13px">Cx ≈ 0.060, Φ₀ ≈ 10¹⁰. GaAs 대비 방사선 내성 낮음. In/Ga 비율(Band gap grading)에 따라 내성 변동. <b>Lang et al. 2020: Perv/CIGS 탠덤 68MeV 2×10¹² p⁺/cm² 조사 후 85% 잔존 (in operando 직접 측정).</b></td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">홀/전자 수송층<br><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">(HTL/ETL)</span></td><td style="padding:7px 10px;font-size:13px">NiOₓ, Spiro-OMeTAD, TiO₂ 등. 두께가 매우 얇아(20–100nm) 전체 Cx_eff에 대한 기여는 작으나, 방사선에 의한 계면 결함 생성이 Voc에 큰 영향. 무기계(NiOₓ, TiO₂) > 유기계(Spiro) 내방사선 우수.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">후면전극<br><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">(Mo, Ag, Au)</span></td><td style="padding:7px 10px;font-size:13px">Cx ≈ 0.007–0.008 — 매우 낮음. 금속은 방사선 손상보다 열피로(Thermal Cycling) 또는 확산 오염이 주된 열화 경로. Mo는 CIGS와의 열팽창 계수 정합이 우수하여 표준 후면전극.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB 3 해설: EOL 예측 ── -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">③ EOL 출력 예측 탭 해설</div></div>
+    <div class="pb">
+      <div class="info-box">
+        연도별 Pmax 잔존율 표와 커버유리 두께 최적화 곡선을 제공합니다. 임무 계획 단계의 전력 마진(Power Margin) 산출에 활용합니다.
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:10px 0">
+        <thead><tr style="background:var(--bg3)">
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">출력 항목</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">활용 방법</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:7px 10px;font-weight:700">Pmax 잔존율 표</td><td style="padding:7px 10px;font-size:13px">◄ 표시된 행이 설정된 임무 기간. Grade가 C 이하이면 패널 면적·배터리 용량 재설계 검토. log(Φ/Φ₀) &lt; 0인 연도는 열화 임계 이전으로 Pmax ≈ Pmax₀ 유지.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">커버유리 최적화 곡선</td><td style="padding:7px 10px;font-size:13px">두께 0–5mm 범위에서 EOL Pmax 변화. 수확체감(Diminishing Return) 지점(곡선 기울기 감소점)이 최적 두께. 통상 0.5–1.5mm에서 최대 효과. 두께 증가에 따른 위성 질량 예산(Mass Budget) 제약 병행 검토 필수.</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">PCE₀ ↔ Pmax₀ 연동</td><td style="padding:7px 10px;font-size:13px">AM0 = 1,367 W/m². PCE₀(%) 입력 시 Pmax₀ = PCE₀ × 13.67 자동 산출. 탠덤 SOA(State of Art): PCE₀ ≈ 33% → Pmax₀ ≈ 451 W/m². 실제 비행 부품은 모듈 손실 고려, 개발 단계에서는 보수적 추정(0.85× 감산) 권장.</td></tr>
+        </tbody>
+      </table>
+      <div class="warn-box">
+        <b>전력 마진 계산 예시 (GEO 통신위성, 15년):</b><br>
+        요구 전력 5kW, EOL Grade B (Pmax 70% 잔존) 가정 시 → BOL 패널 출력 = 5kW / 0.70 = <b>7.14kW</b> 설계 필요.<br>
+        추가 20% 마진 적용 시 → BOL 8.57kW. 패널 면적 = 8,570 / 356 ≈ <b>24.1 m²</b> (Pmax₀=356 W/m² 기준).
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 4 해설: 궤도 환경 ── -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">④ 궤도 환경 상세 탭 해설</div></div>
+    <div class="pb">
+      <div class="info-box">
+        궤도별 방사선 입자 조성과 연간 플럭스를 비교합니다. 소재 선정 전 임무 환경의 심각도를 파악하는 데 사용합니다.
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:10px 0">
+        <thead><tr style="background:var(--bg3)">
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">방사선 종류</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">태양전지 손상 메커니즘</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">차폐 가능 여부</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:7px 10px;font-weight:700;color:#1a52c8">포획대 양성자<br>(Van Allen)</td><td style="padding:7px 10px;font-size:13px">NIEL(비이온화 에너지 손실) → 격자 변위 결함 → 소수 캐리어 수명(τ) 감소 → Jsc·Voc 동시 열화. 0.1–300 MeV 에너지 범위. 수십 MeV 이상이 완전 관통(Fully Penetrating) 조건.</td><td style="padding:7px 10px;font-size:13px">커버유리 효과 큼. 수 MeV 이하는 mm 두께로 완전 차단 가능.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700;color:#0d8a5e">포획대 전자</td><td style="padding:7px 10px;font-size:13px">양성자보다 NIEL 낮음(1/30 수준). MEO에서 지배적. 전자 1MeV 등가 플럭스(Equivalent Fluence)로 양성자와 통합 환산(GaAs 기준 등가계수 ≈580).</td><td style="padding:7px 10px;font-size:13px">커버유리 효과 매우 큼. 1MeV 전자는 수 mm Al로 완전 차단.</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700;color:#8b2fc9">GCR 중이온</td><td style="padding:7px 10px;font-size:13px">수백 MeV/u. 높은 LET(Linear Energy Transfer) → SEE(단입자 현상) + TID(총이온화선량). 태양전지 직접 손상보다 전력계통 반도체 소자(MPPT, 배터리 컨트롤러) SEE 유발이 더 심각.</td><td style="padding:7px 10px;font-size:13px">차폐 실효성 낮음. 심우주·GEO에서 주의.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700;color:#b86e00">SPE 양성자<br>(태양 폭풍)</td><td style="padding:7px 10px;font-size:13px">수일 내 평시 수년치 플럭스 누적 가능. 1989년 10월 이벤트: GEO에서 단일 이벤트로 ~10¹¹ p⁺/cm². 페로브스카이트 자기회복 특성이 SPE 후 회복에 유리할 수 있으나 실측 데이터 부족.</td><td style="padding:7px 10px;font-size:13px">LEO 저경사 지자기 차폐로 일부 방어. 극궤도·GEO는 취약.</td></tr>
+        </tbody>
+      </table>
+      <div class="mnote">
+        <strong>MEO가 가장 가혹한 이유:</strong> 내/외 반앨런대 중간에 위치(고도 약 2,000–20,000km)하여 양성자·전자 모두 최대. GPS(20,200km), Galileo(23,222km) 위성의 태양전지 설계 수명이 LEO 대비 크게 제한되는 원인.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 5 해설: AIAA S-111A ── -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">⑤ AIAA S-111A 시험 조건 탭 해설</div></div>
+    <div class="pb">
+      <div class="info-box">
+        AIAA S-111A-2014는 우주용 태양전지의 방사선 내성 특성화를 위한 국제 표준입니다. 이 탭은 표준에서 요구하는 fluence 범위와 현재 레이어 구조의 예상 응답을 시뮬레이션합니다.
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:10px 0">
+        <thead><tr style="background:var(--bg3)">
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">항목</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">규격 요건</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">실무 주의사항</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:7px 10px;font-weight:700">§8.1 전자 시험</td><td style="padding:7px 10px;font-size:13px">0.6–3 MeV. 기준 에너지 1 MeV. 최대 fluence: 10¹⁶ e/cm². 로그 등간격 최소 5포인트.</td><td style="padding:7px 10px;font-size:13px">전자빔 균일도(Uniformity) ±10% 이내 요구. 진공 조건 필수(대기 중 측정 시 흡습 오염 위험).</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">§8.2 양성자 시험</td><td style="padding:7px 10px;font-size:13px">20 keV – 3 MeV. Pmax 40% 이상 열화 fluence까지 조사. 진공 ≤ 1×10⁻⁵ Torr. Unshielded(커버유리 없음) 필수.</td><td style="padding:7px 10px;font-size:13px"><b>Low-energy proton(20–300 keV)은 얕은 침투 → 표면층만 손상.</b> 20 MeV 이하에서는 소자가 두꺼우면 양성자가 완전 관통하지 못해 NIEL 값이 에너지·깊이에 따라 급변. SRIM/TRIM 코드로 사전 범위(Range) 계산 필수.</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">Bare Cell 조건</td><td style="padding:7px 10px;font-size:13px">소재 고유 Cx, Φ₀ 추출 목적. 커버유리 장착 시 실제 운용 특성과 다름.</td><td style="padding:7px 10px;font-size:13px">이 탭에서 "Bare Cell vs. 커버유리 포함" 비교로 차폐 효과 추정 가능. 단, 커버유리 감쇠율은 에너지 의존적 근사값.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">§8.2.3.2 "충족" 기준</td><td style="padding:7px 10px;font-size:13px">최대 fluence에서 bare cell Pmax ≤ 60% (열화 ≥ 40%).</td><td style="padding:7px 10px;font-size:13px">방사선 내성이 매우 우수한 소재(Cx 낮음)는 규정 fluence 범위 내에서 40% 열화에 도달 못할 수 있음 → "미충족" 표시되나 실제 성능은 우수. "시험 계획 보조" 탭에서 더 높은 fluence 범위 설계 필요.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB 6 해설: 시험 계획 보조 ── -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">⑥ 시험 계획 보조 탭 해설</div></div>
+    <div class="pb">
+      <div class="info-box">
+        입력한 Cx·Φ₀를 바탕으로 AIAA §8.2.3.2의 "40% 열화" 조건을 만족하는 fluence 범위를 역산하여 조사 실험 계획을 지원합니다.
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:10px 0">
+        <thead><tr style="background:var(--bg3)">
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">항목</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">설명</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:7px 10px;font-weight:700">Φ_start (5% 열화)</td><td style="padding:7px 10px;font-size:13px">측정 유효 시작점. Φ_start = Φ₀ × 10^(0.05/Cx). 이 이하에서는 열화량이 측정 불확도에 묻힐 수 있음. I-V 측정 정밀도 ±1% 가정 시 최소 열화 목표 5% 권장.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">Φ_end (목표 열화)</td><td style="padding:7px 10px;font-size:13px">Φ_end = Φ₀ × 10^(D_target/Cx). AIAA 기준 D_target = 0.40. 가속기 최대 fluence(빔 전류 × 시간)가 Φ_end 이상인지 사전 확인 필수. 일반 저에너지 양성자 가속기: 최대 fluence ≈ 10¹³ p⁺/cm².</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">레퍼런스 소재 비교</td><td style="padding:7px 10px;font-size:13px">GaAs·Si·Ge의 Anspaugh(1996) 참고값과 입력 소재를 동일 Φ_end에서 비교. 방사선 내성 상대 위치 파악에 활용. <b>주의: 레퍼런스값은 10MeV 양성자 기준 중간값으로, 에너지·온도·축적률(Flux Rate)에 따라 수십% 편차 발생.</b></td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">시험 포인트 수</td><td style="padding:7px 10px;font-size:13px">AIAA 최소 5포인트(로그 등간격). Cx 불확도를 줄이려면 7–10포인트 권장. 각 포인트에서 Light I-V(AM0 조건) + Dark I-V + EQE 측정 세트를 구성하면 Cx와 더불어 J₀·n-factor 변화도 추출 가능.</td></tr>
+        </tbody>
+      </table>
+      <div class="ok-box">
+        <b>실험 계획 체크리스트:</b><br>
+        □ 빔 에너지 — SRIM으로 Range ≥ 소자 총 두께 확인 (Fully Penetrating 조건)<br>
+        □ 빔 균일도 — 셀 면적 내 ±10% 이내<br>
+        □ 진공도 — ≤ 1×10⁻⁵ Torr (양성자), ≤ 10⁻⁴ Torr (전자)<br>
+        □ 온도 제어 — 조사 중 25±5°C 유지 (온도 상승 시 어닐링 효과 혼입 방지)<br>
+        □ In-situ 모니터링 — Faraday Cup으로 실시간 fluence 적분 계측
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 7 해설: 효율 저하 브릿지 ── -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">⑦ 효율 저하 브릿지 탭 해설</div></div>
+    <div class="pb">
+      <div class="info-box">
+        NRL Tada 모델(Pmax 기반)과 물리적 캐리어 수명 모델(Messenger-Clawson + Bourgoin-Corbett)을 연결하여, Fluence → 결함 밀도 → 캐리어 수명 → PCE 저하의 4단계 파이프라인을 시각화합니다.
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:10px 0">
+        <thead><tr style="background:var(--bg3)">
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">파이프라인 단계</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">물리적 의미</th>
+          <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">조절 파라미터</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:7px 10px;font-weight:700;color:#1a52c8">Step 1<br>결함 생성</td><td style="padding:7px 10px;font-size:13px">Nₜ = K_d × Φ. 방사선 입자가 격자를 변위시켜 생성하는 결함 트랩 밀도. K_d(결함 생성율)은 소재의 NIEL에 비례하며 입자 에너지·종류에 따라 수십 배 차이.</td><td style="padding:7px 10px;font-size:13px">K_d 슬라이더. 값이 클수록 동일 Fluence에서 더 많은 결함 생성.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700;color:#1a52c8">Step 2<br>수명 감소</td><td style="padding:7px 10px;font-size:13px">1/τ = 1/τ₀ + σ·v_th·Nₜ (Shockley-Read-Hall 재결합). 결함 밀도 증가 → 소수 캐리어 수명 τ 감소 → 확산 거리 L = √(D·τ) 단축 → 광생성 캐리어 컬렉션 효율 저하.</td><td style="padding:7px 10px;font-size:13px">σ, v_th, D는 고정값(물성치). τ₀=100ns 고정. τ 서브 차트로 시각화.</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700;color:#1a52c8">Step 3<br>PCE 저하</td><td style="padding:7px 10px;font-size:13px">η(Φ) = η₀ × [1 − C·ln(1 + Φ/Φ₀)]. Messenger-Clawson 스케일링. C는 소재별 방사선 민감도를 결정하는 경험 파라미터. Φ₀ 이전에는 열화 거의 없음.</td><td style="padding:7px 10px;font-size:13px">C, Φ₀ 슬라이더. C가 클수록 조기 급격 열화.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700;color:#1a52c8">Step 4<br>탠덤 병목</td><td style="padding:7px 10px;font-size:13px">η_tandem = η₀_tandem × min(η_top/η_top₀, η_bot/η_bot₀). 직렬 연결 탠덤에서 전류는 두 셀의 최솟값으로 제한(Current Matching). 방사선 내성이 낮은 셀이 전체 효율을 제한하는 병목.</td><td style="padding:7px 10px;font-size:13px">"병목 셀" 표시기. Perv/CIGS 각각의 잔존율 비교로 최약 링크 파악.</td></tr>
+        </tbody>
+      </table>
+      <div class="warn-box">
+        <b>Current Matching 설계 시사점:</b><br>
+        Perv 방사선 내성(Cx≈0.015) &gt; CIGS 내성(Cx≈0.06)이므로, 장기 임무에서 CIGS가 먼저 병목이 됩니다. 
+        이를 완화하려면 ① CIGS Band Gap Grading으로 내성 향상, ② 커버유리 두께를 CIGS 측에 집중 배분(비대칭 차폐), 
+        ③ Perv/Si 구조로 대체 시 Si의 Cx≈0.20로 오히려 악화됨에 주의하십시오.
+      </div>
+    </div>
+  </div>
+
 </div>
 </div>
 

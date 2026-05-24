@@ -897,7 +897,23 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
             <input type="range" id="eb-tandem0" min="15" max="40" step="0.5" value="26"
               oninput="eb_markDirty('tandem0');eb_updateSliderLabel('eb-tandem0','eb-tandem0-v','%',1)">
           </div>
- 
+          
+          <!-- 등가 플루언스 기준 선택기 -->
+          <div class="field" style="margin-bottom:8px">
+            <label>입사 입자 종류 (1 MeV n_eq 환산)</label>
+            <select id="eb-particle-type" onchange="eb_updateKappa();eb_markDirty('range')">
+              <option value="n_1mev" selected>1 MeV 중성자 (κ = 1.00, 기준)</option>
+              <option value="p_10mev">10 MeV 양성자 (κ ≈ 0.99)</option>
+              <option value="p_1mev">1 MeV 양성자 (κ ≈ 3.16)</option>
+              <option value="e_1mev">1 MeV 전자 (κ ≈ 6.3×10⁻⁴)</option>
+              <option value="p_68mev">68 MeV 양성자 (κ ≈ 0.40, Lang+2020)</option>
+            </select>
+          </div>
+          <div id="eb-kappa-display" style="font-family:var(--mono);font-size:11px;color:var(--accent2);
+            background:rgba(26,62,143,.07);border-radius:4px;padding:5px 9px;margin-bottom:8px;line-height:1.7">
+            κ = 1.00 &nbsp;|&nbsp; X축: 실제 플루언스 Φ (p·n·e/cm²)
+          </div>
+
           <!-- Fluence 범위 -->
           <div class="field" style="margin-bottom:8px">
             <label>Fluence 표시 범위 (로그)</label>
@@ -1973,6 +1989,28 @@ if(typeof Chart !== 'undefined'){
       'eb-cigs-eta0': 20, 'eb-cigs-kd': 0.045, 'eb-cigs-C': 0.08, 'eb-cigs-phi0': 10.699,
       'eb-ito-kd': 0.008, 'eb-ito-C': 0.02, 'eb-ito-phi0': 12,
     };
+    // 입자별 NIEL 환산 인수 κ (vs 1 MeV neutron)
+  const EB_KAPPA_MAP = {
+    n_1mev:  { kappa: 1.00,   label: '1 MeV n (기준)',       unit: 'n/cm²'  },
+    p_10mev: { kappa: 0.99,   label: '10 MeV p⁺',            unit: 'p⁺/cm²' },
+    p_1mev:  { kappa: 3.16,   label: '1 MeV p⁺',             unit: 'p⁺/cm²' },
+    e_1mev:  { kappa: 6.3e-4, label: '1 MeV e⁻',             unit: 'e⁻/cm²' },
+    p_68mev: { kappa: 0.40,   label: '68 MeV p⁺ (Lang+2020)',unit: 'p⁺/cm²' },
+  };
+  let eb_kappa = 1.0;
+
+  window.eb_updateKappa = function() {
+    const key = document.getElementById('eb-particle-type')?.value || 'n_1mev';
+    const entry = EB_KAPPA_MAP[key];
+    eb_kappa = entry.kappa;
+    const dispEl = document.getElementById('eb-kappa-display');
+    if (dispEl) {
+      dispEl.innerHTML =
+        `κ = <b>${entry.kappa.toExponential(2)}</b> &nbsp;|&nbsp; `+
+        `X축: Φ<sub>eq</sub> = Φ × κ &nbsp;[1 MeV n<sub>eq</sub>/cm²] &nbsp;`+
+        `<span style="color:var(--dim)">(입자: ${entry.label})</span>`;
+    }
+  };
     Object.entries(defaults).forEach(([id, val]) => {
       const el = document.getElementById(id);
       if (el) el.value = val;
@@ -2029,6 +2067,7 @@ if(typeof Chart !== 'undefined'){
  
   function eb_compute(p) {
     const { npts, phiMinExp, phiMaxExp, perv, cigs, tandem0 } = p;
+    const kappa = (typeof eb_kappa !== 'undefined') ? eb_kappa : 1.0;
     const logStep = (phiMaxExp - phiMinExp) / (npts - 1);
  
     // Float64Array로 타입화 배열 — 힙 할당 최소화
@@ -2044,10 +2083,11 @@ if(typeof Chart !== 'undefined'){
     for (let i = 0; i < npts; i++) {
       const logPhi = phiMinExp + i * logStep;
       const phi    = Math.pow(10, logPhi);
-      phiArr[i]    = phi;
+      const phi_eq = phi * kappa;
+      phiArr[i]    = phi_eq;
  
-      const rPerv = eb_calcPoint(phi, perv);
-      const rCigs = eb_calcPoint(phi, cigs);
+      const rPerv = eb_calcPoint(phi_eq, perv);
+      const rCigs = eb_calcPoint(phi_eq, cigs);
  
       eta_perv[i]   = perv.eta0 * rPerv.etaRel;
       eta_cigs[i]   = cigs.eta0 * rCigs.etaRel;
@@ -2106,7 +2146,7 @@ if(typeof Chart !== 'undefined'){
           scales: {
             x: {
               type: 'linear',
-              title: { display: true, text: 'log₁₀(Φ)  [p⁺/cm²]', color: '#3a5070', font: { size: 12, family: 'IBM Plex Mono' } },
+              title: { display: true, text: 'log₁₀(Φ_eq)  [1 MeV n_eq / cm²]', color: '#3a5070', font: { size: 12, family: 'IBM Plex Mono' } },
               grid: { color: 'rgba(0,0,0,.06)' },
               ticks: {
                 color: '#3a5070', font: { size: 11, family: 'IBM Plex Mono' },

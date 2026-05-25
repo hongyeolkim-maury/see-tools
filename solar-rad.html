@@ -2109,7 +2109,7 @@ if(typeof Chart !== 'undefined'){
  
   // ── 차트 업데이트 ────────────────────────────────────────────────
   function eb_updateCharts(result, p) {
-    const { phiArr, eta_perv, eta_cigs, eta_tandem, tau_perv, tau_cigs } = result;
+    const { phiArr, eta_perv, eta_cigs, eta_tandem, tau_perv, tau_cigs, L_perv, L_cigs } = result;
     const npts = phiArr.length;
  
     // Chart.js용 데이터 변환 (log x축을 linear 인덱스로 매핑)

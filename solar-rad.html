@@ -116,6 +116,30 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 .ft{font-family:var(--mono);font-size:11px;color:var(--dim)}
 @media(max-width:900px){.g2,.layer-fields{grid-template-columns:1fr 1fr}.g3,.g4,.g5{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.g2,.g3,.g4,.g5,.layer-fields{grid-template-columns:1fr}}
+/* ── Phase 2: LocalStorage UI ── */
+.ls-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 0 10px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.ls-btn{font-family:var(--mono);font-size:11px;padding:5px 13px;border-radius:4px;border:1px solid var(--border2);background:var(--bg2);color:var(--muted);cursor:pointer;transition:all .2s;letter-spacing:.04em;display:flex;align-items:center;gap:5px}
+.ls-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ls-btn.save:hover{background:var(--ok);border-color:var(--ok)}
+.ls-btn.clear:hover{background:var(--bad);border-color:var(--bad)}
+.ls-status{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:4px;transition:color .3s}
+.ls-status.ok{color:var(--ok)}
+.ls-status.err{color:var(--bad)}
+.ls-slot-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:5px;border:1px solid var(--border);margin-bottom:6px;font-size:12px;background:var(--bg1);cursor:pointer;transition:background .15s}
+.ls-slot-row:hover{background:var(--bg2)}
+.ls-slot-name{flex:1;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text)}
+.ls-slot-meta{font-size:11px;color:var(--muted)}
+.ls-slot-del{font-size:13px;color:var(--bad);cursor:pointer;padding:2px 6px;border-radius:3px}
+.ls-slot-del:hover{background:var(--bad-bg)}
+.ls-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;align-items:center;justify-content:center}
+.ls-modal-bg.open{display:flex}
+.ls-modal{background:var(--bg1);border:1px solid var(--border2);border-radius:10px;padding:22px 24px;width:min(420px,95vw);box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:9999}
+.ls-modal h3{font-family:var(--mono);font-size:14px;color:var(--accent);margin-bottom:14px;letter-spacing:.06em}
+.ls-name-input{width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:5px;background:var(--bg2);color:var(--text);font-family:var(--mono);font-size:13px;margin-bottom:12px}
+.ls-modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.ls-modal-btns button{font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:4px;border:1px solid var(--border2);background:var(--bg2);color:var(--muted);cursor:pointer}
+.ls-modal-btns button.primary{background:var(--ok);color:#fff;border-color:var(--ok)}
+.ls-autosave-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd);letter-spacing:.05em}  
 </style>
 </head>
 <body>
@@ -140,6 +164,43 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
   </div>
 </header>
 
+<!-- ── Phase 2: LocalStorage 저장/불러오기 바 ── -->
+<div class="ls-bar">
+  <button class="ls-btn save" onclick="lsSaveModal()">💾 저장</button>
+  <button class="ls-btn" onclick="lsLoadModal()">📂 불러오기</button>
+  <button class="ls-btn clear" onclick="lsClearAuto()">🗑 자동저장 초기화</button>
+  <span class="ls-autosave-badge" id="ls-auto-badge" style="display:none">✓ 자동저장됨</span>
+  <span class="ls-status" id="ls-status"></span>
+</div>
+
+<!-- 저장 모달 -->
+<div class="ls-modal-bg" id="ls-save-modal">
+  <div class="ls-modal">
+    <h3>💾 시뮬레이션 저장</h3>
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px">저장 이름 (예: GEO_5yr_Perv-CIGS)</label>
+    <input class="ls-name-input" id="ls-save-name" type="text" placeholder="저장 이름 입력..." maxlength="40">
+    <div style="font-size:11px;color:var(--dim);margin-bottom:12px">최대 10개 슬롯 저장 가능. 동일 이름은 덮어씁니다.</div>
+    <div class="ls-modal-btns">
+      <button onclick="lsModalClose('ls-save-modal')">취소</button>
+      <button class="primary" onclick="lsDoSave()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 불러오기 모달 -->
+<div class="ls-modal-bg" id="ls-load-modal">
+  <div class="ls-modal">
+    <h3>📂 저장된 시뮬레이션 불러오기</h3>
+    <div id="ls-slot-list" style="max-height:280px;overflow-y:auto"></div>
+    <div style="font-size:11px;color:var(--dim);margin-top:8px;margin-bottom:12px">
+      슬롯을 클릭하면 해당 설정을 불러옵니다.
+    </div>
+    <div class="ls-modal-btns">
+      <button onclick="lsModalClose('ls-load-modal')">닫기</button>
+    </div>
+  </div>
+</div>
+  
 <div class="tabs">
   <div class="tab active" onclick="sw('assess',this)">방사선 내성 평가</div>
   <div class="tab" onclick="sw('layers',this)">레이어 구조 편집</div>
@@ -2487,6 +2548,194 @@ if(typeof Chart !== 'undefined'){
     capture_pageleave: true,             // 이탈 시점 수집
     autocapture: false                   // 자동 클릭 추적 OFF (GDPR 안전)
   });
+  // ═══════════════════════════════════════════════════════
+// Phase 2: LocalStorage 저장/불러오기 시스템
+// ═══════════════════════════════════════════════════════
+const LS_KEY_SLOTS  = 'helias_solarrad_slots';   // 수동 저장 슬롯 배열
+const LS_KEY_AUTO   = 'helias_solarrad_auto';    // 자동저장 단일 슬롯
+const LS_MAX_SLOTS  = 10;
+
+/** 현재 UI 상태를 JS 객체로 수집 */
+function lsGetState() {
+  return {
+    ver: '2.3',
+    ts: Date.now(),
+    orbit:  document.getElementById('orbit')?.value  || 'geo',
+    solar:  document.getElementById('solar')?.value  || 'min',
+    cover:  parseFloat(document.getElementById('cover')?.value || 0.5),
+    dur:    parseFloat(document.getElementById('dur')?.value   || 5),
+    heal:   parseFloat(document.getElementById('heal')?.value  || 0.3),
+    pce0:   parseFloat(document.getElementById('pce0')?.value  || 26.3),
+    pmax0:  parseFloat(document.getElementById('pmax0')?.value || 356),
+    layers: typeof layers !== 'undefined' ? JSON.parse(JSON.stringify(layers)) : []
+  };
+}
+
+/** 저장된 상태를 UI에 복원 */
+function lsApplyState(st) {
+  if (!st) return;
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+  set('orbit', st.orbit);
+  set('solar', st.solar);
+  set('cover', st.cover);
+  set('dur',   st.dur);
+  set('heal',  st.heal);
+  set('pce0',  st.pce0);
+  set('pmax0', st.pmax0);
+
+  // 레이어 복원 — layers 전역 배열 + 재렌더
+  if (st.layers && Array.isArray(st.layers) && typeof layers !== 'undefined') {
+    layers.length = 0;
+    st.layers.forEach(l => layers.push(l));
+    if (typeof renderLayers === 'function') renderLayers();
+  }
+  // 슬라이더 표시값 수동 갱신
+  const covEl  = document.getElementById('covV');
+  const durEl  = document.getElementById('durV');
+  const healEl = document.getElementById('healV');
+  if (covEl)  covEl.textContent  = st.cover + ' mm';
+  if (durEl)  durEl.textContent  = st.dur + ' yr';
+  if (healEl) healEl.textContent = st.heal.toFixed(2);
+
+  if (typeof update === 'function') update();
+}
+
+// ── 슬롯 유틸 ──────────────────────────────────────────
+function lsReadSlots() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY_SLOTS) || '[]'); }
+  catch { return []; }
+}
+function lsWriteSlots(arr) {
+  localStorage.setItem(LS_KEY_SLOTS, JSON.stringify(arr));
+}
+
+// ── 저장 모달 ──────────────────────────────────────────
+function lsSaveModal() {
+  const now = new Date();
+  const def = `GEO_${now.getMonth()+1}${now.getDate()}_${now.getHours()}${String(now.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('ls-save-name').value = def;
+  document.getElementById('ls-save-modal').classList.add('open');
+  setTimeout(() => document.getElementById('ls-save-name').select(), 50);
+}
+function lsDoSave() {
+  const name = document.getElementById('ls-save-name').value.trim();
+  if (!name) { lsStatus('이름을 입력하세요', true); return; }
+  const slots = lsReadSlots().filter(s => s.name !== name); // 동일 이름 덮어쓰기
+  if (slots.length >= LS_MAX_SLOTS) slots.shift(); // 초과 시 가장 오래된 것 제거
+  slots.push({ name, state: lsGetState() });
+  lsWriteSlots(slots);
+  lsModalClose('ls-save-modal');
+  lsStatus(`"${name}" 저장 완료 ✓`, false);
+}
+
+// ── 불러오기 모달 ──────────────────────────────────────
+function lsLoadModal() {
+  const slots = lsReadSlots();
+  const listEl = document.getElementById('ls-slot-list');
+  if (!slots.length) {
+    listEl.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px 0;text-align:center">저장된 시뮬레이션이 없습니다.</div>';
+  } else {
+    listEl.innerHTML = slots.map((s, i) => {
+      const dt = new Date(s.state?.ts || 0);
+      const dtStr = dt.getFullYear() > 2000
+        ? `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`
+        : '날짜 미상';
+      const orbitLabel = s.state?.orbit || '';
+      const durLabel   = s.state?.dur ? s.state.dur + 'yr' : '';
+      return `
+        <div class="ls-slot-row" onclick="lsDoLoad(${i})">
+          <div>
+            <div class="ls-slot-name">${s.name}</div>
+            <div class="ls-slot-meta">${dtStr} | ${orbitLabel} ${durLabel}</div>
+          </div>
+          <span class="ls-slot-del" onclick="lsDelSlot(event,${i})" title="삭제">✕</span>
+        </div>`;
+    }).join('');
+  }
+  document.getElementById('ls-load-modal').classList.add('open');
+}
+function lsDoLoad(idx) {
+  const slots = lsReadSlots();
+  if (!slots[idx]) return;
+  lsApplyState(slots[idx].state);
+  lsModalClose('ls-load-modal');
+  lsStatus(`"${slots[idx].name}" 불러오기 완료 ✓`, false);
+}
+function lsDelSlot(e, idx) {
+  e.stopPropagation();
+  const slots = lsReadSlots();
+  const name = slots[idx]?.name;
+  slots.splice(idx, 1);
+  lsWriteSlots(slots);
+  lsLoadModal(); // 목록 갱신
+  lsStatus(`"${name}" 삭제됨`, false);
+}
+
+// ── 자동저장 ───────────────────────────────────────────
+function lsAutoSave() {
+  try {
+    localStorage.setItem(LS_KEY_AUTO, JSON.stringify(lsGetState()));
+    const badge = document.getElementById('ls-auto-badge');
+    if (badge) { badge.style.display = 'inline'; setTimeout(() => badge.style.display = 'none', 2500); }
+  } catch(e) { console.warn('AutoSave failed:', e); }
+}
+function lsClearAuto() {
+  localStorage.removeItem(LS_KEY_AUTO);
+  lsStatus('자동저장 초기화됨', false);
+}
+
+/** 페이지 로드 시 자동저장 복원 여부 확인 */
+function lsInitAutoRestore() {
+  try {
+    const raw = localStorage.getItem(LS_KEY_AUTO);
+    if (!raw) return;
+    const st = JSON.parse(raw);
+    if (!st || !st.ts) return;
+    const age = (Date.now() - st.ts) / 1000 / 60; // 분 단위
+    if (age > 60 * 24 * 7) return; // 7일 초과 시 무시
+    // 복원 안내 없이 자동 복원 (마지막 세션 유지)
+    lsApplyState(st);
+    lsStatus('이전 세션 자동 복원됨', false);
+  } catch(e) { /* 무시 */ }
+}
+
+// ── 공용 유틸 ──────────────────────────────────────────
+function lsModalClose(id) {
+  document.getElementById(id)?.classList.remove('open');
+}
+function lsStatus(msg, isErr) {
+  const el = document.getElementById('ls-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'ls-status ' + (isErr ? 'err' : 'ok');
+  setTimeout(() => { el.textContent = ''; el.className = 'ls-status'; }, 3500);
+}
+
+// ── 모달 배경 클릭으로 닫기 ──────────────────────────
+document.querySelectorAll('.ls-modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+});
+
+// ── 자동저장: 30초마다 + update() 호출 시 후크 ────────
+setInterval(lsAutoSave, 30000);
+
+// update() 함수에 자동저장 후크 — 기존 update를 래핑
+(function() {
+  const _origUpdate = typeof update === 'function' ? update : null;
+  if (_origUpdate) {
+    window.update = function() {
+      _origUpdate();
+      // debounce: 마지막 호출 후 3초 뒤 저장 (연속 슬라이더 이동 시 폭주 방지)
+      clearTimeout(window._lsDebounce);
+      window._lsDebounce = setTimeout(lsAutoSave, 3000);
+    };
+  }
+})();
+
+// ── 페이지 로드 완료 후 자동복원 실행 ────────────────
+window.addEventListener('load', () => {
+  setTimeout(lsInitAutoRestore, 200); // DOM 안정화 후 실행
+});
 </script>
 </body>
 </html>

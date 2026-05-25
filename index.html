@@ -900,6 +900,16 @@ function fmtExpShort(v) {
 let chart1, chart2;
 
 function update() {
+  // PostHog: 파라미터 변경 시 이벤트 수집
+  if (window.posthog) {
+    posthog.capture('see_simulation_run', {
+      page: 'index',
+      orbit: document.getElementById('orbit')?.value,
+      solar: document.getElementById('solar')?.value,
+      preset: document.getElementById('preset')?.value,
+      shield_mm: document.getElementById('shield')?.value,
+    });
+  }
   const L0     = parseFloat(document.getElementById('L0').value);
   const sigExp = parseFloat(document.getElementById('sig').value);
   const W      = parseFloat(document.getElementById('W').value);

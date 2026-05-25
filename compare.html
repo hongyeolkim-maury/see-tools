@@ -372,6 +372,18 @@ function populateSelects() {
 let radarChart = null;
 
 function update() {
+  // PostHog: 소자 비교 실행 이벤트
+  if (window.posthog) {
+    posthog.capture('comparison_run', {
+      page: 'compare',
+      orbit: document.getElementById('orbit')?.value,
+      solar: document.getElementById('solar')?.value,
+      dev_a: document.getElementById('dev0')?.value,
+      dev_b: document.getElementById('dev1')?.value,
+      dev_c: document.getElementById('dev2')?.value,
+      dev_d: document.getElementById('dev3')?.value,
+    });
+  }
   const orbKey = document.getElementById('orbit').value;
   const solar  = document.getElementById('solar').value;
   const tid3yr = computeTID(orbKey, solar);

@@ -1993,28 +1993,13 @@ if(typeof Chart !== 'undefined'){
       'eb-cigs-eta0': 20, 'eb-cigs-kd': 0.045, 'eb-cigs-C': 0.08, 'eb-cigs-phi0': 10.699,
       'eb-ito-kd': 0.008, 'eb-ito-C': 0.02, 'eb-ito-phi0': 12,
     };
-    // 입자별 NIEL 환산 인수 κ (vs 1 MeV neutron)
-  const EB_KAPPA_MAP = {
+    const EB_KAPPA_MAP = {
     n_1mev:  { kappa: 1.00,   label: '1 MeV n (기준)',       unit: 'n/cm²'  },
-    p_10mev: { kappa: 0.99,   label: '10 MeV p⁺',            unit: 'p⁺/cm²' },
-    p_1mev:  { kappa: 3.16,   label: '1 MeV p⁺',             unit: 'p⁺/cm²' },
-    e_1mev:  { kappa: 6.3e-4, label: '1 MeV e⁻',             unit: 'e⁻/cm²' },
-    p_68mev: { kappa: 0.40,   label: '68 MeV p⁺ (Lang+2020)',unit: 'p⁺/cm²' },
-  };
-  let eb_kappa = 1.0;
+    ...
+    };
+    let eb_kappa = 1.0;
+    window.eb_updateKappa = function() { ... };
 
-  window.eb_updateKappa = function() {
-    const key = document.getElementById('eb-particle-type')?.value || 'n_1mev';
-    const entry = EB_KAPPA_MAP[key];
-    eb_kappa = entry.kappa;
-    const dispEl = document.getElementById('eb-kappa-display');
-    if (dispEl) {
-      dispEl.innerHTML =
-        `κ = <b>${entry.kappa.toExponential(2)}</b> &nbsp;|&nbsp; `+
-        `X축: Φ<sub>eq</sub> = Φ × κ &nbsp;[1 MeV n<sub>eq</sub>/cm²] &nbsp;`+
-        `<span style="color:var(--dim)">(입자: ${entry.label})</span>`;
-    }
-  };
     Object.entries(defaults).forEach(([id, val]) => {
       const el = document.getElementById(id);
       if (el) el.value = val;

@@ -874,7 +874,19 @@ function setE(v, u){
   syncSlider();
 }
 
+let _stopMatLastFired = 0;
 async function update(){
+  const _now = Date.now();
+  if (window.posthog && _now - _stopMatLastFired > 2000) {
+    _stopMatLastFired = _now;
+    posthog.capture('stop_material_calc', {
+      page:    'stop',
+      ion:     document.getElementById('ion')?.value,
+      target:  document.getElementById('target')?.value,
+      energy:  document.getElementById('eVal')?.value,
+      eunit:   document.getElementById('eUnit')?.value,
+    });
+  }
   const ionKey = document.getElementById('ion').value;
   const tarKey = document.getElementById('target').value;
   const ion = IONS[ionKey], tar = TARGETS[tarKey] || TARGETS.si;
@@ -1107,7 +1119,19 @@ function onDragEnd(e){ e.currentTarget.classList.remove('dragging'); document.qu
 
 function setDpE(v, u){ document.getElementById('dpEVal').value=v; document.getElementById('dpEUnit').value=u; runDepthSim(); }
 
+let _stopDepthLastFired = 0;
 function runDepthSim(){
+  const _now = Date.now();
+  if (window.posthog && _now - _stopDepthLastFired > 2000) {
+    _stopDepthLastFired = _now;
+    posthog.capture('stop_bragg_sim', {
+      page:    'stop',
+      ion:     document.getElementById('dpIon')?.value,
+      energy:  document.getElementById('dpEVal')?.value,
+      eunit:   document.getElementById('dpEUnit')?.value,
+      n_layers: layers?.length,
+    });
+  }
   const ionKey=document.getElementById('dpIon').value;
   const ion=IONS[ionKey];
   const v=parseFloat(document.getElementById('dpEVal').value)||50;

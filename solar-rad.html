@@ -464,6 +464,105 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
     </div>
   </div>
 
+  <!-- ── 탭 목적 비교: 방사선 내성 평가 vs 효율 저하 브릿지 ── -->
+  <div class="panel">
+    <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">두 핵심 탭의 목적 비교 — 언제 어느 탭을 사용하는가</div></div>
+    <div class="pb">
+      <div class="g2" style="gap:12px;margin-bottom:14px">
+
+        <!-- 방사선 내성 평가 카드 -->
+        <div style="background:var(--ok-bg);border:2px solid var(--ok-bd);border-radius:8px;padding:14px 16px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--ok);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:700">
+            ① 방사선 내성 평가 탭
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px">
+            임무 적합성 판정 도구
+          </div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:10px">
+            선택한 궤도·임무 기간에서 탠덤 구조가 <b>EOL 기준을 충족하는지</b> 종합 판정합니다.
+            NRL Tada 모델(Pmax 기반)로 계산하며 Grade A–D로 결과를 요약합니다.
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <tr style="background:rgba(13,138,94,.08)">
+              <td style="padding:5px 8px;color:var(--muted);width:40%">출력 형식</td>
+              <td style="padding:5px 8px;font-weight:600">Grade A–D + EOL Pmax 잔존율 (%)</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 8px;color:var(--muted)">물리 모델</td>
+              <td style="padding:5px 8px">NRL Tada(1982) — Pmax 열화</td>
+            </tr>
+            <tr style="background:rgba(13,138,94,.08)">
+              <td style="padding:5px 8px;color:var(--muted)">입력 기준</td>
+              <td style="padding:5px 8px">궤도, 임무기간, 커버유리 두께</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 8px;color:var(--muted)">불확도 수준</td>
+              <td style="padding:5px 8px">±20–50% (소재 파라미터 추정치)</td>
+            </tr>
+            <tr style="background:rgba(13,138,94,.08)">
+              <td style="padding:5px 8px;color:var(--muted)">사용 시점</td>
+              <td style="padding:5px 8px"><b>임무 설계 단계</b> — 소재/궤도 선정</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 8px;color:var(--muted)">표준 근거</td>
+              <td style="padding:5px 8px">ECSS-E-ST-20-08C (Grade 기준)</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- 효율 저하 브릿지 카드 -->
+        <div style="background:rgba(124,58,237,.07);border:2px solid rgba(124,58,237,.3);border-radius:8px;padding:14px 16px">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--perv);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:700">
+            ② 효율 저하 브릿지 탭
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px">
+            물리 메커니즘 시각화 도구
+          </div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:10px">
+            Fluence → 결함 → 캐리어 수명 → PCE 저하의 <b>4단계 물리 파이프라인</b>을 연속으로 계산하여
+            열화 메커니즘을 시각화합니다. 소재 상수(K_d, C, Φ₀) 튜닝으로 민감도를 분석합니다.
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <tr style="background:rgba(124,58,237,.08)">
+              <td style="padding:5px 8px;color:var(--muted);width:40%">출력 형식</td>
+              <td style="padding:5px 8px;font-weight:600">η(Φ) 곡선 + τ/L vs. Φ 그래프</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 8px;color:var(--muted)">물리 모델</td>
+              <td style="padding:5px 8px">Messenger-Clawson + Bourgoin-Corbett</td>
+            </tr>
+            <tr style="background:rgba(124,58,237,.08)">
+              <td style="padding:5px 8px;color:var(--muted)">입력 기준</td>
+              <td style="padding:5px 8px">소재 상수 (K_d, C, Φ₀) 직접 입력</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 8px;color:var(--muted)">불확도 수준</td>
+              <td style="padding:5px 8px">소재 파라미터 의존 (추정치 포함)</td>
+            </tr>
+            <tr style="background:rgba(124,58,237,.08)">
+              <td style="padding:5px 8px;color:var(--muted)">사용 시점</td>
+              <td style="padding:5px 8px"><b>소재 연구 단계</b> — 손상 메커니즘 분석</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 8px;color:var(--muted)">표준 근거</td>
+              <td style="padding:5px 8px">AIAA S-111A (시험 조건 설계 보조)</td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- 핵심 차이 요약 -->
+      <div style="background:var(--bg2);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:11px 14px;font-size:12px;line-height:1.9">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;font-weight:700">핵심 차이 요약</div>
+        <b>방사선 내성 평가</b>는 "이 소재·궤도 조합이 임무를 버틸 수 있는가?"에 답합니다 → <b style="color:var(--ok)">Pass/Fail 판정</b><br>
+        <b>효율 저하 브릿지</b>는 "왜 열화가 일어나며 어느 소재 상수가 지배적인가?"를 분석합니다 → <b style="color:var(--perv)">메커니즘 이해</b><br>
+        두 탭은 상호 보완적으로 사용하십시오: 브릿지로 메커니즘을 파악한 뒤, 내성 평가로 임무 적합성을 최종 확인합니다.
+      </div>
+
+    </div>
+  </div>
+  
   <!-- ── NRL Tada 모델 ── -->
   <div class="panel">
     <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">NRL Tada 모델 — 수식·변수·측정 방법</div></div>

@@ -577,6 +577,16 @@ function fmtSci(v,d=2) {
 // ── NIEL ──
 let nielChart;
 function updateNIEL() {
+  // PostHog: NIEL 계산 이벤트
+  if (window.posthog) {
+    posthog.capture('niel_simulation_run', {
+      page: 'niel-tid',
+      material: document.getElementById('n-material')?.value,
+      particle: document.getElementById('n-particle')?.value,
+      orbit: document.getElementById('n-orbit')?.value,
+      solar: document.getElementById('n-solar')?.value,
+    });
+  }
   const mat   = document.getElementById('n-material').value;
   const part  = document.getElementById('n-particle').value;
   const orbit = document.getElementById('n-orbit').value;

@@ -1393,7 +1393,7 @@ function drawSrimCharts(result, ion) {
         legend: { display: false },
         tooltip: { callbacks: {
           title: c => 'x = ' + c[0].parsed.x.toFixed(2) + ' μm',
-          label: c => 'f(x) = ' + c[0].parsed.y.toExponential(2)
+          label: c => c[0]?.parsed ? 'f(x) = ' + c[0].parsed.y.toExponential(2) : ''
         }},
         annotation: { annotations: {
           meanLine: {
@@ -1493,7 +1493,7 @@ function drawSrimCharts(result, ion) {
               const d = c[0].raw;
               return `x = ${c[0].parsed.x.toFixed(3)} μm${d.layerName ? '  [' + d.layerName + ']' : ''}`;
             },
-            label: c => `dE/dx = ${c[0].parsed.y.toFixed(3)} eV/Å`
+            label: c => c[0]?.parsed ? `dE/dx = ${c[0].parsed.y.toFixed(3)} eV/Å` : ''
           }
         },
         annotation: { annotations: layerAnno }

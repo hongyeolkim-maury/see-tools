@@ -678,6 +678,15 @@ function updateNIEL() {
 // ── TID ──
 let tidChart;
 function updateTID() {
+  // PostHog: TID 계산 이벤트
+  if (window.posthog) {
+    posthog.capture('tid_simulation_run', {
+      page: 'niel-tid',
+      device: document.getElementById('t-device')?.value,
+      orbit: document.getElementById('t-orbit')?.value,
+      solar: document.getElementById('t-solar')?.value,
+    });
+  }
   const dev   = document.getElementById('t-device').value;
   const orbit = document.getElementById('t-orbit').value;
   const solar = document.getElementById('t-solar').value;

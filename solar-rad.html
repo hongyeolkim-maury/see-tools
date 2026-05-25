@@ -309,6 +309,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
             <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px">Cx</th>
             <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px">Φ₀ (p/cm²)</th>
             <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px;text-align:left">역할</th>
+            <th style="padding:7px 10px;color:#fff;font-family:var(--mono);font-size:11px;text-align:left">신뢰도</th>
           </tr></thead>
           <tbody id="matDbTable"></tbody>
         </table>
@@ -1204,24 +1205,24 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 // 소재 데이터베이스 — v2.3 (v2.2와 동일)
 // ════════════════════════════════════════════════════════════════
 const MAT_DB = {
-  ceria_glass:{name:'세리아 도핑 유리',     Z:10, rho:2.53,Eg:'-', cx:0.005,niel:0.80,phi0:1e15,role:'커버유리',      color:'#e2e8f0',textC:'#334155',heal:false},
-  ito:        {name:'ITO (In₂O₃:Sn)',      Z:38, rho:7.14,Eg:3.5, cx:0.012,niel:1.50,phi0:1e11,role:'투명전극',      color:'#bfdbfe',textC:'#1e3a8a',heal:false},
-  azo:        {name:'AZO (Al:ZnO)',         Z:22, rho:5.60,Eg:3.3, cx:0.010,niel:1.20,phi0:1e11,role:'투명전극',      color:'#bae6fd',textC:'#0c4a6e',heal:false},
-  fto:        {name:'FTO (F:SnO₂)',         Z:30, rho:6.99,Eg:3.8, cx:0.011,niel:1.40,phi0:1e11,role:'투명전극',      color:'#dbeafe',textC:'#1e3a8a',heal:false},
-  perv_fama:  {name:'FAMAPbI₃ (페로브스카이트)',Z:42,rho:4.05,Eg:1.55,cx:0.015,niel:0.72,phi0:1e9, role:'흡수층(상부)',  color:'#ede9fe',textC:'#5b21b6',heal:true},
-  perv_cspb:  {name:'CsPbI₂Br (전무기 Perv)', Z:44,rho:4.20,Eg:1.92,cx:0.012,niel:0.72,phi0:1e9, role:'흡수층(상부)',  color:'#f3e8ff',textC:'#6d28d9',heal:true},
-  cigs:       {name:'Cu(In,Ga)Se₂ (CIGS)',  Z:29, rho:5.75,Eg:1.15,cx:0.060,niel:1.99,phi0:1e10,role:'흡수층(하부)',  color:'#d1fae5',textC:'#064e3b',heal:false},
-  gaas:       {name:'GaAs',                 Z:32, rho:5.32,Eg:1.42,cx:0.030,niel:1.99,phi0:1e11,role:'흡수층',        color:'#ccfbf1',textC:'#134e4a',heal:false},
-  si_abs:     {name:'c-Si (단결정)',         Z:14, rho:2.33,Eg:1.12,cx:0.200,niel:1.00,phi0:1e13,role:'흡수층(하부)',  color:'#fee2e2',textC:'#7f1d1d',heal:false},
-  cds:        {name:'CdS 버퍼층',            Z:30, rho:4.82,Eg:2.42,cx:0.015,niel:1.60,phi0:1e11,role:'버퍼층',        color:'#fef9c3',textC:'#713f12',heal:false},
-  niox:       {name:'NiOₓ 홀 수송층',        Z:22, rho:6.67,Eg:3.6, cx:0.020,niel:1.10,phi0:1e11,role:'재결합 접합',  color:'#fef3c7',textC:'#78350f',heal:false},
-  spiro:      {name:'Spiro-OMeTAD HTL',     Z:8,  rho:1.20,Eg:3.0, cx:0.025,niel:0.50,phi0:1e11,role:'홀 수송층',    color:'#fde68a',textC:'#92400e',heal:false},
-  tio2:       {name:'TiO₂ ETL',             Z:18, rho:4.23,Eg:3.2, cx:0.018,niel:1.00,phi0:1e11,role:'전자 수송층',  color:'#e0f2fe',textC:'#0c4a6e',heal:false},
-  mo:         {name:'Mo 후면전극',            Z:42, rho:10.28,Eg:'-',cx:0.008,niel:2.50,phi0:1e15,role:'후면전극',      color:'#f1f5f9',textC:'#334155',heal:false},
-  ag:         {name:'Ag 후면전극',            Z:47, rho:10.49,Eg:'-',cx:0.008,niel:2.80,phi0:1e15,role:'후면전극',      color:'#f8fafc',textC:'#475569',heal:false},
-  au:         {name:'Au 후면전극',            Z:79, rho:19.30,Eg:'-',cx:0.008,niel:3.50,phi0:1e15,role:'후면전극',      color:'#fef9c3',textC:'#713f12',heal:false},
-  al_el:      {name:'Al 후면전극',            Z:13, rho:2.70, Eg:'-',cx:0.007,niel:0.90,phi0:1e15,role:'후면전극',      color:'#f1f5f9',textC:'#64748b',heal:false},
-  ito_back:   {name:'ITO 후면전극',           Z:38, rho:7.14, Eg:'-',cx:0.010,niel:1.50,phi0:1e11,role:'후면전극',      color:'#dbeafe',textC:'#1e3a8a',heal:false},
+  ceria_glass:{name:'세리아 도핑 유리',        Z:10, rho:2.53, Eg:'-',  cx:0.005,niel:0.80,phi0:1e15,role:'커버유리',     color:'#e2e8f0',textC:'#334155',heal:false, conf:5},
+  ito:        {name:'ITO (In₂O₃:Sn)',         Z:38, rho:7.14, Eg:3.5,  cx:0.012,niel:1.50,phi0:1e11,role:'투명전극',     color:'#bfdbfe',textC:'#1e3a8a',heal:false, conf:3},
+  azo:        {name:'AZO (Al:ZnO)',            Z:22, rho:5.60, Eg:3.3,  cx:0.010,niel:1.20,phi0:1e11,role:'투명전극',     color:'#bae6fd',textC:'#0c4a6e',heal:false, conf:3},
+  fto:        {name:'FTO (F:SnO₂)',            Z:30, rho:6.99, Eg:3.8,  cx:0.011,niel:1.40,phi0:1e11,role:'투명전극',     color:'#dbeafe',textC:'#1e3a8a',heal:false, conf:3},
+  perv_fama:  {name:'FAMAPbI₃ (페로브스카이트)',Z:42, rho:4.05, Eg:1.55, cx:0.015,niel:0.72,phi0:1e9, role:'흡수층(상부)',color:'#ede9fe',textC:'#5b21b6',heal:true,  conf:2},
+  perv_cspb:  {name:'CsPbI₂Br (전무기 Perv)', Z:44, rho:4.20, Eg:1.92, cx:0.012,niel:0.72,phi0:1e9, role:'흡수층(상부)',color:'#f3e8ff',textC:'#6d28d9',heal:true,  conf:2},
+  cigs:       {name:'Cu(In,Ga)Se₂ (CIGS)',    Z:29, rho:5.75, Eg:1.15, cx:0.060,niel:1.99,phi0:1e10,role:'흡수층(하부)',color:'#d1fae5',textC:'#064e3b',heal:false, conf:3},
+  gaas:       {name:'GaAs',                   Z:32, rho:5.32, Eg:1.42, cx:0.030,niel:1.99,phi0:1e11,role:'흡수층',      color:'#ccfbf1',textC:'#134e4a',heal:false, conf:5},
+  si_abs:     {name:'c-Si (단결정)',           Z:14, rho:2.33, Eg:1.12, cx:0.200,niel:1.00,phi0:1e13,role:'흡수층(하부)',color:'#fee2e2',textC:'#7f1d1d',heal:false, conf:5},
+  cds:        {name:'CdS 버퍼층',              Z:30, rho:4.82, Eg:2.42, cx:0.015,niel:1.60,phi0:1e11,role:'버퍼층',      color:'#fef9c3',textC:'#713f12',heal:false, conf:3},
+  niox:       {name:'NiOₓ 홀 수송층',          Z:22, rho:6.67, Eg:3.6,  cx:0.020,niel:1.10,phi0:1e11,role:'재결합 접합',color:'#fef3c7',textC:'#78350f',heal:false, conf:2},
+  spiro:      {name:'Spiro-OMeTAD HTL',       Z:8,  rho:1.20, Eg:3.0,  cx:0.025,niel:0.50,phi0:1e11,role:'홀 수송층',  color:'#fde68a',textC:'#92400e',heal:false, conf:2},
+  tio2:       {name:'TiO₂ ETL',               Z:18, rho:4.23, Eg:3.2,  cx:0.018,niel:1.00,phi0:1e11,role:'전자 수송층',color:'#e0f2fe',textC:'#0c4a6e',heal:false, conf:2},
+  mo:         {name:'Mo 후면전극',              Z:42, rho:10.28,Eg:'-',  cx:0.008,niel:2.50,phi0:1e15,role:'후면전극',   color:'#f1f5f9',textC:'#334155',heal:false, conf:4},
+  ag:         {name:'Ag 후면전극',              Z:47, rho:10.49,Eg:'-',  cx:0.008,niel:2.80,phi0:1e15,role:'후면전극',   color:'#f8fafc',textC:'#475569',heal:false, conf:4},
+  au:         {name:'Au 후면전극',              Z:79, rho:19.30,Eg:'-',  cx:0.008,niel:3.50,phi0:1e15,role:'후면전극',   color:'#fef9c3',textC:'#713f12',heal:false, conf:4},
+  al_el:      {name:'Al 후면전극',              Z:13, rho:2.70, Eg:'-',  cx:0.007,niel:0.90,phi0:1e15,role:'후면전극',   color:'#f1f5f9',textC:'#64748b',heal:false, conf:4},
+  ito_back:   {name:'ITO 후면전극',             Z:38, rho:7.14, Eg:'-',  cx:0.010,niel:1.50,phi0:1e11,role:'후면전극',   color:'#dbeafe',textC:'#1e3a8a',heal:false, conf:3},
 };
 
 let layers = [
@@ -1246,6 +1247,17 @@ const RAD_LABELS = {p:'양성자',e:'전자',gcr:'GCR 중이온',spe:'SPE 양성
 
 let eolChart_=null, coverChart_=null;
 
+function confBadge(conf) {
+  const labels = {5:'Measured',4:'Characterized',3:'Characterized',2:'Estimated',1:'Extrapolated'};
+  const colors = {5:'#0d8a5e',4:'#1a52c8',3:'#1a52c8',2:'#b86e00',1:'#b52020'};
+  const bgColors = {5:'rgba(13,138,94,.1)',4:'rgba(26,82,200,.1)',3:'rgba(26,82,200,.1)',2:'rgba(184,110,0,.1)',1:'rgba(181,32,32,.1)'};
+  const stars = '★'.repeat(conf) + '☆'.repeat(5 - conf);
+  const tooltip = conf >= 4 ? '실측 데이터 기반' : conf === 3 ? '제한적 실측 — 주의' : conf === 2 ? '추정치 — 테스트 필요' : '외삽 추정 — 참고만';
+  return `<span title="${tooltip}" style="font-family:var(--mono);font-size:11px;
+    color:${colors[conf]};background:${bgColors[conf]};
+    border:1px solid ${colors[conf]}40;border-radius:3px;
+    padding:1px 6px;letter-spacing:.02em;cursor:help">${stars} ${labels[conf]}</span>`;
+}  
 function fmtSci(v,d=3){
   if(!v||v===0) return '0';
   if(v>=0.01&&v<1e4) return v.toPrecision(d);
@@ -1486,7 +1498,7 @@ function buildLayerEditor(){
       <div class="layer-header">
         <span class="layer-handle">⋮⋮</span>
         <div class="layer-color-dot" style="background:${m.color||'#eee'};border:1px solid rgba(0,0,0,.1)"></div>
-        <span class="layer-name-txt">${i+1}. ${m.name||l.matKey} <span style="font-size:11px;font-family:var(--mono);color:var(--muted)">(${m.role||''})</span></span>
+        <span class="layer-name-txt">${i+1}. ${m.name||l.matKey} <span style="font-size:11px;font-family:var(--mono);color:var(--muted)">(${m.role||''})</span> ${confBadge(m.conf||1)}</span>
         <div class="layer-btns">
           <button class="lbtn" onclick="moveLayer(${l.id},-1)">↑</button>
           <button class="lbtn" onclick="moveLayer(${l.id},1)">↓</button>
@@ -1521,6 +1533,7 @@ function buildMatDb(){
       <td style="padding:6px 10px;font-family:var(--mono);font-size:12px;text-align:center">${m.cx}</td>
       <td style="padding:6px 10px;font-family:var(--mono);font-size:12px;text-align:center">${fmtSci(m.phi0)}</td>
       <td style="padding:6px 10px;font-size:12px;color:var(--muted)">${m.role}</td>
+      <td style="padding:6px 10px">${confBadge(m.conf||1)}</td>
     </tr>`
   ).join('');
 }
@@ -1661,7 +1674,7 @@ function buildAiaaStackVis(containerId, fluxMax, params, isBare){
     return `<div class="sv-row" style="background:${m.color}">
       <div>
         <div class="sv-name" style="color:${m.textC};font-size:12px">${m.name} ${m.heal?'<span style="font-size:10px;background:rgba(124,58,237,.15);color:#7c3aed;padding:1px 5px;border-radius:3px;font-family:var(--mono)">자기회복</span>':''}</div>
-        <div class="sv-sub" style="color:${m.textC}">${l.thick} μm · Cx=${m.cx} · Φ₀=${fmtSci(m.phi0)}</div>
+        <div class="sv-sub" style="color:${m.textC}">${l.thick} μm · Cx=${m.cx} · Φ₀=${fmtSci(m.phi0)} &nbsp;${confBadge(m.conf||1)}</div>
         <div class="sv-bar" style="width:${pct}%;background:${m.textC};opacity:.4;max-width:160px"></div>
       </div>
       <div class="sv-dmg" style="color:${m.textC}">~${pct}%</div>

@@ -1396,7 +1396,20 @@ function getBareLayersParams(){
 // ════════════════════════════════════════════════════════════════
 // update() — Tab1 메인 계산
 // ════════════════════════════════════════════════════════════════
+// PostHog throttle: 마지막 호출 후 2초 이내 재호출은 무시
+let _phLastFired = 0;
 function update(){
+  const _now = Date.now();
+  if (window.posthog && _now - _phLastFired > 2000) {
+    _phLastFired = _now;
+    posthog.capture('solar_rad_simulation_run', {
+      page:   'solar-rad',
+      orbit:  document.getElementById('orbit')?.value,
+      solar:  document.getElementById('solar')?.value,
+      cover:  document.getElementById('cover')?.value,
+      dur:    document.getElementById('dur')?.value,
+    });
+  }
   const orbKey = document.getElementById('orbit').value;
   const solar  = document.getElementById('solar').value;
   const cover  = parseFloat(document.getElementById('cover').value);

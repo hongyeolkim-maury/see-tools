@@ -140,6 +140,10 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 .ls-modal-btns button{font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:4px;border:1px solid var(--border2);background:var(--bg2);color:var(--muted);cursor:pointer}
 .ls-modal-btns button.primary{background:var(--ok);color:#fff;border-color:var(--ok)}
 .ls-autosave-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd);letter-spacing:.05em}  
+/* ── Phase 2: URL Share ── */
+.ls-btn.share:hover{background:#7c3aed;border-color:#7c3aed}
+.url-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1a3e8f;color:#fff;font-family:var(--mono);font-size:13px;padding:11px 22px;border-radius:7px;box-shadow:0 4px 18px rgba(0,0,0,.22);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.url-toast.show{opacity:1}
 </style>
 </head>
 <body>
@@ -169,6 +173,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
   <button class="ls-btn save" onclick="lsSaveModal()">💾 저장</button>
   <button class="ls-btn" onclick="lsLoadModal()">📂 불러오기</button>
   <button class="ls-btn clear" onclick="lsClearAuto()">🗑 자동저장 초기화</button>
+  <button class="ls-btn share" onclick="urlShare()">🔗 URL 공유</button>
   <span class="ls-autosave-badge" id="ls-auto-badge" style="display:none">✓ 자동저장됨</span>
   <span class="ls-status" id="ls-status"></span>
 </div>
@@ -2736,6 +2741,79 @@ setInterval(lsAutoSave, 30000);
 window.addEventListener('load', () => {
   setTimeout(lsInitAutoRestore, 200); // DOM 안정화 후 실행
 });
+
+  // ═══════════════════════════════════════════════════════
+// Phase 2: URL Share Link (Base64 인코딩)
+// ═══════════════════════════════════════════════════════
+
+/** 현재 상태 → Base64 URL 생성 후 클립보드 복사 */
+function urlShare() {
+  try {
+    const state = lsGetState();           // LocalStorage와 동일한 수집 함수 재사용
+    delete state.ts;                      // 타임스탬프는 URL에 불필요
+    const json    = JSON.stringify(state);
+    const b64     = btoa(unescape(encodeURIComponent(json))); // UTF-8 안전 인코딩
+    const url     = location.origin + location.pathname + '?state=' + b64;
+
+    // 클립보드 복사
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => urlToast());
+    } else {
+      // fallback: 구형 브라우저
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.opacity  = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      urlToast();
+    }
+  } catch(e) {
+    lsStatus('URL 생성 실패: ' + e.message, true);
+  }
+}
+
+/** URL 파라미터에서 상태 복원 */
+function urlRestoreFromParam() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const b64    = params.get('state');
+    if (!b64) return;
+    const json  = decodeURIComponent(escape(atob(b64)));  // UTF-8 안전 디코딩
+    const state = JSON.parse(json);
+    if (!state?.orbit) return;                             // 최소 유효성 검사
+    lsApplyState(state);                                   // LocalStorage 복원 함수 재사용
+    lsStatus('URL에서 설정 복원됨 ✓', false);
+
+    // URL을 깔끔하게 정리 (state 파라미터 제거 — 히스토리 오염 방지)
+    const cleanUrl = location.origin + location.pathname;
+    history.replaceState(null, '', cleanUrl);
+  } catch(e) {
+    console.warn('URL state restore failed:', e);
+  }
+}
+
+/** 토스트 알림 */
+function urlToast() {
+  const el = document.getElementById('url-toast');
+  if (!el) return;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// 페이지 로드 시 URL 복원 — 자동저장 복원보다 우선 실행
+window.addEventListener('load', () => {
+  const hasStateParam = new URLSearchParams(location.search).has('state');
+  if (hasStateParam) {
+    // URL 파라미터가 있으면 URL 복원 우선 (자동저장 무시)
+    setTimeout(urlRestoreFromParam, 150);
+  }
+  // hasStateParam 없으면 기존 lsInitAutoRestore()가 실행됨 (이미 등록되어 있음)
+});
+  
 </script>
+<div class="url-toast" id="url-toast">🔗 공유 URL이 클립보드에 복사되었습니다</div>
 </body>
 </html>

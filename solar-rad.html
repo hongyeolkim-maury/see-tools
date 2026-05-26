@@ -144,6 +144,11 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 .ls-btn.share:hover{background:#7c3aed;border-color:#7c3aed}
 .url-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1a3e8f;color:#fff;font-family:var(--mono);font-size:13px;padding:11px 22px;border-radius:7px;box-shadow:0 4px 18px rgba(0,0,0,.22);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .url-toast.show{opacity:1}
+
+/* ── Phase 2: KV 버튼 스타일 ── */
+.ls-btn.kv{border-color:rgba(124,58,237,.4);color:#7c3aed}
+.ls-btn.kv:hover{background:#7c3aed;color:#fff;border-color:#7c3aed}  
+  
 </style>
 </head>
 <body>
@@ -174,6 +179,8 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
   <button class="ls-btn" onclick="lsLoadModal()">📂 불러오기</button>
   <button class="ls-btn clear" onclick="lsClearAuto()">🗑 자동저장 초기화</button>
   <button class="ls-btn share" onclick="urlShare()">🔗 URL 공유</button>
+  <button class="ls-btn kv" onclick="kvSaveModal()">☁️ 서버 저장</button>
+  <button class="ls-btn kv" onclick="kvLoadModal()">☁️ 서버 불러오기</button>
   <span class="ls-autosave-badge" id="ls-auto-badge" style="display:none">✓ 자동저장됨</span>
   <span class="ls-status" id="ls-status"></span>
 </div>
@@ -2812,6 +2819,155 @@ window.addEventListener('load', () => {
   }
   // hasStateParam 없으면 기존 lsInitAutoRestore()가 실행됨 (이미 등록되어 있음)
 });
+
+  // ═══════════════════════════════════════════════════════
+// Phase 2: Cloudflare KV 연동
+// Worker: https://helias-kv-api.hongyeolkim81.workers.dev
+// ═══════════════════════════════════════════════════════
+
+const KV_API = 'https://helias-kv-api.hongyeolkim81.workers.dev';
+
+// ── 익명 UUID — 브라우저당 고정 ─────────────────────────
+// LocalStorage에 보존되므로 같은 브라우저라면 항상 동일 UUID
+function kvGetUUID() {
+  let id = localStorage.getItem('helias_uuid');
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem('helias_uuid', id);
+  }
+  return id;
+}
+
+// ── 저장 ─────────────────────────────────────────────────
+async function kvSave(name) {
+  const uuid  = kvGetUUID();
+  const state = lsGetState(); // LocalStorage와 동일한 수집 함수 재사용
+  try {
+    lsStatus('☁️ 서버 저장 중...', false);
+    const res  = await fetch(`${KV_API}/save`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ uuid, name, state })
+    });
+    const data = await res.json();
+    if (data.ok) lsStatus(`☁️ 서버 저장 완료: "${name}" ✓`, false);
+    else         lsStatus('☁️ 서버 저장 실패: ' + data.error, true);
+    return data.ok;
+  } catch(e) {
+    lsStatus('☁️ 서버 저장 오류 (네트워크 확인): ' + e.message, true);
+    return false;
+  }
+}
+
+// ── 슬롯 목록 조회 ───────────────────────────────────────
+async function kvList() {
+  const uuid = kvGetUUID();
+  try {
+    const res  = await fetch(`${KV_API}/list/${uuid}`);
+    const data = await res.json();
+    return data.ok ? data.slots : [];
+  } catch {
+    return [];
+  }
+}
+
+// ── 불러오기 ─────────────────────────────────────────────
+async function kvLoad(name) {
+  const uuid = kvGetUUID();
+  try {
+    lsStatus('☁️ 서버에서 불러오는 중...', false);
+    const res  = await fetch(`${KV_API}/load/${uuid}/${encodeURIComponent(name)}`);
+    const data = await res.json();
+    if (data.ok) {
+      lsApplyState(data.state);
+      lsStatus(`☁️ 서버 불러오기 완료: "${name}" ✓`, false);
+    } else {
+      lsStatus('☁️ 불러오기 실패: ' + data.error, true);
+    }
+  } catch(e) {
+    lsStatus('☁️ 불러오기 오류: ' + e.message, true);
+  }
+}
+
+// ── 삭제 ─────────────────────────────────────────────────
+async function kvDelete(name) {
+  const uuid = kvGetUUID();
+  try {
+    await fetch(`${KV_API}/delete/${uuid}/${encodeURIComponent(name)}`, {
+      method: 'DELETE'
+    });
+    lsStatus(`☁️ 서버 삭제 완료: "${name}"`, false);
+  } catch(e) {
+    lsStatus('☁️ 삭제 오류: ' + e.message, true);
+  }
+}
+
+// ── 저장 모달 (기존 ls-save-modal 재사용) ────────────────
+function kvSaveModal() {
+  const now = new Date();
+  const def = `KV_${now.getMonth()+1}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+  const nameEl = document.getElementById('ls-save-name');
+  if (nameEl) nameEl.value = def;
+
+  // 저장 버튼을 KV 저장으로 교체
+  const btn = document.querySelector('#ls-save-modal .primary');
+  if (btn) btn.onclick = kvDoSave;
+
+  // 모달 타이틀 변경
+  const title = document.querySelector('#ls-save-modal h3');
+  if (title) title.textContent = '☁️ 서버에 저장';
+
+  document.getElementById('ls-save-modal')?.classList.add('open');
+  setTimeout(() => nameEl?.select(), 50);
+}
+async function kvDoSave() {
+  const name = document.getElementById('ls-save-name')?.value.trim();
+  if (!name) { lsStatus('이름을 입력하세요', true); return; }
+  lsModalClose('ls-save-modal');
+
+  // 모달 타이틀 원복
+  const title = document.querySelector('#ls-save-modal h3');
+  if (title) title.textContent = '💾 시뮬레이션 저장';
+  const btn = document.querySelector('#ls-save-modal .primary');
+  if (btn) btn.onclick = lsDoSave;
+
+  await kvSave(name);
+}
+
+// ── 불러오기 모달 (기존 ls-load-modal 재사용) ────────────
+async function kvLoadModal() {
+  // 모달 타이틀 변경
+  const title = document.querySelector('#ls-load-modal h3');
+  if (title) title.textContent = '☁️ 서버에서 불러오기';
+
+  const listEl = document.getElementById('ls-slot-list');
+  if (listEl) listEl.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px 0;text-align:center">☁️ 서버 조회 중...</div>';
+
+  document.getElementById('ls-load-modal')?.classList.add('open');
+
+  const slots = await kvList();
+
+  if (!slots.length) {
+    listEl.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px 0;text-align:center">☁️ 서버에 저장된 시뮬레이션이 없습니다.</div>';
+  } else {
+    listEl.innerHTML = slots.map((s, i) => {
+      const dt    = new Date(s.ts || 0);
+      const dtStr = dt.getFullYear() > 2000
+        ? `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`
+        : '날짜 미상';
+      return `
+        <div class="ls-slot-row" onclick="kvLoad('${s.name.replace(/'/g,"\\'")}');lsModalClose('ls-load-modal');document.querySelector('#ls-load-modal h3').textContent='📂 저장된 시뮬레이션 불러오기'">
+          <div>
+            <div class="ls-slot-name">☁️ ${s.name}</div>
+            <div class="ls-slot-meta">${dtStr}</div>
+          </div>
+          <span class="ls-slot-del"
+            onclick="event.stopPropagation();kvDelete('${s.name.replace(/'/g,"\\'")}').then(()=>kvLoadModal())"
+            title="삭제">✕</span>
+        </div>`;
+    }).join('');
+  }
+}
   
 </script>
 <div class="url-toast" id="url-toast">🔗 공유 URL이 클립보드에 복사되었습니다</div>

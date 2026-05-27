@@ -150,6 +150,9 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
 .ls-btn.kv:hover{background:#7c3aed;color:#fff;border-color:#7c3aed}  
   
 </style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
 </head>
 <body>
 <div class="wrap">
@@ -181,7 +184,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
   <button class="ls-btn share" onclick="urlShare()">🔗 URL 공유</button>
   <button class="ls-btn kv" onclick="kvSaveModal()">☁️ 서버 저장</button>
   <button class="ls-btn kv" onclick="kvLoadModal()">☁️ 서버 불러오기</button>
-  <button class="ls-btn" onclick="exportCSV()">📥 CSV</button>
+  <button class="ls-btn" onclick="exportXLSX()">📥 XLSX</button>
   <button class="ls-btn" onclick="exportPNG()">📷 PNG</button>
   <span class="ls-autosave-badge" id="ls-auto-badge" style="display:none">✓ 자동저장됨</span>
   <span class="ls-status" id="ls-status"></span>
@@ -2129,18 +2132,8 @@ if(typeof Chart !== 'undefined'){
 }  
 
 // ════════════════════════════════════════════════════════════════
-// Phase 3: CSV / PNG Export
+// Phase 3: XLSX Multi-Sheet Export (SheetJS)
 // ════════════════════════════════════════════════════════════════
-
-/** 현재 활성 탭 판별 */
-function getActiveTabId() {
-  const tabs = ['assess','layers','eol','orbit','aiaa','testplan','ebridge','guide'];
-  for (const t of tabs) {
-    const el = document.getElementById('tab-' + t);
-    if (el && el.classList.contains('active')) return t;
-  }
-  return 'assess';
-}
 
 /** Blob → 자동 다운로드 */
 function triggerDownload(blob, filename) {
@@ -2160,94 +2153,246 @@ function dateStamp() {
   return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// ── CSV Export ───────────────────────────────────────────────────
-function exportCSV() {
-  const tab = getActiveTabId();
-
-  if (tab === 'eol') {
-    // Tab 3: EOL 연도별 Pmax 잔존율 표 → DOM 테이블 직접 추출
-    const table = document.getElementById('eolTable');
-    if (!table) { lsStatus('EOL 표를 찾을 수 없습니다', true); return; }
-
-    const rows = [];
-    // 헤더
-    const ths = table.querySelectorAll('thead th');
-    rows.push(Array.from(ths).map(th => '"' + th.textContent.trim() + '"').join(','));
-    // 데이터
-    table.querySelectorAll('tbody tr').forEach(tr => {
-      const cells = Array.from(tr.querySelectorAll('td'));
-      rows.push(cells.map(td => '"' + td.textContent.trim().replace(/"/g,'""') + '"').join(','));
-    });
-
-    const csv  = '\uFEFF' + rows.join('\r\n'); // UTF-8 BOM for Excel
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    triggerDownload(blob, `helias_EOL_table_${dateStamp()}.csv`);
-    lsStatus('📥 EOL 표 CSV 다운로드 완료', false);
-
-  } else {
-    // 기본 (Tab 1 assess): Pmax 열화 곡선 Chart.js 데이터 직접 추출
-    if (!eolChart_) { lsStatus('먼저 시뮬레이션을 실행하세요', true); return; }
-
-    const ds   = eolChart_.data.datasets[0].data;
-    const rows = ['"임무기간 (yr)","Pmax (W/m²)"'];
-    ds.forEach(pt => {
-      rows.push(`${pt.x},${pt.y.toFixed(2)}`);
-    });
-
-    // 헤더 메타 추가
-    const orbKey = document.getElementById('orbit')?.value || '';
-    const dur    = document.getElementById('dur')?.value   || '';
-    const cover  = document.getElementById('cover')?.value || '';
-    const meta = [
-      `"# HELIAS Solar-Rad Export — ${new Date().toLocaleString()}"`,
-      `"# Orbit: ${orbKey} | Duration: ${dur}yr | Cover: ${cover}mm"`,
-      `"# Model: NRL Tada (1982)"`,
-      ''
-    ];
-
-    const csv  = '\uFEFF' + meta.join('\r\n') + rows.join('\r\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    triggerDownload(blob, `helias_Pmax_curve_${dateStamp()}.csv`);
-    lsStatus('📥 열화곡선 CSV 다운로드 완료', false);
-  }
-}
-
-// ── PNG Export ───────────────────────────────────────────────────
-function exportPNG() {
-  const tab = getActiveTabId();
-
-  // 탭에 따른 대상 차트 canvas 선택
-  let canvasId, filename;
-
-  if (tab === 'eol') {
-    canvasId = 'coverChart';
-    filename = `helias_cover_optimization_${dateStamp()}.png`;
-  } else if (tab === 'ebridge') {
-    canvasId = 'eb-chart';
-    filename = `helias_PCE_bridge_${dateStamp()}.png`;
-  } else {
-    // 기본: Tab 1 Pmax 열화 곡선
-    canvasId = 'eolChart';
-    filename = `helias_Pmax_curve_${dateStamp()}.png`;
+function exportXLSX() {
+  if (typeof XLSX === 'undefined') {
+    lsStatus('SheetJS 로딩 중... 잠시 후 다시 시도하세요', true);
+    return;
   }
 
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) { lsStatus('차트를 찾을 수 없습니다 (해당 탭에서 실행하세요)', true); return; }
+  const wb = XLSX.utils.book_new();
 
-  // 흰 배경 합성 후 PNG 추출
-  const offscreen = document.createElement('canvas');
-  offscreen.width  = canvas.width;
-  offscreen.height = canvas.height;
-  const ctx = offscreen.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, offscreen.width, offscreen.height);
-  ctx.drawImage(canvas, 0, 0);
+  // ── 공통 계산값 수집 ─────────────────────────────────────────
+  const orbKey = document.getElementById('orbit')?.value || 'geo';
+  const solar  = document.getElementById('solar')?.value || 'min';
+  const cover  = parseFloat(document.getElementById('cover')?.value || 0.5);
+  const dur    = parseFloat(document.getElementById('dur')?.value   || 5);
+  const heal   = parseFloat(document.getElementById('heal')?.value  || 0.3);
+  const pmax0  = parseFloat(document.getElementById('pmax0')?.value || 356);
+  const pce0   = parseFloat(document.getElementById('pce0')?.value  || 26.3);
 
-  offscreen.toBlob(blob => {
-    if (!blob) { lsStatus('PNG 생성 실패', true); return; }
-    triggerDownload(blob, filename);
-    lsStatus('📷 PNG 다운로드 완료', false);
-  }, 'image/png');
+  const orb    = ORBITS[orbKey];
+  const smod   = orb.solar_mod[solar];
+  const atten  = Math.exp(-cover / 1.2);
+  const fluxYr = orb.fluxYr * smod * atten;
+  const {cx, phi0} = getCxEffAndPhi0();
+  const pervThick  = layers.filter(l => MAT_DB[l.matKey]?.heal).reduce((s,l) => s + l.thick, 0);
+  const totalThick = Math.max(layers.reduce((s,l) => s + l.thick, 0), 1);
+  const fPerv      = Math.min(0.7, pervThick / totalThick);
+  const healCorr   = heal * fPerv;
+  const totalFlux  = fluxYr * dur;
+  const deg        = pmaxDeg(totalFlux, cx, phi0);
+  const eolPct     = Math.min(100, deg * (1 + healCorr) * 100);
+  const grade      = eolPct >= 80 ? 'A' : eolPct >= 65 ? 'B' : eolPct >= 50 ? 'C' : 'D';
+
+  // ══════════════════════════════════════════════════════════════
+  // Sheet 1: Assessment — 현재 파라미터 + 종합 결과
+  // ══════════════════════════════════════════════════════════════
+  const assessData = [
+    ['HELIAS Solar-Rad — Assessment Summary'],
+    ['Export Date', new Date().toLocaleString()],
+    [''],
+    ['=== 임무 환경 설정 ==='],
+    ['Parameter', 'Value', 'Unit'],
+    ['목표 궤도',        orb.name,             ''],
+    ['태양 활동 조건',   solar === 'min' ? '태양 극소기 (GCR 최대)' : '태양 극대기 (SPE 최대)', ''],
+    ['커버유리 두께',    cover,                'mm'],
+    ['임무 기간',        dur,                  'yr'],
+    ['페로브스카이트 자기회복 계수', heal,     ''],
+    ['초기 PCE₀',       pce0,                 '%'],
+    ['초기 Pmax₀',      pmax0,                'W/m²'],
+    [''],
+    ['=== NRL Tada 계산 파라미터 ==='],
+    ['Parameter', 'Value', 'Unit/Note'],
+    ['Cx_eff (두께 가중 평균)',   cx.toFixed(6),          '무차원'],
+    ['Φ₀_eff (기하 가중 평균)',   phi0.toExponential(3),  'p⁺/cm²'],
+    ['커버유리 감쇠율 (λ=1.2mm)', (atten*100).toFixed(2), '%'],
+    ['셀 도달 연간 플럭스',       fluxYr.toExponential(3),'p⁺/cm²/yr'],
+    ['임무 전체 누적 플럭스 Φ',   totalFlux.toExponential(3), 'p⁺/cm²'],
+    ['log₁₀(Φ/Φ₀)',              totalFlux > phi0 ? Math.log10(totalFlux/phi0).toFixed(4) : '< 0 (열화 임계 미달)', ''],
+    ['자기회복 보정',              (healCorr*100).toFixed(2), '%'],
+    [''],
+    ['=== 종합 판정 결과 ==='],
+    ['Result', 'Value'],
+    ['EOL Pmax 잔존율',  eolPct.toFixed(2) + '%'],
+    ['EOL Pmax',         (pmax0 * eolPct / 100).toFixed(1) + ' W/m²'],
+    ['Grade',            'Grade ' + grade],
+    ['GaAs 기준 1MeV e⁻ 등가 플럭스', (totalFlux*580).toExponential(3) + ' e⁻/cm²'],
+    ['판정 기준',        'ECSS-E-ST-20-08C (Grade A: EOL ≥ 80%)'],
+  ];
+  const wsAssess = XLSX.utils.aoa_to_sheet(assessData);
+  wsAssess['!cols'] = [{wch:38},{wch:28},{wch:22}];
+  XLSX.utils.book_append_sheet(wb, wsAssess, 'Assessment');
+
+  // ══════════════════════════════════════════════════════════════
+  // Sheet 2: EOL_Table — 연도별 Pmax 잔존율
+  // ══════════════════════════════════════════════════════════════
+  const eolRows = [
+    ['HELIAS Solar-Rad — EOL Annual Pmax Table'],
+    ['Orbit', orb.name, 'Cover Glass', cover + ' mm', 'Cx_eff', cx.toFixed(6)],
+    [''],
+    ['연도 (yr)', '누적 플럭스 (p⁺/cm²)', 'Cx_eff', 'log(Φ/Φ₀)',
+     '회복 보정 (%)', 'Pmax 잔존 (%)', 'Pmax (W/m²)', 'Grade']
+  ];
+  for (let y = 1; y <= 15; y++) {
+    const phi  = fluxYr * y;
+    const logR = phi > phi0 ? Math.log10(phi / phi0) : 0;
+    const pct  = Math.min(100, pmaxDeg(phi, cx, phi0) * (1 + healCorr) * 100);
+    const g    = pct >= 80 ? 'A' : pct >= 65 ? 'B' : pct >= 50 ? 'C' : 'D';
+    eolRows.push([
+      y,
+      parseFloat(phi.toExponential(4)),
+      parseFloat(cx.toFixed(6)),
+      parseFloat(logR.toFixed(4)),
+      parseFloat((healCorr*100).toFixed(2)),
+      parseFloat(pct.toFixed(2)),
+      parseFloat((pmax0*pct/100).toFixed(1)),
+      'Grade ' + g
+    ]);
+  }
+  const wsEol = XLSX.utils.aoa_to_sheet(eolRows);
+  wsEol['!cols'] = [{wch:12},{wch:24},{wch:12},{wch:12},{wch:16},{wch:16},{wch:14},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, wsEol, 'EOL_Table');
+
+  // ══════════════════════════════════════════════════════════════
+  // Sheet 3: Layer_Structure — 레이어 구조
+  // ══════════════════════════════════════════════════════════════
+  const layerRows = [
+    ['HELIAS Solar-Rad — Layer Structure'],
+    ['총 두께', totalThick.toFixed(3) + ' μm', 'Cx_eff', cx.toFixed(6), 'Φ₀_eff', phi0.toExponential(3)],
+    [''],
+    ['순서 (광입사→)', '소재명', '역할', '두께 (μm)', 'Z_eff', 'ρ (g/cm³)',
+     'Cx', 'Φ₀ (p/cm²)', '자기회복', '두께 비중 (%)', '신뢰도']
+  ];
+  layers.forEach((l, i) => {
+    const m = MAT_DB[l.matKey] || {};
+    const thickFrac = (l.thick / totalThick * 100).toFixed(1);
+    const confStr   = ['','★☆☆☆☆','★★☆☆☆','★★★☆☆','★★★★☆','★★★★★'][m.conf || 1];
+    layerRows.push([
+      i + 1,
+      m.name || l.matKey,
+      m.role || '',
+      l.thick,
+      m.Z    || '',
+      m.rho  || '',
+      m.cx   || '',
+      m.phi0 ? parseFloat(m.phi0.toExponential(3)) : '',
+      m.heal ? 'Y' : 'N',
+      parseFloat(thickFrac),
+      confStr
+    ]);
+  });
+  // 유효 파라미터 요약
+  layerRows.push(['']);
+  layerRows.push(['=== 유효 파라미터 요약 ===']);
+  layerRows.push(['Cx_eff (두께 가중 평균)',  cx.toFixed(6)]);
+  layerRows.push(['Φ₀_eff (기하 가중 평균)', phi0.toExponential(3)]);
+  layerRows.push(['페로브스카이트 층 비중',   (fPerv*100).toFixed(1) + '%']);
+
+  const wsLayer = XLSX.utils.aoa_to_sheet(layerRows);
+  wsLayer['!cols'] = [{wch:10},{wch:26},{wch:16},{wch:12},{wch:8},{wch:12},
+                      {wch:8},{wch:18},{wch:10},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, wsLayer, 'Layer_Structure');
+
+  // ══════════════════════════════════════════════════════════════
+  // Sheet 4: Orbit_Environment — 궤도별 방사선 환경
+  // ══════════════════════════════════════════════════════════════
+  const orbitRows = [
+    ['HELIAS Solar-Rad — Orbit Radiation Environment'],
+    [''],
+    ['궤도', '고도', '양성자 (%)', '전자 (%)', 'GCR (%)', 'SPE (%)',
+     '연간 플럭스 (p⁺/cm²)', '특이사항', '현재 선택']
+  ];
+  const orbitDefs = [
+    ['LEO 저경사', '400km',     55, 30, 10,  5, 1.0e9,  'SAA 통과, 지자기 차폐 최대',    orbKey==='leo'],
+    ['LEO 극궤도', '800km',     60, 25, 10,  5, 1.5e10, '극관 통과 시 GCR 차폐 없음',   orbKey==='leo_pol'],
+    ['MEO (GPS)',  '20,200km',  30, 55, 10,  5, 5.0e12, '반앨런대 내부 — 가장 가혹',    orbKey==='meo'],
+    ['GEO',        '36,000km',  25, 35, 30, 10, 2.0e10, 'GCR 지배, 통신위성 주류',      orbKey==='geo'],
+    ['심우주',     '> 1 AU',    15, 10, 60, 15, 8.0e10, 'GCR 극대, 지자기 차폐 없음',   orbKey==='deep'],
+  ];
+  orbitDefs.forEach(o => {
+    orbitRows.push([o[0], o[1], o[2], o[3], o[4], o[5],
+      parseFloat(o[6].toExponential(3)), o[7], o[8] ? '◄ 현재' : '']);
+  });
+  orbitRows.push(['']);
+  orbitRows.push(['=== 방사선 종류별 태양전지 영향 ===']);
+  orbitRows.push(['입자', '에너지 범위', '주요 손상 메커니즘', '태양전지 영향']);
+  orbitRows.push(['양성자',     '0.1–300 MeV',  'NIEL + TID',      '격자 변위 → 캐리어 수명 감소 → Jsc·Voc 열화']);
+  orbitRows.push(['전자',       '0.1–10 MeV',   'NIEL (경미)',     '양성자보다 NIEL 낮음, 커버유리로 효과적 차단']);
+  orbitRows.push(['GCR 중이온', '수백 MeV/u',   'SEE + TID',       '고LET, 차폐로 방어 어려움']);
+  orbitRows.push(['SPE 양성자', '수 MeV~GeV',   '순간 대량 NIEL', '수일 내 수년치 손상 누적 가능']);
+  orbitRows.push(['감마/X선',   'keV~MeV',      'TID',             '페로브스카이트 결함 생성, 자기회복으로 부분 보상']);
+
+  const wsOrbit = XLSX.utils.aoa_to_sheet(orbitRows);
+  wsOrbit['!cols'] = [{wch:14},{wch:12},{wch:12},{wch:12},{wch:10},{wch:10},
+                      {wch:24},{wch:36},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, wsOrbit, 'Orbit_Environment');
+
+  // ══════════════════════════════════════════════════════════════
+  // Sheet 5: Pmax_Curve — Pmax 열화 곡선 데이터
+  // ══════════════════════════════════════════════════════════════
+  const pmaxRows = [
+    ['HELIAS Solar-Rad — Pmax Degradation Curve Data'],
+    ['Orbit', orb.name, 'Cover', cover+'mm', 'Cx_eff', cx.toFixed(6), 'Φ₀_eff', phi0.toExponential(3)],
+    ['Model', 'NRL Tada (1982)', 'Heal Corr', (healCorr*100).toFixed(2)+'%'],
+    [''],
+    ['임무기간 (yr)', '누적 플럭스 (p⁺/cm²)', 'Pmax 잔존율 (%)', 'Pmax (W/m²)', 'log₁₀(Φ/Φ₀)']
+  ];
+  // 0.5년 간격으로 최대 15년
+  const maxYr = Math.max(dur, 10);
+  for (let y = 0; y <= maxYr; y += 0.5) {
+    const phi  = fluxYr * y;
+    const pct  = Math.min(100, pmaxDeg(phi, cx, phi0) * (1 + healCorr) * 100);
+    const logR = phi > phi0 ? parseFloat(Math.log10(phi/phi0).toFixed(4)) : 0;
+    pmaxRows.push([
+      y,
+      parseFloat(phi.toExponential(4)),
+      parseFloat(pct.toFixed(3)),
+      parseFloat((pmax0*pct/100).toFixed(2)),
+      logR
+    ]);
+  }
+  const wsPmax = XLSX.utils.aoa_to_sheet(pmaxRows);
+  wsPmax['!cols'] = [{wch:16},{wch:26},{wch:18},{wch:16},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, wsPmax, 'Pmax_Curve');
+
+  // ══════════════════════════════════════════════════════════════
+  // Sheet 6: Cover_Optimization — 커버유리 두께 vs EOL Pmax
+  // ══════════════════════════════════════════════════════════════
+  const coverRows = [
+    ['HELIAS Solar-Rad — Cover Glass Optimization'],
+    ['Orbit', orb.name, 'Duration', dur+'yr', 'Cx_eff', cx.toFixed(6)],
+    [''],
+    ['커버유리 두께 (mm)', '감쇠율 (%)', 'EOL 누적 플럭스 (p⁺/cm²)',
+     'EOL Pmax 잔존율 (%)', 'EOL Pmax (W/m²)', 'Grade']
+  ];
+  for (let t = 0; t <= 5; t += 0.1) {
+    const a2  = Math.exp(-t / 1.2);
+    const fy2 = orb.fluxYr * smod * a2;
+    const pct = Math.min(100, pmaxDeg(fy2*dur, cx, phi0) * (1+healCorr) * 100);
+    const g   = pct>=80?'A':pct>=65?'B':pct>=50?'C':'D';
+    coverRows.push([
+      parseFloat(t.toFixed(1)),
+      parseFloat((a2*100).toFixed(2)),
+      parseFloat((fy2*dur).toExponential(4)),
+      parseFloat(pct.toFixed(3)),
+      parseFloat((pmax0*pct/100).toFixed(2)),
+      'Grade ' + g
+    ]);
+  }
+  const wsCover = XLSX.utils.aoa_to_sheet(coverRows);
+  wsCover['!cols'] = [{wch:20},{wch:14},{wch:28},{wch:20},{wch:16},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, wsCover, 'Cover_Optimization');
+
+  // ══════════════════════════════════════════════════════════════
+  // 파일 생성 및 다운로드
+  // ══════════════════════════════════════════════════════════════
+  const wbOut = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob  = new Blob([wbOut], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
+  const fname = `HELIAS_SolarRad_${orbKey.toUpperCase()}_${dur}yr_${dateStamp()}.xlsx`;
+  triggerDownload(blob, fname);
+  lsStatus(`📥 XLSX 다운로드 완료 (6개 시트)`, false);
 }
   
 </script>

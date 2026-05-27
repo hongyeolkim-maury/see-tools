@@ -181,6 +181,8 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
   <button class="ls-btn share" onclick="urlShare()">🔗 URL 공유</button>
   <button class="ls-btn kv" onclick="kvSaveModal()">☁️ 서버 저장</button>
   <button class="ls-btn kv" onclick="kvLoadModal()">☁️ 서버 불러오기</button>
+  <button class="ls-btn" onclick="exportCSV()">📥 CSV</button>
+  <button class="ls-btn" onclick="exportPNG()">📷 PNG</button>
   <span class="ls-autosave-badge" id="ls-auto-badge" style="display:none">✓ 자동저장됨</span>
   <span class="ls-status" id="ls-status"></span>
 </div>
@@ -2125,6 +2127,129 @@ if(typeof Chart !== 'undefined'){
     }, 50);
   });
 }  
+
+// ════════════════════════════════════════════════════════════════
+// Phase 3: CSV / PNG Export
+// ════════════════════════════════════════════════════════════════
+
+/** 현재 활성 탭 판별 */
+function getActiveTabId() {
+  const tabs = ['assess','layers','eol','orbit','aiaa','testplan','ebridge','guide'];
+  for (const t of tabs) {
+    const el = document.getElementById('tab-' + t);
+    if (el && el.classList.contains('active')) return t;
+  }
+  return 'assess';
+}
+
+/** Blob → 자동 다운로드 */
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 1000);
+}
+
+/** 날짜 스탬프 (파일명용) */
+function dateStamp() {
+  const d = new Date();
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ── CSV Export ───────────────────────────────────────────────────
+function exportCSV() {
+  const tab = getActiveTabId();
+
+  if (tab === 'eol') {
+    // Tab 3: EOL 연도별 Pmax 잔존율 표 → DOM 테이블 직접 추출
+    const table = document.getElementById('eolTable');
+    if (!table) { lsStatus('EOL 표를 찾을 수 없습니다', true); return; }
+
+    const rows = [];
+    // 헤더
+    const ths = table.querySelectorAll('thead th');
+    rows.push(Array.from(ths).map(th => '"' + th.textContent.trim() + '"').join(','));
+    // 데이터
+    table.querySelectorAll('tbody tr').forEach(tr => {
+      const cells = Array.from(tr.querySelectorAll('td'));
+      rows.push(cells.map(td => '"' + td.textContent.trim().replace(/"/g,'""') + '"').join(','));
+    });
+
+    const csv  = '\uFEFF' + rows.join('\r\n'); // UTF-8 BOM for Excel
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    triggerDownload(blob, `helias_EOL_table_${dateStamp()}.csv`);
+    lsStatus('📥 EOL 표 CSV 다운로드 완료', false);
+
+  } else {
+    // 기본 (Tab 1 assess): Pmax 열화 곡선 Chart.js 데이터 직접 추출
+    if (!eolChart_) { lsStatus('먼저 시뮬레이션을 실행하세요', true); return; }
+
+    const ds   = eolChart_.data.datasets[0].data;
+    const rows = ['"임무기간 (yr)","Pmax (W/m²)"'];
+    ds.forEach(pt => {
+      rows.push(`${pt.x},${pt.y.toFixed(2)}`);
+    });
+
+    // 헤더 메타 추가
+    const orbKey = document.getElementById('orbit')?.value || '';
+    const dur    = document.getElementById('dur')?.value   || '';
+    const cover  = document.getElementById('cover')?.value || '';
+    const meta = [
+      `"# HELIAS Solar-Rad Export — ${new Date().toLocaleString()}"`,
+      `"# Orbit: ${orbKey} | Duration: ${dur}yr | Cover: ${cover}mm"`,
+      `"# Model: NRL Tada (1982)"`,
+      ''
+    ];
+
+    const csv  = '\uFEFF' + meta.join('\r\n') + rows.join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    triggerDownload(blob, `helias_Pmax_curve_${dateStamp()}.csv`);
+    lsStatus('📥 열화곡선 CSV 다운로드 완료', false);
+  }
+}
+
+// ── PNG Export ───────────────────────────────────────────────────
+function exportPNG() {
+  const tab = getActiveTabId();
+
+  // 탭에 따른 대상 차트 canvas 선택
+  let canvasId, filename;
+
+  if (tab === 'eol') {
+    canvasId = 'coverChart';
+    filename = `helias_cover_optimization_${dateStamp()}.png`;
+  } else if (tab === 'ebridge') {
+    canvasId = 'eb-chart';
+    filename = `helias_PCE_bridge_${dateStamp()}.png`;
+  } else {
+    // 기본: Tab 1 Pmax 열화 곡선
+    canvasId = 'eolChart';
+    filename = `helias_Pmax_curve_${dateStamp()}.png`;
+  }
+
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) { lsStatus('차트를 찾을 수 없습니다 (해당 탭에서 실행하세요)', true); return; }
+
+  // 흰 배경 합성 후 PNG 추출
+  const offscreen = document.createElement('canvas');
+  offscreen.width  = canvas.width;
+  offscreen.height = canvas.height;
+  const ctx = offscreen.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, offscreen.width, offscreen.height);
+  ctx.drawImage(canvas, 0, 0);
+
+  offscreen.toBlob(blob => {
+    if (!blob) { lsStatus('PNG 생성 실패', true); return; }
+    triggerDownload(blob, filename);
+    lsStatus('📷 PNG 다운로드 완료', false);
+  }, 'image/png');
+}
+  
 </script>
 <script id="eb-script-block">
 // ════════════════════════════════════════════════════════════════════

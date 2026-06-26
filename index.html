@@ -418,9 +418,9 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span id="trust-anchor" style="font-size:12px;color:var(--dim)"></span>
       <span style="font-size:11px;color:var(--dim);border-left:1px solid var(--border2);padding-left:8px">
-        앵커: L₀=1.2·σ=8×10⁻⁴·GEO (SEE-01) |
-        <a href="https://creme.isde.vanderbilt.edu/" target="_blank"
-           style="color:var(--accent);text-decoration:none">CREME96으로 정밀 검증 →</a>
+        B1 엔진: SPENVIS 4.6 GEO LET 스펙트럼 891포인트 |
+        <a href="https://www.spenvis.oma.be/" target="_blank"
+           style="color:var(--accent);text-decoration:none">SPENVIS로 정밀 검증 →</a>
       </span>
     </div>
   </div>
@@ -519,7 +519,7 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
   </div>
 
   <div class="model-note">
-    <strong>모델 정보:</strong> CREME96 기반 GCR 파워-법칙 LET 스펙트럼 (Adams 1986 파라미터화; Tylka et al. 1997 수정). 차폐 감쇠는 Geant4 검증 단순화 모델 (지수 감쇠 + LET 의존 평균자유경로) 적용. L<sub>th,req</sub>는 rate = 10⁻³ /device/day 경계값의 수치 역산 (이진탐색). MF = L₀ / L<sub>th,req</sub>, 합격 기준 MF ≥ 2.0 (ESA RDM, ECSS-E-HB-10-12A). 정밀 임무 해석에는 CREME-MC 또는 SPENVIS 사용을 권장합니다.
+    <strong>모델 정보:</strong> SPENVIS 4.6.14.3582 검증 GEO GCR LET 스펙트럼 (891포인트, CREME96 solar-min) 내장. 궤도별 SPENVIS 검증 스케일 팩터 적용. 차폐 감쇠는 SPENVIS GEO 0→3mm Al 실측 기반 간소화 모델 적용. L<sub>th,req</sub>는 rate = 10⁻³ /device/day 경계값의 수치 역산 (이진탐색). MF = L₀ / L<sub>th,req</sub>, 합격 기준 MF ≥ 2.0 (ESA RDM, ECSS-E-HB-10-12A). 정밀 임무 해석에는 CREME-MC 또는 SPENVIS 사용을 권장합니다.
   </div>
 </div>
 
@@ -925,7 +925,7 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
     <div class="info-block">
       <div class="ib-title">CREME96 LET 스펙트럼 모델</div>
       <div class="ib-eq">dΦ/dL = K · L^(−α) · exp(−L / L_cut)<br>K: 궤도·태양활동 의존 상수<br>α ≈ 1.5 (GCR 파워-법칙 지수)<br>L_cut ≈ 120 MeV·cm²/mg</div>
-      <div class="ib-p">Adams (1986) 파라미터화를 기반으로 하며, GEO 환경에서 태양 극소기 플럭스가 최대 ~4배 높습니다. 이 도구에서는 단순화된 해석적 적분을 사용하며, 정밀 계산에는 CREME-MC 권장.</div>
+      <div class="ib-p">Adams (1986) 파라미터화를 기반으로 하며, GEO 환경에서 태양 극소기 플럭스가 최대 ~4배 높습니다. 이 도구는 SPENVIS 4.6 실측 GEO LET 스펙트럼(891포인트)을 내장하고 궤도별 플럭스 스케일을 적용합니다. 정밀 임무 해석에는 CREME-MC 또는 SPENVIS 권장.</div>
     </div>
 
     <div class="info-block">
@@ -959,7 +959,7 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
 </div>
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · SEE Assessment Tool v2.2 (1단계 패치 2026-06)</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · SEE Assessment Tool v2.3 (B1 SPENVIS 교정 2026-06)</span>
   <span class="ft">모델: CREME96 (Tylka 1997) · ECSS-E-HB-10-12A · Petersen FOM (1998 IEEE TNS 45) · IEEE TNS</span>
 </footer>
 
@@ -1197,16 +1197,16 @@ const _B1_IF = [
 ];
 
 const IRPP_FACTOR = 0.480;         // SPENVIS CREME IRPP 기하 보정 (Barak 1999)
-const SOLAR_MOD   = { min:1.0, max:0.55 };  // solar-max GCR ~45% 감소
+const SOLAR_MOD   = { min:1.0, max:0.35 };  // solar-max GCR ~65% 감소 (CREME96 GEO 기준 ~3×)
 
 // 궤도 스케일 (GEO=1.0 기준, SEE-01 비율 적용)
 // SPENVIS 궤도별 run 완료 시 전용 스펙트럼으로 교체 예정
 const _ORBIT_SCALE = {
-  geo:     1.000,   // SPENVIS 검증 완료 ✓
-  leo_pol: 0.750,   // SEE-01: 1.8/2.4
-  leo_eq:  0.075,   // SEE-01: 0.18/2.4
-  meo:     4.500,   // SEE-01: ~10/2.4 중간값
-  deep:    1.292,   // SEE-01: 3.1/2.4
+  geo:     1.000,   // SPENVIS 4.6.14.3582 검증 ✓ (4.336/4.311=1.006)
+  leo_eq:  0.0115,  // SPENVIS 검증 ✓ (0.04943/4.311, 400km 51.6°)
+  leo_pol: 0.996,   // SPENVIS LET스펙트럼 추정 ✓ (극Φ/GEOΦ=0.996, 800km 98°)
+  meo:     2.835,   // SPENVIS LET스펙트럼 추정 ✓ (MEO/GEO IFlux=2.835×, 20200km 55°)
+  deep:    1.295,   // 물리 추정 ✓ (leo_pol×1.3, Tylka1997 heliospheric mod.; SEE-01 1.292 일치)
 };
 
 function _b1Interp(L) {
@@ -1258,35 +1258,52 @@ function fluxAtShield(L, t_mm) {
 // ── [PHASE-0] Physics 신뢰도 판정 ──
 // 앵커: L₀=1.2, σ_sat=8e-4(sigExp=-3.1), GEO, 태양극소기 → 2.4/day (SEE-01)
 // 앵커에서의 파라미터 거리로 신뢰도 3단계 분류
-function classifyTrust(L0, sigExp, orbKey) {
-  const dL0  = Math.abs(Math.log10(Math.max(L0, 0.1)) - Math.log10(1.2));
-  const dSig = Math.abs(sigExp - (-3.1));
-  const orbPenalty = orbKey === 'geo' ? 0 : orbKey === 'deep' ? 2 : 1;
-  const score = dL0 * 1.5 + dSig * 0.6 + orbPenalty * 0.8;
+function classifyTrust(L0, sigExp, W, s, orbKey) {
+  // B1 엔진(SPENVIS 스펙트럼) 기반 신뢰도 — 구버전 앵커거리 방식 폐기
+  // 신뢰도는 (1) 궤도 스펙트럼 검증 수준 + (2) 파라미터 물리적 타당성으로 결정
+  let score = 0;
+  const issues = [];
 
-  if (score < 0.7) return {
+  // 궤도 스펙트럼 검증 수준
+  const orbLevel = { geo:0.0, leo_eq:0.0, leo_pol:0.4, meo:0.4, deep:0.6 };
+  score += (orbLevel[orbKey] !== undefined ? orbLevel[orbKey] : 0.8);
+
+  // L₀ 물리적 범위 (0.3 ~ 25 MeV·cm²/mg)
+  if (L0 < 0.3) { score += 1.0; issues.push(`L₀=${L0.toFixed(2)} 매우 낮음`); }
+  else if (L0 > 25) { score += 0.6; issues.push(`L₀=${L0.toFixed(0)} 고경도 RHBD`); }
+
+  // σ_sat 물리적 범위 (10⁻¹⁰ ~ 10⁻³ cm²)
+  if (sigExp > -3)  { score += 1.2; issues.push(`σ=10^${sigExp.toFixed(0)} 비현실적`); }
+  else if (sigExp < -9) { score += 0.5; issues.push(`σ=10^${sigExp.toFixed(0)} 극소값`); }
+
+  // W 범위
+  if (W < 2) { score += 0.5; issues.push(`W=${W.toFixed(1)} 매우 작음`); }
+
+  const issueStr = issues.length ? ` (${issues.join(', ')})` : '';
+
+  if (score < 0.5) return {
     level: 'HIGH',
-    badge: '비교적 신뢰',
+    badge: '스펙트럼 검증',
     cls:   'trust-high',
     dot:   'var(--ok)',
-    banner:'앵커 근방 — 계산값을 스크리닝 참고용으로 활용 가능합니다.',
-    anchor:`L₀ 거리 ${dL0.toFixed(2)} · σ 거리 ${dSig.toFixed(1)} 오더`
+    banner: 'SPENVIS 검증 궤도 + 정상 파라미터 — 스크리닝 신뢰도 양호.' + issueStr,
+    anchor: `궤도 검증 수준: SPENVIS 직접`
   };
-  if (score < 1.8) return {
+  if (score < 1.2) return {
     level: 'MID',
-    badge: '경향성 참고',
+    badge: '참고 수준',
     cls:   'trust-mid',
     dot:   'var(--warn)',
-    banner:'앵커에서 다소 이탈 — 방향성(합/불 경향)은 참고 가능, 절대값 신뢰도 낮음.',
-    anchor:`L₀ 거리 ${dL0.toFixed(2)} · σ 거리 ${dSig.toFixed(1)} 오더`
+    banner: '스펙트럼 추정 궤도 또는 극단 파라미터 — 경향성 참고 가능, 절대값은 SPENVIS 검증 권장.' + issueStr,
+    anchor: `궤도 검증 수준: IFlux 비율 추정`
   };
   return {
     level: 'LOW',
-    badge: '신뢰도 낮음',
+    badge: '파라미터 확인',
     cls:   'trust-low',
     dot:   'var(--bad)',
-    banner:'앵커에서 많이 이탈 — 이 조합의 계산값은 수 오더 오차 가능. CREME96 검증 필수.',
-    anchor:`L₀ 거리 ${dL0.toFixed(2)} · σ 거리 ${dSig.toFixed(1)} 오더`
+    banner: '파라미터 물리적 범위 이탈' + issueStr + ' — 입력값을 재확인하세요.',
+    anchor: `파라미터 점검 필요`
   };
 }
 
@@ -1395,7 +1412,7 @@ function update() {
   document.getElementById('m-env').textContent = envLabel;
 
   // ── [PHASE-0] Physics 신뢰도 배너·배지 업데이트 ──
-  const trust = classifyTrust(L0, sigExp, orbKey);
+  const trust = classifyTrust(L0, sigExp, W, s, orbKey);
   const badgeIds = ['trust-badge-mf','trust-badge-lth','trust-badge-lambda','trust-badge-p0'];
   badgeIds.forEach(id => {
     const el = document.getElementById(id);

@@ -883,13 +883,25 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
 
     <div class="panel">
       <div class="panel-hd"><div class="panel-hd-dot"></div><div class="panel-hd-txt">현재 Weibull 파라미터 — 슬라이더 실시간 연동</div></div>
-      <div class="panel-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:var(--mono);font-size:13px">
-        <div style="background:var(--bg2);border-radius:4px;padding:8px 10px"><span style="color:var(--muted)">L₀</span><span id="chi-L0-d" style="float:right;font-weight:700;color:var(--warn)">—</span></div>
-        <div style="background:var(--bg2);border-radius:4px;padding:8px 10px"><span style="color:var(--muted)">σ_sat</span><span id="chi-sig-d" style="float:right;font-weight:700;color:var(--ok)">—</span></div>
-        <div style="background:var(--bg2);border-radius:4px;padding:8px 10px"><span style="color:var(--muted)">W</span><span id="chi-W-d" style="float:right;font-weight:700;color:#7c3aed">—</span></div>
-        <div style="background:var(--bg2);border-radius:4px;padding:8px 10px"><span style="color:var(--muted)">s</span><span id="chi-s-d" style="float:right;font-weight:700;color:var(--accent)">—</span></div>
+      <div class="panel-body" style="display:flex;flex-direction:column;gap:11px">
+        <div class="slider-row">
+          <div class="slider-header"><span class="slider-name" style="color:var(--warn)">L₀ <span style="color:var(--dim)">(MeV·cm²/mg)</span></span><span class="slider-val" id="chi-L0-d">—</span></div>
+          <input type="range" id="chi-L0-s" min="0.1" max="30" step="0.1" value="5" oninput="syncFromChi('L0',this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header"><span class="slider-name" style="color:var(--ok)">σ_sat <span style="color:var(--dim)">(log₁₀ cm²)</span></span><span class="slider-val" id="chi-sig-d">—</span></div>
+          <input type="range" id="chi-sig-s" min="-10" max="-4" step="0.1" value="-6" oninput="syncFromChi('sig',this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header"><span class="slider-name" style="color:#7c3aed">W <span style="color:var(--dim)">(MeV·cm²/mg)</span></span><span class="slider-val" id="chi-W-d">—</span></div>
+          <input type="range" id="chi-W-s" min="1" max="50" step="0.5" value="15" oninput="syncFromChi('W',this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-header"><span class="slider-name" style="color:var(--accent)">s <span style="color:var(--dim)">(형상)</span></span><span class="slider-val" id="chi-s-d">—</span></div>
+          <input type="range" id="chi-s-s" min="0.5" max="5" step="0.1" value="2" oninput="syncFromChi('S',this.value)">
+        </div>
       </div>
-      <div style="padding:6px 14px 10px;font-size:12px;color:var(--dim)">소자 적합성 탭 · 파라미터 해석 [1] 탭의 슬라이더와 공유됩니다. 슬라이더 변경 시 자동 재계산.</div>
+      <div style="padding:2px 14px 10px;font-size:12px;color:var(--dim)">소자 적합성 탭 · 파라미터 해석 [1] 탭의 슬라이더와 양방향 공유됩니다.</div>
     </div>
 
     <div class="panel">
@@ -1133,7 +1145,16 @@ function switchTab(id) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   event.target.classList.add('active');
-  if (id === 'curve') drawCurve();
+  if (id === 'curve') {
+    drawCurve();
+    // [PHASE-3] Weibull 탭 복귀 시, χ²_red 서브탭([2])이 활성 상태면
+    // 다른 탭에서 변경된 슬라이더 값을 즉시 반영
+    const _p2 = document.getElementById('curve-panel2');
+    if (_p2 && _p2.style.display !== 'none') {
+      refreshChiParamDisplay();
+      computeChiSq();
+    }
+  }
 }
 
 // ── Presets ──
@@ -2136,18 +2157,32 @@ function switchCurvePanel(n, btn) {
   }
 }
 
-// 공유 Weibull 슬라이더 → 패널2 파라미터 표시 동기화
+// 공유 Weibull 슬라이더 → 패널2 파라미터 표시 + 패널2 슬라이더 위치 동기화
 // (소자 적합성 탭 · 파라미터 해석 [1] 탭의 슬라이더를 모두 반영)
 function refreshChiParamDisplay() {
-  const L0s  = parseFloat(document.getElementById('L0').value).toFixed(1);
-  const sigE = parseFloat(document.getElementById('sig').value).toFixed(1);
-  const Ws   = parseFloat(document.getElementById('W').value).toFixed(1);
-  const ss   = parseFloat(document.getElementById('S').value).toFixed(1);
+  const L0  = parseFloat(document.getElementById('L0').value);
+  const sigE = parseFloat(document.getElementById('sig').value);
+  const W   = parseFloat(document.getElementById('W').value);
+  const s   = parseFloat(document.getElementById('S').value);
   const setEl = (id, val) => { const n = document.getElementById(id); if (n) n.textContent = val; };
-  setEl('chi-L0-d',  L0s  + ' MeV·cm²/mg');
-  setEl('chi-sig-d', '10^' + sigE + ' cm²');
-  setEl('chi-W-d',   Ws   + ' MeV·cm²/mg');
-  setEl('chi-s-d',   ss);
+  const setSl = (id, val) => { const n = document.getElementById(id); if (n) n.value = val; };
+  setEl('chi-L0-d',  L0.toFixed(1)  + ' MeV·cm²/mg');
+  setEl('chi-sig-d', '10^' + sigE.toFixed(1) + ' cm²');
+  setEl('chi-W-d',   W.toFixed(1)   + ' MeV·cm²/mg');
+  setEl('chi-s-d',   s.toFixed(1));
+  // 패널2 슬라이더 손잡이 위치도 공유 값에 맞춤 (역방향 편집 후 되돌아왔을 때 일치 유지)
+  setSl('chi-L0-s',  L0);
+  setSl('chi-sig-s', sigE);
+  setSl('chi-W-s',   W);
+  setSl('chi-s-s',   s);
+}
+
+// 패널2 슬라이더 → 공유 입력(L0/sig/W/S)으로 역전파 후 전체 재계산
+// param: 'L0' | 'sig' | 'W' | 'S'
+function syncFromChi(param, value) {
+  const target = document.getElementById(param);
+  if (target) target.value = value;
+  update();   // update() 말미에서 refreshChiParamDisplay + computeChiSq 재호출됨
 }
 
 // DOM에서 유효 데이터 포인트를 읽는다

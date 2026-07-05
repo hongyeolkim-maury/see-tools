@@ -882,14 +882,14 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
   <div style="display:flex;flex-direction:column;gap:12px">
 
     <div class="panel">
-      <div class="panel-hd"><div class="panel-hd-dot"></div><div class="panel-hd-txt">현재 Weibull 파라미터 — 소자 적합성 탭 연동</div></div>
+      <div class="panel-hd"><div class="panel-hd-dot"></div><div class="panel-hd-txt">현재 Weibull 파라미터 — 슬라이더 실시간 연동</div></div>
       <div class="panel-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:var(--mono);font-size:13px">
         <div style="background:var(--bg2);border-radius:4px;padding:8px 10px"><span style="color:var(--muted)">L₀</span><span id="chi-L0-d" style="float:right;font-weight:700;color:var(--warn)">—</span></div>
         <div style="background:var(--bg2);border-radius:4px;padding:8px 10px"><span style="color:var(--muted)">σ_sat</span><span id="chi-sig-d" style="float:right;font-weight:700;color:var(--ok)">—</span></div>
         <div style="background:var(--bg2);border-radius:4px;padding:8px 10px"><span style="color:var(--muted)">W</span><span id="chi-W-d" style="float:right;font-weight:700;color:#7c3aed">—</span></div>
         <div style="background:var(--bg2);border-radius:4px;padding:8px 10px"><span style="color:var(--muted)">s</span><span id="chi-s-d" style="float:right;font-weight:700;color:var(--accent)">—</span></div>
       </div>
-      <div style="padding:6px 14px 10px;font-size:12px;color:var(--dim)">파라미터 수정 → 소자 적합성 탭 또는 파라미터 해석 [1] 탭에서 진행</div>
+      <div style="padding:6px 14px 10px;font-size:12px;color:var(--dim)">소자 적합성 탭 · 파라미터 해석 [1] 탭의 슬라이더와 공유됩니다. 슬라이더 변경 시 자동 재계산.</div>
     </div>
 
     <div class="panel">
@@ -1752,6 +1752,14 @@ function update() {
   drawShieldMF(L0, sigSat, W, s, orbKey, solar, t_mm);
 
   drawCurve();
+
+  // [PHASE-3] curve-panel2가 활성(display≠none)이면 파라미터 표시 + χ²_red 재계산
+  // → 소자 적합성 탭 · 파라미터 해석 탭에서 슬라이더를 조작해도 즉시 반영
+  const _p2 = document.getElementById('curve-panel2');
+  if (_p2 && _p2.style.display !== 'none') {
+    refreshChiParamDisplay();
+    computeChiSq();
+  }
 }
 
 // ── [PATCH-7] 차폐-MF 차트 함수 ──
@@ -2128,17 +2136,18 @@ function switchCurvePanel(n, btn) {
   }
 }
 
-// 소자 적합성 탭의 현재 파라미터를 패널2에 표시
+// 공유 Weibull 슬라이더 → 패널2 파라미터 표시 동기화
+// (소자 적합성 탭 · 파라미터 해석 [1] 탭의 슬라이더를 모두 반영)
 function refreshChiParamDisplay() {
-  const L0s   = parseFloat(document.getElementById('L0').value).toFixed(1);
-  const sigE  = parseFloat(document.getElementById('sig').value).toFixed(1);
-  const Ws    = parseFloat(document.getElementById('W').value).toFixed(1);
-  const ss    = parseFloat(document.getElementById('S').value).toFixed(1);
-  const d = document.getElementById;
-  if (d('chi-L0-d'))  d('chi-L0-d').textContent  = L0s + ' MeV·cm²/mg';
-  if (d('chi-sig-d')) d('chi-sig-d').textContent = '10^' + sigE + ' cm²';
-  if (d('chi-W-d'))   d('chi-W-d').textContent   = Ws  + ' MeV·cm²/mg';
-  if (d('chi-s-d'))   d('chi-s-d').textContent   = ss;
+  const L0s  = parseFloat(document.getElementById('L0').value).toFixed(1);
+  const sigE = parseFloat(document.getElementById('sig').value).toFixed(1);
+  const Ws   = parseFloat(document.getElementById('W').value).toFixed(1);
+  const ss   = parseFloat(document.getElementById('S').value).toFixed(1);
+  const setEl = (id, val) => { const n = document.getElementById(id); if (n) n.textContent = val; };
+  setEl('chi-L0-d',  L0s  + ' MeV·cm²/mg');
+  setEl('chi-sig-d', '10^' + sigE + ' cm²');
+  setEl('chi-W-d',   Ws   + ' MeV·cm²/mg');
+  setEl('chi-s-d',   ss);
 }
 
 // DOM에서 유효 데이터 포인트를 읽는다

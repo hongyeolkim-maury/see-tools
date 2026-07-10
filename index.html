@@ -991,7 +991,7 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
       <div class="panel-hd"><div class="panel-hd-dot" style="background:var(--ok)"></div><div class="panel-hd-txt">RHA 보고서 검토 체크리스트 (SEE-05 기준)</div></div>
       <div class="panel-body" style="padding:12px 14px">
         <div class="rha-row"><div class="rha-num rha-warn" id="ck1-ic">?</div><div><strong>χ²_red 수치 명기</strong><br><span style="color:var(--muted);font-size:12px">보고서에 χ²_red 또는 Goodness of Fit 항목 명시 여부</span><br><span id="ck1-st" style="font-family:var(--mono);font-size:11px;color:var(--dim)">데이터 입력 후 자동 평가</span></div></div>
-        <div class="rha-row"><div class="rha-num rha-warn" id="ck2-ic">?</div><div><strong>χ²_red 값 0.5 ~ 2.0 범위</strong><br><span style="color:var(--muted);font-size:12px">범위 이탈 시 재피팅 또는 추가 데이터 필요</span><br><span id="ck2-st" style="font-family:var(--mono);font-size:11px;color:var(--dim)">데이터 입력 후 자동 평가</span></div></div>
+        <div class="rha-row"><div class="rha-num rha-warn" id="ck2-ic">?</div><div><strong>χ²_red 값 0.8 ~ 2.0 범위</strong><br><span style="color:var(--muted);font-size:12px">범위 이탈 시 재피팅 또는 추가 데이터 필요</span><br><span id="ck2-st" style="font-family:var(--mono);font-size:11px;color:var(--dim)">데이터 입력 후 자동 평가</span></div></div>
         <div class="rha-row"><div class="rha-num rha-warn" id="ck3-ic">?</div><div><strong>데이터 포인트 N ≥ 8</strong><br><span style="color:var(--muted);font-size:12px">ν = N − 4 ≥ 4 확보가 통계적 신뢰성 최소 기준</span><br><span id="ck3-st" style="font-family:var(--mono);font-size:11px;color:var(--dim)">데이터 입력 후 자동 평가</span></div></div>
         <div class="rha-row"><div class="rha-num rha-warn" id="ck4-ic">?</div><div><strong>자유도 ν ≥ 4</strong><br><span style="color:var(--muted);font-size:12px">ν ≤ 1은 과적합 구조 — 파라미터 예측력 없음</span><br><span id="ck4-st" style="font-family:var(--mono);font-size:11px;color:var(--dim)">데이터 입력 후 자동 평가</span></div></div>
         <div class="rha-row"><div class="rha-num rha-warn" id="ck5-ic">?</div><div><strong>최대 잔차 ≤ 2σ</strong><br><span style="color:var(--muted);font-size:12px">단일 이상값이 피팅 전체를 지배하지 않는지 확인</span><br><span id="ck5-st" style="font-family:var(--mono);font-size:11px;color:var(--dim)">데이터 입력 후 자동 평가</span></div></div>
@@ -2379,8 +2379,8 @@ function updateRhaChecklist(chiRed, N, nu, maxRes) {
     stEl.textContent = st;
   };
   setCheck('ck1', true,  false, 'χ²_red = ' + chiRed.toFixed(3) + ' — 계산 완료');
-  const chi_ok = chiRed >= 0.5 && chiRed <= 2.0;
-  const chi_warn = !chi_ok && ((chiRed >= 0.3 && chiRed < 0.5) || (chiRed > 2.0 && chiRed <= 3.0));
+  const chi_ok = chiRed >= 0.8 && chiRed <= 2.0;
+  const chi_warn = !chi_ok && ((chiRed >= 0.5 && chiRed < 0.8) || (chiRed > 2.0 && chiRed <= 3.0));
   setCheck('ck2', chi_ok, chi_warn, 'χ²_red = ' + chiRed.toFixed(3) + (chi_ok ? ' ✓ 양호 범위' : chi_warn ? ' △ 경계 범위' : ' ✕ 범위 이탈'));
   setCheck('ck3', N >= 8, N >= 5, 'N = ' + N + (N >= 8 ? ' ✓ 충분' : N >= 5 ? ' △ 최소 충족' : ' ✕ 부족'));
   setCheck('ck4', nu >= 4, nu >= 1, 'ν = ' + nu + (nu >= 4 ? ' ✓ 충분' : nu >= 1 ? ' △ 최소 충족' : ' ✕ 부족'));

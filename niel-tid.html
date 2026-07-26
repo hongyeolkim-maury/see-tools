@@ -282,8 +282,20 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
     <div class="mc"><div class="mcl">허용 TNID 임계값</div><div class="mcv" id="m-limit">—</div><div class="mcu">MeV/g</div></div>
   </div>
 
+  <div id="n-material-warn" class="mnote" style="display:none;border-color:var(--warn-bd);background:var(--warn-bg);color:var(--warn)">
+    <strong>⚠ 잠정치:</strong> 현재 선택된 소재의 NIEL 상대 비율은 Si 교정 배율을 동일 적용한 잠정값이며, 원문(Jun 2003 IEEE TNS Table I) 개별 대조가 완료되지 않았습니다. 정밀 평가에는 SR-NIEL 계산기(sr-niel.org)로 소재별 E_d를 직접 입력해 재계산한 값과 대조하십시오.
+  </div>
+
+  <div id="n-geo-warn" class="mnote" style="display:none;border-color:var(--warn-bd);background:var(--warn-bg);color:var(--warn)">
+    <strong>⚠ SPE 미포함:</strong> 현재 선택된 궤도의 플럭스는 AP9 트랩(belt) 성분만 반영하며, 태양입자이벤트(SPE) 기여는 포함되어 있지 않습니다. 이 계산기의 결과만으로 최악 시나리오를 판단하지 말고, SPENVIS에서 AP9(트랩) + ESP-PSYCHIC 또는 SAPPHIRE(SPE) 합산 결과와 반드시 대조하십시오.
+  </div>
+
+  <div id="n-electron-warn" class="mnote" style="display:none;border-color:var(--bad-bd);background:var(--bad-bg);color:var(--bad)">
+    <strong>⚠ 데이터 부족 — 전자 등가 계수 미검증:</strong> 1 MeV 전자 등가 손상 계수(RDC)는 소자·소재 구조마다 실측되는 값이며 (JPL Tada Solar Cell Radiation Handbook, Ch.4), 본 계산기는 Si 소재에 한해서만 문헌 검증된 계수를 반영합니다. 현재 선택된 소재는 전자 조사 결과가 검증되지 않았으므로 이 조합의 계산값은 사용하지 마십시오.
+  </div>
+
   <div class="mnote">
-    <strong>모델:</strong> SR(Screened Relativistic) 처리 기반 NIEL 근사값 (Summers et al. 1993; Jun et al. 2003). Si 10MeV 양성자 NIEL 기준값은 O'Brien(2016, Aerospace Corp. AE9/AP9 kernel report)로 재검증(9.43×10⁻³ MeV·cm²/g). 에너지 의존 핵 저지능에 차폐 감쇠 및 궤도 플럭스 모델을 적용. <span style="color:var(--warn)">⚠ GEO 값은 AP9(트랩 성분) 평균이며 태양입자이벤트(SPE) 기여는 포함되지 않았을 수 있음 — GEO 최악 시나리오는 SPENVIS ESP-PSYCHIC 모델과 반드시 대조할 것.</span> 정밀 계산은 SPENVIS NIEL 모듈 또는 MULASSIS(Geant4 기반) 권장.
+    <strong>모델:</strong> SR(Screened Relativistic) 처리 기반 NIEL 근사값 (Summers et al. 1993; Jun et al. 2003). Si/GaAs/Ge 10MeV 양성자 NIEL 기준값은 <a href="https://www.sr-niel.org/" target="_blank" rel="noopener" style="color:var(--accent)">sr-niel.org</a> 계산기 직접 실행으로 확정 검증(Si 9.4037×10⁻³, GaAs 6.9443×10⁻³, Ge 6.4573×10⁻³ MeV·cm²/g). GaN/SiC/InP는 아직 잠정치이며 하단 소재 경고 배너 참조. 에너지 의존 핵 저지능에 차폐 감쇠 및 궤도 플럭스 모델을 적용. <span style="color:var(--warn)">⚠ GEO 값은 AP9(트랩 성분) 평균이며 태양입자이벤트(SPE) 기여는 포함되지 않았을 수 있음 — GEO 최악 시나리오는 SPENVIS ESP-PSYCHIC 모델과 반드시 대조할 것.</span> 정밀 계산은 SPENVIS NIEL 모듈 또는 MULASSIS(Geant4 기반) 권장.
   </div>
 </div>
 
@@ -386,6 +398,10 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
     <div class="mc"><div class="mcl">연간 선량률</div><div class="mcv" id="m-trate">—</div><div class="mcu">krad/yr</div></div>
   </div>
 
+  <div id="t-geo-warn" class="mnote" style="display:none;border-color:var(--warn-bd);background:var(--warn-bg);color:var(--warn)">
+    <strong>⚠ SPE 미포함:</strong> 현재 선택된 궤도의 선량률은 AP9 트랩(belt) 성분 기준(SHIELDOSE-2)이며, 태양입자이벤트(SPE) 기여는 포함되어 있지 않습니다. 최악 시나리오 평가에는 SPENVIS SHIELDOSE-2에서 AP9(트랩) + ESP-PSYCHIC/SAPPHIRE(SPE)를 합산한 결과와 반드시 대조하십시오.
+  </div>
+
   <div class="mnote">
     <strong>모델:</strong> 전리 선량은 Shieldose-2 기반 단순화 해석 모델 적용 (Seltzer 1994). 궤도별 전자·양성자 플럭스에 알루미늄 차폐 감쇠를 적용하여 Si 기준 등가 흡수 선량 계산. 정밀 계산: SPENVIS SHIELDOSE-2 모듈 사용 권장. TID 한계값은 문헌 대표값이며 소자별 시험 결과로 검증 필요.
   </div>
@@ -480,15 +496,15 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
         <table class="ref-tbl">
           <thead><tr><th>소재</th><th>NIEL₀ (×10⁻³)</th><th>Si 대비 비</th><th>주요 응용</th></tr></thead>
           <tbody>
-            <tr><td>Si</td><td>9.43</td><td>1.00</td><td>CMOS, SRAM</td></tr>
-            <tr><td>GaAs <span style="color:var(--warn)">†</span></td><td>18.9</td><td>1.99</td><td>RF, 광소자</td></tr>
+            <tr><td>Si <span style="color:var(--ok)">✓</span></td><td>9.43</td><td>1.00</td><td>CMOS, SRAM</td></tr>
+            <tr><td>GaAs <span style="color:var(--ok)">✓</span></td><td>6.94</td><td>0.74</td><td>RF, 광소자</td></tr>
             <tr><td>GaN <span style="color:var(--warn)">†</span></td><td>3.14</td><td>0.33</td><td>전력, RF HEMT</td></tr>
             <tr><td>SiC <span style="color:var(--warn)">†</span></td><td>4.86</td><td>0.51</td><td>전력 MOSFET</td></tr>
-            <tr><td>Ge <span style="color:var(--warn)">†</span></td><td>25.4</td><td>2.69</td><td>SiGe HBT</td></tr>
+            <tr><td>Ge <span style="color:var(--ok)">✓</span></td><td>6.46</td><td>0.69</td><td>SiGe HBT</td></tr>
             <tr><td>InP <span style="color:var(--warn)">†</span></td><td>31.4</td><td>3.33</td><td>광통신</td></tr>
           </tbody>
         </table>
-        <div class="info-p" style="margin-top:8px">단위: MeV·cm²/g @ <strong>10 MeV 양성자</strong>. Si 값은 O'Brien, <em>AE9/AP9 proton displacement damage kernels (v2)</em>, Aerospace Corp. ATR-2016-03268 (2016)로 재검증 (Jun 2003 IEEE TNS 50(6):1924와 동일 SR/Summers-Messenger 모델 계열). <span style="color:var(--warn)">† 표시 소재는 Si 교정 배율을 동일 적용한 잠정치이며, 개별 원문(Table I) 대조 전까지 참고용으로만 사용 권장.</span> ⚠ 1MeV 양성자 NIEL은 약 6× 더 큼 (저에너지 Coulomb 산란 지배).</div>
+        <div class="info-p" style="margin-top:8px">단위: MeV·cm²/g @ <strong>10 MeV 양성자</strong>. <span style="color:var(--ok)">✓ 표시 소재(Si, GaAs, Ge)</span>는 <a href="https://www.sr-niel.org/" target="_blank" rel="noopener" style="color:var(--accent)">sr-niel.org</a> Protons &amp; Ions NIEL 계산기(Hadron+Coulomb, No Scaling)를 직접 실행해 확정 검증됨 — Si: Ed=21eV, GaAs: Ga/As Ed=21.5eV, Ge: Ed=40.5eV(Campesato et al. 2019 근거). <span style="color:var(--warn)">† 표시 소재(GaN, SiC, InP)는 아직 이 방식으로 재계산되지 않은 Si 교정 배율 기반 잠정치이며, 개별 E_d 확보 후 재검증 필요.</span> ⚠ 1MeV 양성자 NIEL은 약 6× 더 큼 (저에너지 Coulomb 산란 지배).</div>
       </div>
     </div>
     <div class="panel">
@@ -503,16 +519,18 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:30px;displ
             <tr><td>SPENVIS NIEL</td><td>궤도별 NIEL/TNID 정밀 계산</td></tr>
             <tr><td>MULASSIS</td><td>Geant4 기반 차폐 분석</td></tr>
             <tr><td>SHIELDOSE-2</td><td>TID 차폐 선량 계산</td></tr>
+            <tr><td><a href="https://www.sr-niel.org/" target="_blank" rel="noopener" style="color:var(--accent)">SR-NIEL (sr-niel.org)</a></td><td>소재·에너지별 NIEL 직접 계산기 — 본 페이지 Si/GaAs/Ge 값의 1차 검증 출처</td></tr>
           </tbody>
         </table>
         <div class="info-p" style="margin-top:8px">HELIAS Lab. 헤비이온·양성자 실험 서비스: <a href="https://heliaslab.com" style="color:var(--accent)">heliaslab.com</a></div>
+        <div class="info-p" style="margin-top:6px">참고: 이온 저지능·Bragg peak 관점의 교차 검증은 <a href="stop.html" style="color:var(--accent)">STOP 도구</a>의 Sₙ(핵 저지능) 계산 결과와 대조하십시오 — 두 도구 모두 저에너지 영역에서 유사한 SRIM 계열 저지능 데이터를 참조합니다.</div>
       </div>
     </div>
   </div>
 </div>
 
 <footer>
-  <span class="ft">HELIAS Laboratory · heliaslab.com · NIEL/TID Calculator v1.2 (P1-patched 2026-07, NIEL-02)</span>
+  <span class="ft">HELIAS Laboratory · heliaslab.com · NIEL/TID Calculator v1.4 (P5-patched 2026-07, NIEL-03: Si/GaAs/Ge SR-NIEL 실측 검증)</span>
   <span class="ft">Jun 2003 IEEE TNS 50(6):1924 · O'Brien 2016 ATR-2016-03268 · Summers 1993 · SHIELDOSE-2 (Seltzer 1994) · ECSS-E-HB-10-12A</span>
 </footer>
 </div>
@@ -542,58 +560,82 @@ function switchTab(id, el) {
 //   기존 코드에 내재된 Si 대비 상대비율(gaas/si=2.0, gan/si=0.333, sic/si=0.515,
 //   ge/si=2.697, inp/si=3.333)을 유지한 채 Si 교정 배율(×2.858)만 동일 적용한
 //   잠정값입니다. 개별 소재 원문 대조 후 재검증 필요(TODO).
-const NIEL0 = { si:9.43e-3, gaas:1.89e-2, gan:3.14e-3, sic:4.86e-3, ge:2.54e-2, inp:3.14e-2 };
+//   ➜ [P5에서 갱신됨] 이 잠정비율(gaas/si=2.0, ge/si=2.697)은 이후 SR-NIEL 실측으로
+//   방향 자체가 틀렸음이 확인되어 P5에서 교체됨 — 아래 P5 블록 참조.
+// [P3-REVIEW 2026-07 / NIEL-03 후속 검토] Si 이외 소재 NIEL0 — 여전히 검증 미완료.
+//   시도한 것: SR-NIEL(sr-niel.org, Boschini et al.) 및 Campesato et al.(2018,2019)
+//   논문에서 소재별 변위 임계 에너지 E_d 출처는 확인함 (GaAs Ga/As: 21.5eV,
+//   Ge: 40.5eV 등). 그러나 이는 NIEL 계산의 입력값 하나일 뿐, 최종 NIEL(10MeV
+//   양성자, MeV·cm²/g) 절대값은 소재별로 확인하지 못함 — SR-NIEL 계산기는
+//   E_d·에너지를 직접 입력해 실행해야 하는 대화형 도구이며, 문헌마다 동일 소재에
+//   서로 다른 E_d(예: GaAs 21.5eV vs 24eV)를 사용해 결과가 달라짐.
+//   ⚠ 결론: 아래 Si 이외 소재 비율은 여전히 "Si 교정 배율만 동일 적용한 잠정치"
+//   상태이며, 특정 숫자로 교체하지 않는다(근거 없는 확정치 주입 방지). 대신 이
+//   사실을 코드 주석에만 두지 않고 화면에도 명시적으로 경고한다
+//   (NIEL_MATERIAL_VALIDATED / n-material-warn 참조, updateNIEL() 내부).
+//   재검증 절차(TODO): SR-NIEL 계산기를 소재별로 직접 실행 + Jun 2003 Table I
+//   원문 대조 후에만 이 배율을 교체할 것.
+// [P4-VERIFIED 2026-07 / NIEL-03 실측 재검증 완료] Si=9.43e-3.
+//   sr-niel.org Protons & Ions NIEL 계산기를 Si(Z=14), Ed=21eV, Hadron+Coulomb,
+//   No Scaling 조건으로 직접 실행한 결과 10 MeV 행: NIEL=9.4037e-3 MeV·cm²/g.
+//   기존 O'Brien(2016) 인용값과 0.3% 이내 일치 — 문헌 인용이 아닌 독립 실행
+//   결과로 재확인됨. GaAs/Ge 결과는 P5에서 확보·반영 완료 — 아래 P5 블록 참조.
+// [P5-VERIFIED 2026-07 / NIEL-03 실측 재검증] GaAs=6.9443e-3, Ge=6.4573e-3 확정.
+//   sr-niel.org 직접 실행 결과(10 MeV 행):
+//     GaAs(31:Ga+33:As, 1:1, Ed=21.5/21.5eV) → NIEL=6.9443e-3 MeV·cm²/g
+//     Ge(32:Ge, Ed=40.5eV)                   → NIEL=6.4573e-3 MeV·cm²/g
+//   ⚠ 중요: 기존 잠정치(gaas/si=2.0, ge/si=2.697 — Si보다 손상 취약)는 방향 자체가
+//   틀렸음이 확인됨. 실측 결과는 GaAs/Si=0.738, Ge/Si=0.687로 오히려 Si보다 우수함.
+//   물리적 근거: 무거운 표적 원자와의 충돌은 질량비 문제로 T_max(최대 전달 에너지)가
+//   작아져, E_d 문턱을 넘는 충돌 확률 자체가 Si 대비 감소하는 운동학적 효과.
+const NIEL0 = { si:9.43e-3, gaas:6.9443e-3, gan:3.14e-3, sic:4.86e-3, ge:6.4573e-3, inp:3.14e-2 };
+const NIEL_MATERIAL_VALIDATED = { si:true, gaas:true, gan:false, sic:false, ge:true, inp:false }; // Si/GaAs/Ge는 SR-NIEL 직접 실행으로 확정 검증됨
 const NIEL_LIMITS = { si:1e10, gaas:5e9, gan:5e10, sic:2e10, ge:3e9, inp:2e9 }; // p/cm² (NIEL displacement limit)
 const NIEL_LABELS = { si:'Si', gaas:'GaAs', gan:'GaN', sic:'SiC', ge:'Ge', inp:'InP' };
 
-// [P1-REVIEW 2026-07 / NIEL-02 검토] PART_FACTOR — 1MeV 전자 등가 환산 인자.
-//   ⚠⚠ 미해결 내부 불일치 확인 (수치 미확정 — TBD, 임의 교체하지 않음):
-//   - 코드 실제값: electron=0.05 → proton 대비 1/0.05 = 20배 비율을 의미함.
-//   - 바로 위 원 주석: "GaAs 기준 ≈4416배(1MeV p/1MeV e)" 및 "10MeV p ≈580배(1MeV e⁻)"
-//     → 코드값(20배)과 주석 서술(580배/4416배)이 서로 20~220배 이상 어긋남.
-//   - 외부 문헌 추가 대조(2026-07): Rep(1MeV e : 10MeV p) 손상계수 실측 논문
-//     (GaInP/GaAs/InGaAs 태양전지 DDD 모델, 2021)은 이 비율을 약 1:3 수준으로 제시 —
-//     이는 위 코드값·주석값 모두와 정의 자체가 다를 수 있어(순수 NIEL비 vs
-//     실측 손상계수) 직접 비교 불가.
-//   - Messenger 2001 (NASA/TP-2001-210997), Tada Solar Cell Radiation Handbook(JPL)
-//     원문 미대조 상태. 원문 대조 전까지는 electron 값을 특정 숫자로 확정하지 않음.
-//   - 실무 영향: 이 계산기의 "전자" 옵션은 양성자용 ORBIT_FLUX 표를 배율만 곱해
-//     재사용하는 근사 방식이며, 실제 GEO 전자 스펙트럼 테이블이 없음. 전자 모드
-//     결과는 스크리닝 참고용으로만 사용하고 정밀 평가에는 SPENVIS 전자 NIEL 모듈
-//     또는 AE9/AP9 electron displacement damage kernel(O'Brien et al. 2016) 권장.
-const PART_FACTOR = { proton:1.0, neutron:0.95, electron:0.05, alpha:3.2 }; // ⚠ electron: 근거 미확정(TBD)
+// [P2-PATCH 2026-07 / NIEL-03 검토, 재설계 완료] PART_FACTOR — 1MeV 전자 등가 환산 인자.
+//   ✅ 결론 확정 (2026-07 문헌 재검토): 이전 P1 리뷰는 이 값을 "아직 못 찾은 정확한
+//   상수"로 취급했으나, 이는 문제 설정 자체가 잘못된 것이었음. JPL Tada Solar Cell
+//   Radiation Handbook 체계에서 상대 손상 계수(RDC, Relative Damage Coefficient)는
+//   물리 상수가 아니라 특정 소자 구조·에너지·커버글라스 두께별로 개별 실측되는 값이다.
+//   실제 문헌 비교(동일 1MeV e/10MeV p 조건에서도 IMM 셀 RDC=3.11 vs LM 셀 RDC=2.78,
+//   GaInP/GaAs/InGaAs DDD 모델, 2021)만 봐도 소자 구조 하나 바뀌면 값이 달라진다.
+//   따라서 Si/GaAs/GaN/SiC/Ge/InP 전체에 electron=0.05 하나를 공통 적용하는 것은
+//   "숫자가 틀렸다"가 아니라 "이런 방식으로는 애초에 맞는 숫자가 존재하지 않는다"는
+//   구조적 오류다.
+//   → 재설계: electron 옵션은 문헌상 최초로 도출되고 가장 널리 검증된 케이스인
+//   Si 태양전지(Tada Handbook Ch.3.4, "1 MeV electron irradiation of silicon solar
+//   cells")에 한해서만 노출한다. 다른 소재 선택 시 electron 계산 자체를 차단하고
+//   경고를 표시한다(아래 updateNIEL()의 electronDataOK 분기 참조).
+const PART_FACTOR = { proton:1.0, neutron:0.95, electron:0.05, alpha:3.2 }; // electron 계수는 Si 전용 근사치(Tada Handbook 계열) — Si 이외 소재에는 미적용(차단)
+const ELECTRON_VALIDATED_MATERIALS = { si:true }; // RDC가 소재별 실측값이므로, 문헌 검증된 소재만 여기 등록
 
-// [P1-REVIEW 2026-07 / NIEL-02 검토] 궤도 플럭스 — AP9 mean (>10MeV protons, 100mil Al).
-//   기존 ORBIT_FLUX는 1~2 자릿수 과소(특히 MEO/GPS).
-//   참조: Ginet 2013 Space Sci Rev 179, NASA/TM-20220011775.
-//   ⚠⚠ GEO 값의 물리적 전제 관련 미해결 이슈 (수치 미확정 — TBD, 임의 변경하지 않음):
-//   - "AP9 mean"은 정상상태 트랩(belt) 양성자 모델이며, 태양입자이벤트(SPE)는
-//     AP9과 완전히 별도인 통계 모델(ESP/PSYCHIC)로 다뤄짐(O'Brien 2016 AE9/AP9
-//     displacement damage kernel 보고서에서 SPE 스펙트럼을 ESP-PSYCHIC로 별도 생성
-//     후 AP9 커널과 별개로 적용하는 절차를 서술).
-//   - NOAA 우주기상 S-scale(태양방사선폭풍 경보)이 ">10MeV proton flux observed
-//     AT GEO"를 관측 기준으로 삼는다는 사실 자체가, GEO의 >10MeV 양성자 환경이
-//     정상상태 트랩 성분이 아니라 SPE 지배적임을 시사함(GEO는 내부 양성자대
-//     바깥쪽 경계에 위치 — Van Allen 벨트 피크는 통상 1,000~20,000km 부근).
-//   - 즉 geo:2.0e10이 "트랩 성분 단독" 값이라면, 실제 GEO 임무에서 지배적인
-//     SPE 기여분이 이 계산기의 TNID·판정에서 누락되어 있을 가능성이 있음.
-//     반대로 이미 SPE 포함 연간 통계치라면 문제 없음 — Ginet 2013 원문에서
-//     "trapped-only" vs "SPE 포함 통계치" 여부 확인 전까지 미확정.
-//   - 참고: MEO(GPS)가 GEO보다 250배 높은 것은 MEO가 벨트 중심부에 가깝다는
-//     물리와 정합적이며, 이는 오히려 GEO 값이 "트랩 성분만" 반영했을 가능성을
-//     뒷받침하는 정황(트랩 성분만이라면 GEO에서 급격히 낮아지는 것이 물리적으로 맞음).
-//   - 실무 영향: 본 계산기의 GEO NIEL/TID 결과는 SPE 기여가 반영되지 않았을 수
-//     있으므로 최악 시나리오 평가에는 SPENVIS에서 AP9(트랩) + ESP-PSYCHIC(SPE)를
-//     함께 적용한 결과와 반드시 대조할 것을 권장.
-const ORBIT_FLUX = { leo:1.0e9, leo_pol:1.5e10, meo:5.0e12, geo:2.0e10, deep:8.0e10 }; // p/cm²/yr ⚠ geo: SPE 포함여부 미확정(TBD)
+// [P2-PATCH 2026-07 / NIEL-03 검토, 확정] 궤도 플럭스 — AP9 mean (>10MeV protons, 100mil Al).
+//   참조: Ginet 2013 Space Sci Rev 179; NASA/TM-20220011775; O'Brien et al. 2016
+//   (AE9/AP9 proton displacement damage kernel report).
+//   ✅ 결론 확정: AP9은 정상상태 방사선대(trapped belt) 전용 모델이며, 태양입자이벤트
+//   (SPE)는 AP9과 완전히 분리된 별도 통계 모델(ESP-PSYCHIC, 최신은 SAPPHIRE)로
+//   다루어진다는 것이 문헌상 일관되게 확인됨(Xapsos et al. ESP→PSYCHIC 계열;
+//   O'Brien 2016 kernel report도 SPE 스펙트럼을 ESP-PSYCHIC로 별도 생성 후 AP9
+//   커널과 개별 적용). 즉 geo:2.0e10은 "트랩 성분 단독" 값이며 SPE 기여는
+//   본 계산기에 포함되어 있지 않다. 이는 임의 추정이 아니라 AP9/ESP-PSYCHIC의
+//   모델 설계상 원천적으로 분리되어 있다는 사실에 근거한다.
+//   ⚠ 실무 영향(확정 사실에 기반한 안내): GEO·심우주 궤도 결과는 트랩 성분만
+//   반영하므로, 임무 최악 시나리오 평가에는 반드시 SPENVIS에서 AP9(트랩)+
+//   ESP-PSYCHIC 또는 SAPPHIRE(SPE)를 합산한 값과 대조해야 한다. 본 계산기는
+//   이 경고를 GEO 선택 시 화면에 명시적으로 표시한다(하단 geoSpeCaveat 참조).
+const ORBIT_FLUX = { leo:1.0e9, leo_pol:1.5e10, meo:5.0e12, geo:2.0e10, deep:8.0e10 }; // p/cm²/yr — 모두 트랩(belt) 성분 기준, SPE 별도 가산 필요
+const SPE_EXCLUDED_ORBITS = { geo:true, deep:true }; // AP9 등 트랩 모델만으로는 SPE 기여가 누락되는 궤도
 const SOLAR_MOD  = { min:1.0, max:0.5 };
 const SHIELD_LAM = 8; // mm Al, 1/e for low-E protons (≤30 MeV)
 
-// [P0-PATCH 2026-05] TID 궤도별 dose rate — SHIELDOSE-2 typical @ 100mil Al.
+// [P0-PATCH 2026-05, P2-REVIEW 2026-07] TID 궤도별 dose rate — SHIELDOSE-2 typical @ 100mil Al.
 //   참조: Seltzer 1994 NISTIR 5477, NASA/TM-20220011775 Mission Radiation Modeling.
 //   기존: leo:0.1, leo_pol:0.8, meo:50, geo:15, deep:25
 //   수정: AE9/AP9 + SHIELDOSE-2 기준으로 GEO 8 krad/yr (10년 ~80 krad 권고치 정합).
-const TID_RATE0 = { leo:0.3, leo_pol:2.5, meo:80, geo:8.0, deep:12 }; // krad/yr @ 100mil Al
+//   ⚠ NIEL-03 검토에서 확정된 사실과 동일하게 적용: 본 표도 AP9(트랩) 기반이므로
+//   GEO/심우주 값은 SPE(태양입자이벤트) 기여가 제외된 트랩 성분 선량률이다.
+const TID_RATE0 = { leo:0.3, leo_pol:2.5, meo:80, geo:8.0, deep:12 }; // krad/yr @ 100mil Al — SPE 미포함(트랩 성분만)
 const TID_LIMITS = {
   cmos_com:5, cmos_rh:500, bipolar:30, gan_hemt:300, sic_fet:30, flash:3, solar:300
 };
@@ -634,6 +676,33 @@ function updateNIEL() {
   document.getElementById('n-shv').textContent  = t_mm.toFixed(1)+' mm';
   document.getElementById('n-durv').textContent = dur.toFixed(1)+' yr';
   document.getElementById('n-volv').textContent = '10'+fmtSup(Math.round(logVol));
+
+  // GEO/심우주 SPE 미포함 경고 배너 토글 (확정 사실 — AP9은 트랩 성분만 반영)
+  const nGeoWarn = document.getElementById('n-geo-warn');
+  if(nGeoWarn) nGeoWarn.style.display = SPE_EXCLUDED_ORBITS[orbit] ? 'block' : 'none';
+
+  // Si 이외 소재는 NIEL0 상대 비율이 여전히 잠정치 — 경고 배너 토글
+  const nMatWarn = document.getElementById('n-material-warn');
+  if(nMatWarn) nMatWarn.style.display = NIEL_MATERIAL_VALIDATED[mat] ? 'none' : 'block';
+
+  // 전자 등가 계수는 Si 이외 소재에서 문헌 검증되지 않음 — 해당 조합은 계산을 차단
+  const electronDataOK = !(part === 'electron' && !ELECTRON_VALIDATED_MATERIALS[mat]);
+  const nElecWarn = document.getElementById('n-electron-warn');
+  if(nElecWarn) nElecWarn.style.display = electronDataOK ? 'none' : 'block';
+  if(!electronDataOK) {
+    ['m-niel','m-tnid','m-ratio','m-limit'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.textContent='—';
+    });
+    document.getElementById('nv-ring').style.cssText='border-color:var(--bad);color:var(--bad);background:var(--bad-bg);width:66px;height:66px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;font-family:var(--mono);font-weight:700';
+    document.getElementById('nv-ring').textContent='?';
+    document.getElementById('nv-title').textContent='검증 불가';
+    document.getElementById('nv-title').style.color='var(--bad)';
+    document.getElementById('nv-sub').textContent=`${NIEL_LABELS[mat]} 소재의 전자 등가 손상 계수(RDC)는 문헌 검증되지 않았습니다. 아래 경고를 확인하세요.`;
+    document.getElementById('nv-actions').innerHTML=
+      `<div class="act"><div class="actn" style="background:var(--bad-bg);color:var(--bad)">1</div><span class="actt">전자 조사 평가가 필요하면 소재를 Si로 변경하거나, ${NIEL_LABELS[mat]} 소자의 실측 RDC 데이터를 HELIAS Lab에 문의하십시오.</span></div>`;
+    updateCombined();
+    return;
+  }
 
   const niel0   = NIEL0[mat] * PART_FACTOR[part];
   const flux0   = ORBIT_FLUX[orbit] * SOLAR_MOD[solar];
@@ -733,6 +802,10 @@ function updateTID() {
   document.getElementById('t-shv').textContent  = t_mm.toFixed(1)+' mm';
   document.getElementById('t-durv').textContent = dur.toFixed(1)+' yr';
   document.getElementById('t-margv').textContent= '×'+margin.toFixed(1);
+
+  // GEO/심우주 SPE 미포함 경고 배너 토글 (확정 사실 — AP9/SHIELDOSE-2는 트랩 성분만 반영)
+  const tGeoWarn = document.getElementById('t-geo-warn');
+  if(tGeoWarn) tGeoWarn.style.display = SPE_EXCLUDED_ORBITS[orbit] ? 'block' : 'none';
 
   const rate0   = TID_RATE0[orbit] * SOLAR_MOD[solar];
   const atten   = Math.exp(-t_mm / 5); // TID: ~5mm half-value

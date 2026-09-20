@@ -239,6 +239,9 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
 <div class="mnote" style="margin-bottom:16px;border-color:rgba(184,110,0,.35);background:rgba(184,110,0,.09);color:#b86e00">
   <strong>⚠ NIEL 잠정치 표시(†):</strong> SiGe BiCMOS, GaN HEMT(전력/RF), SiC MOSFET, InP HBT는 개별 소재 NIEL이 SR-NIEL로 아직 재검증되지 않은 Si 교정 배율 기반 잠정치입니다. 점수표에 †로 표시된 소자의 NIEL 내성 점수 및 종합 점수는 참고용으로만 사용하고, 정밀 평가는 niel-tid.html 및 sr-niel.org 직접 계산으로 재확인하십시오.
 </div>  
+<div class="mnote" style="margin-bottom:16px;border-color:rgba(181,32,32,.35);background:rgba(181,32,32,.09);color:#b52020">
+  <strong>⚠ NIEL 내성 지표 임시 비활성화:</strong> 12개 소자 전수 문헌 조사 결과, 신뢰할 수 있는 TNID 한계값(niel_lim)을 확정할 수 있는 소자가 없어 종합 점수 계산에서 NIEL 항목을 제외했습니다(SEE 57% + TID 43%로 재가중). 디지털 CMOS 계열(SRAM/Flash/RHBD)은 TNID가 인정된 열화 기전이 아니라 "해당없음"으로, GaN/SiC/GaAs/InP/SiGe 계열은 소재 NIEL 또는 파트별 열화 임계값이 아직 검증되지 않아 "검증대기"로 표시됩니다. 문헌 근거가 확보되는 대로 순차 반영 예정입니다.
+</div>  
 <div class="mnote" style="margin-bottom:16px">
   <strong>모델 기준 (P-fixed 2026-XX):</strong> SEE 발생률 — CREME96 (Tylka 1997) + Petersen FOM (Petersen 1998 IEEE TNS 45). NIEL — O'Brien 2016 (ATR-2016-03268), SR-NIEL(sr-niel.org) 직접 실행 검증 (NIEL_Si@10MeV=9.43e-3 MeV·cm²/g; GaAs=6.9443e-3 검증 완료). SiGe/GaN/SiC/InP는 잠정치(†) — niel-tid.html 참조. TID — SHIELDOSE-2 (Seltzer 1994 NISTIR 5477). 차폐 Al 2.54mm (100 mil, ECSS-E-ST-10-04C 표준). 종합 점수(0~100)는 SEE 40% + NIEL 30% + TID 30% 가중 합산. 정밀 설계에는 CREME-MC·SPENVIS 사용 권장.
 </div>
@@ -251,27 +254,32 @@ footer{border-top:1px solid var(--border);padding-top:14px;margin-top:28px;displ
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-// ── 소자 데이터베이스 ──
-// [P-FIX 2026-XX] niel_r 재검토.
-//   gaas_hbt: SR-NIEL 실측(GaAs/Si=6.9443e-3/9.43e-3=0.738)으로 교정, 방향 오류 해소.
-//   bipolar(SiGe 합금)/gan_hemt/gan_rf/sic_fet/inp_hbt: 개별 소재 SR-NIEL 미검증 —
-//   niel_validated:false로 표시. bipolar는 순수 Ge 비율(0.687)을 SiGe 합금에
-//   그대로 대입하는 것 자체가 근거 없어 기존 niel_r 유지한 채 미검증 처리만 함.
+// [P-FIX 2026-XX / niel_lim 문헌 조사] 12개 소자 전수 조사 결과, 어느 소자도
+//   10 MeV 등가 TNID 한계값을 신뢰 있게 확정할 문헌 근거가 없음이 확인됨.
+//   - SRAM/Flash/RHBD SOI/CMOS: TNID 자체가 해당 소자의 인정된 열화 기전이 아님
+//     (다수캐리어 디지털 CMOS는 TID가 지배적, NIEL-01 참조) → niel_applicable:false
+//   - GaN/SiC: DD가 실재하는 열화 기전이나(문헌 확인), 소재 NIEL 자체가
+//     SR-NIEL 미검증 상태라 플루언스→MeV/g 환산 기준이 없음 → pending
+//   - GaAs/InP HBT: 문헌상 파트별(구조별) 열화 임계값 편차가 커서
+//     "카테고리 하나에 숫자 하나" 방식 자체가 물리적으로 부적절 → pending
+//   - Si 태양전지: TNID가 의미 있으나 Anspaugh 모델(연속 함수)이 필요,
+//     "고정 한계값 대비 현재값" 구조와 안 맞음 → solar-rad.html(SOL-01)로 이관 예정
+//   niel_lim을 임의로 채우지 않고, niel_applicable=false인 소자는 NIEL 점수
+//   계산에서 제외한다(아래 update() 로직 참조).
 const DEVICES = {
-  sram65:   { name:'65nm SRAM',         type:'SEU',  L0:0.5,  sig:-8,  W:10,  s:1.2, tid_lim:5,    niel_r:1.00, niel_validated:true  },
-  sram130:  { name:'130nm SRAM',        type:'SEU',  L0:2.0,  sig:-7,  W:14,  s:1.4, tid_lim:8,    niel_r:1.00, niel_validated:true  },
-  flash64:  { name:'64nm NAND Flash',   type:'SEFI', L0:1.5,  sig:-7,  W:12,  s:1.6, tid_lim:3,    niel_r:0.95, niel_validated:true  },
-  bipolar:  { name:'SiGe BiCMOS HBT',   type:'SET',  L0:3.0,  sig:-7,  W:18,  s:1.8, tid_lim:25,   niel_r:2.69, niel_validated:false },
-  rhbd_soi: { name:'RHBD SOI SRAM',     type:'SEU',  L0:20.0, sig:-7,  W:25,  s:2.0, tid_lim:500,  niel_r:0.90, niel_validated:true  },
-  gan_hemt: { name:'GaN HEMT (전력)',    type:'SET',  L0:8.0,  sig:-7,  W:20,  s:2.5, tid_lim:300,  niel_r:0.33, niel_validated:false },
-  gan_rf:   { name:'GaN HEMT (RF)',     type:'SET',  L0:6.0,  sig:-7,  W:18,  s:2.2, tid_lim:200,  niel_r:0.33, niel_validated:false },
-  sic_fet:  { name:'SiC MOSFET',        type:'SEB',  L0:14.0, sig:-6,  W:30,  s:3.1, tid_lim:30,   niel_r:0.51, niel_validated:false },
-  gaas_hbt: { name:'GaAs HBT (RF)',     type:'SET',  L0:1.0,  sig:-7,  W:15,  s:1.5, tid_lim:15,   niel_r:0.738, niel_validated:true },
-  inp_hbt:  { name:'InP HBT (광통신)',   type:'SET',  L0:0.8,  sig:-8,  W:12,  s:1.3, tid_lim:10,   niel_r:3.33, niel_validated:false },
-  solar_si: { name:'Si 태양전지',        type:'DD',   L0:99.0, sig:-9,  W:1,   s:1.0, tid_lim:300,  niel_r:1.00, niel_validated:true  },
-  cmos_rh:  { name:'RHBD CMOS 0.35μm',  type:'SEU',  L0:18.0, sig:-7,  W:22,  s:2.0, tid_lim:1000, niel_r:0.92, niel_validated:true  },
+  sram65:   { name:'65nm SRAM',         type:'SEU',  L0:0.5,  sig:-8,  W:10,  s:1.2, tid_lim:5,    niel_r:1.00, niel_validated:true,  niel_applicable:false },
+  sram130:  { name:'130nm SRAM',        type:'SEU',  L0:2.0,  sig:-7,  W:14,  s:1.4, tid_lim:8,    niel_r:1.00, niel_validated:true,  niel_applicable:false },
+  flash64:  { name:'64nm NAND Flash',   type:'SEFI', L0:1.5,  sig:-7,  W:12,  s:1.6, tid_lim:3,    niel_r:0.95, niel_validated:true,  niel_applicable:false },
+  bipolar:  { name:'SiGe BiCMOS HBT',   type:'SET',  L0:3.0,  sig:-7,  W:18,  s:1.8, tid_lim:25,   niel_r:2.69, niel_validated:false, niel_applicable:true  },
+  rhbd_soi: { name:'RHBD SOI SRAM',     type:'SEU',  L0:20.0, sig:-7,  W:25,  s:2.0, tid_lim:500,  niel_r:0.90, niel_validated:true,  niel_applicable:false },
+  gan_hemt: { name:'GaN HEMT (전력)',    type:'SET',  L0:8.0,  sig:-7,  W:20,  s:2.5, tid_lim:300,  niel_r:0.33, niel_validated:false, niel_applicable:true  },
+  gan_rf:   { name:'GaN HEMT (RF)',     type:'SET',  L0:6.0,  sig:-7,  W:18,  s:2.2, tid_lim:200,  niel_r:0.33, niel_validated:false, niel_applicable:true  },
+  sic_fet:  { name:'SiC MOSFET',        type:'SEB',  L0:14.0, sig:-6,  W:30,  s:3.1, tid_lim:30,   niel_r:0.51, niel_validated:false, niel_applicable:true  },
+  gaas_hbt: { name:'GaAs HBT (RF)',     type:'SET',  L0:1.0,  sig:-7,  W:15,  s:1.5, tid_lim:15,   niel_r:0.738, niel_validated:true, niel_applicable:true  },
+  inp_hbt:  { name:'InP HBT (광통신)',   type:'SET',  L0:0.8,  sig:-8,  W:12,  s:1.3, tid_lim:10,   niel_r:3.33, niel_validated:false, niel_applicable:true  },
+  solar_si: { name:'Si 태양전지',        type:'DD',   L0:99.0, sig:-9,  W:1,   s:1.0, tid_lim:300,  niel_r:1.00, niel_validated:true,  niel_applicable:true  },
+  cmos_rh:  { name:'RHBD CMOS 0.35μm',  type:'SEU',  L0:18.0, sig:-7,  W:22,  s:2.0, tid_lim:1000, niel_r:0.92, niel_validated:true,  niel_applicable:false },
 };
-
 // [P0-PATCH 2026-05] CREME96 K값 Petersen FOM(1998) 정합 재교정.
 // 양성자 플럭스: AP9 mean (#/cm²/yr >10MeV).
 // TID: SHIELDOSE-2 typical (krad/yr @ 100mil Al, mean solar).
@@ -413,15 +421,26 @@ function update() {
   }
 
   // 계산
+    // [P-FIX 2026-XX] niel_applicable=false 소자는 NIEL 점수를 계산하지 않고
+  //   종합점수 가중치를 SEE 40:TID 30 → SEE 57:TID 43(원래 SEE:TID 비율 4:3 유지)로
+  //   재분배한다. niel_lim이 문헌으로 확정되지 않은 상태에서 임의 한계값을 넣지
+  //   않기 위한 임시 조치 — bipolar/gan_hemt/gan_rf/sic_fet/gaas_hbt/inp_hbt/solar_si는
+  //   niel_applicable:true이지만 niel_lim 자체가 아직 없으므로 sNIEL은 null로 두고
+  //   "검증 대기" 표시만 한다(실제 한계값 확보 전까지 total에도 반영하지 않음).
   const results = active.map(({key, dev, idx}) => {
     const see  = computeSEE(dev, orbKey, solar);
-    const tnid = computeTNID(dev, orbKey, solar);
-    const niel_limit = 1e10 * 2.16e-3 * dev.niel_r;
-    const sSEE  = scoreSEE(see);
-    const sNIEL = scoreNIEL(tnid, niel_limit);
-    const sTID  = scoreTID(tid3yr, dev.tid_lim);
-    const sLET  = scoreSensitivity(dev.L0);
-    const total = Math.round(sSEE * 0.40 + sNIEL * 0.30 + sTID * 0.30);
+    const sSEE = scoreSEE(see);
+    const sTID = scoreTID(tid3yr, dev.tid_lim);
+    const sLET = scoreSensitivity(dev.L0);
+
+    let tnid = null, sNIEL = null, total;
+    if (dev.niel_applicable) {
+      // TNID는 계산해서 참고용으로 보여주되, niel_lim 미확정이므로 sNIEL은 아직 없음
+      tnid = computeTNID(dev, orbKey, solar);
+    }
+    // niel_lim이 확정되기 전까지는 전 소자 공통으로 SEE:TID = 57:43만 사용
+    total = Math.round(sSEE * 0.57 + sTID * 0.43);
+
     return { key, dev, idx, see, tnid, tid:tid3yr, sSEE, sNIEL, sTID, sLET, total };
   });
 
@@ -521,7 +540,11 @@ function update() {
     { name:'소자 유형',    sub:'SEE 유형',         fmt: r => r.dev.type, bar:false },
     { name:'LET 임계값',   sub:'L₀ (MeV·cm²/mg)', fmt: r => r.dev.L0.toFixed(1), score: r=>r.sLET, bar:true },
     { name:'SEE 발생률',   sub:'회/소자/일 (3yr)', fmt: r => fmtExp(r.see), score: r=>r.sSEE, bar:true },
-    { name:'NIEL 내성',    sub:'TNID 점수',        fmt: r => r.sNIEL+'/100'+(r.dev.niel_validated?'':' †'), score: r=>r.sNIEL, bar:true },,
+    { name:'NIEL 내성',    sub:'TNID 점수',
+      fmt: r => !r.dev.niel_applicable ? '해당없음'
+               : (r.sNIEL===null ? '검증대기'+(r.tnid?` (TNID=${fmtExp(r.tnid)})`:'')
+               : r.sNIEL+'/100'+(r.dev.niel_validated?'':' †')),
+      score: r=>r.sNIEL, bar:true },
     { name:'TID 누적',     sub:'krad (3yr)',       fmt: r => r.tid.toFixed(1)+'k/'+r.dev.tid_lim+'k', score: r=>r.sTID, bar:true },
     { name:'종합 점수',    sub:'SEE×0.4 + 기타',   fmt: r => r.total+'/100', score: r=>r.total, bar:true, bold:true },
   ];

@@ -490,10 +490,10 @@ function update() {
     `TID 기준을 통과한 소자는 ${tidPass.length}개입니다.`;
 
   // ── 레이더 차트 ──
-  const labels = ['SEE 내성', 'NIEL 내성', 'TID 내성', 'LET 임계', '종합 점수'];
+  const labels = ['SEE 내성', 'TID 내성', 'LET 임계', '종합 점수'];
   const datasets = results.map(r => ({
     label: r.dev.name,
-    data: [r.sSEE, r.sNIEL, r.sTID, r.sLET, r.total],
+    data: [r.sSEE, r.sTID, r.sLET, r.total],
     borderColor: DEV_COLORS[r.idx],
     backgroundColor: DEV_COLORS_A[r.idx],
     borderWidth: 2,

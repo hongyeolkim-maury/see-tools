@@ -450,12 +450,12 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
         <div class="g2" style="gap:10px">
           <div class="field">
             <label>초기 PCE₀ (%)</label>
-            <input type="number" id="pce0" value="26.3" min="5" max="40" step="0.1"
+            <input type="number" id="pce0" value="25.5" min="5" max="40" step="0.1"
               oninput="syncPmaxFromPce();drawEolCharts();update()">
           </div>
           <div class="field">
             <label>초기 Pmax₀ (W/m², AM0)</label>
-            <input type="number" id="pmax0" value="356" min="50" max="600" step="1"
+            <input type="number" id="pmax0" value="349" min="50" max="600" step="1"
               oninput="syncPceFromPmax();drawEolCharts();update()">
           </div>
         </div>
@@ -531,7 +531,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
     <div class="ph"><div class="phdot" style="background:var(--accent)"></div><div class="phtxt">이 도구의 목적과 사용 범위</div></div>
     <div class="pb">
       <div class="info-box">
-        페로브스카이트/CIGS 탠덤은 <b>2024년 실험실 효율 33% 돌파</b>와 함께 우주 전력 시스템의 차세대 후보로 급부상했습니다. 이 도구는 NRL Tada(1982) 모델 기반의 <b>정성적 경향 분석 및 실험 계획 보조</b> 목적으로 설계되었습니다.
+        페로브스카이트/CIGS 2단자 탠덤은 <b>2025년 인증 효율 25.5%(HZB/HU Berlin, Solar Cell Efficiency Tables 등재)</b>를 기록하며 경량·유연 우주 전력 시스템의 차세대 후보로 부상했습니다(33% 이상의 수치는 페로브스카이트/실리콘 탠덤 수치이며, 이 도구가 다루는 구조가 아닙니다). 이 도구는 JPL Tada 등(1982) Remaining Factor 모델 기반의 <b>정성적 경향 분석 및 실험 계획 보조</b> 목적으로 설계되었습니다.
       </div>
       <div class="warn-box">
         <b>v2.4 주요 변경점:</b><br>
@@ -646,7 +646,7 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
     <div class="ph"><div class="phdot" style="background:var(--accent2)"></div><div class="phtxt">NRL Tada 모델 — 수식·변수·측정 방법</div></div>
     <div class="pb">
       <div style="font-size:15px;font-weight:700;color:var(--accent);font-family:var(--mono);text-align:center;padding:12px;background:var(--bg2);border-radius:6px;margin-bottom:14px">
-        Pmax(Φ) = Pmax₀ · max[ 0,  1 − Cx · log₁₀(Φ / Φ₀) ]
+        Pmax(Φ) = Pmax₀ · max[ 0,  1 − Cx · log₁₀(1 + Φ / Φ₀) ]
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px">
         <thead><tr style="background:var(--accent)">
@@ -734,13 +734,13 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
         <tbody>
           <tr><td style="padding:7px 10px;font-weight:700">Pmax 잔존율 표</td><td style="padding:7px 10px;font-size:13px">◄ 표시된 행이 설정된 임무 기간. Grade가 C 이하이면 패널 면적·배터리 용량 재설계 검토. log(Φ/Φ₀) &lt; 0인 연도는 열화 임계 이전으로 Pmax ≈ Pmax₀ 유지.</td></tr>
           <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">커버유리 최적화 곡선</td><td style="padding:7px 10px;font-size:13px">두께 0–5mm 범위에서 EOL Pmax 변화. 수확체감(Diminishing Return) 지점(곡선 기울기 감소점)이 최적 두께. 통상 0.5–1.5mm에서 최대 효과. 두께 증가에 따른 위성 질량 예산(Mass Budget) 제약 병행 검토 필수.</td></tr>
-          <tr><td style="padding:7px 10px;font-weight:700">PCE₀ ↔ Pmax₀ 연동</td><td style="padding:7px 10px;font-size:13px">AM0 = 1,367 W/m². PCE₀(%) 입력 시 Pmax₀ = PCE₀ × 13.67 자동 산출. 탠덤 SOA(State of Art): PCE₀ ≈ 33% → Pmax₀ ≈ 451 W/m². 실제 비행 부품은 모듈 손실 고려, 개발 단계에서는 보수적 추정(0.85× 감산) 권장.</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">PCE₀ ↔ Pmax₀ 연동</td><td style="padding:7px 10px;font-size:13px">AM0 = 1,367 W/m². PCE₀(%) 입력 시 Pmax₀ = PCE₀ × 13.67 자동 산출. 페로브스카이트/CIGS 2단자 탠덤 인증 기록(2025): PCE₀ ≈ 25.5% → Pmax₀ ≈ 349 W/m². 실제 비행 부품은 모듈 손실 고려, 개발 단계에서는 보수적 추정(0.85× 감산) 권장.</td></tr>
         </tbody>
       </table>
       <div class="warn-box">
         <b>전력 마진 계산 예시 (GEO 통신위성, 15년):</b><br>
         요구 전력 5kW, EOL Grade B (Pmax 70% 잔존) 가정 시 → BOL 패널 출력 = 5kW / 0.70 = <b>7.14kW</b> 설계 필요.<br>
-        추가 20% 마진 적용 시 → BOL 8.57kW. 패널 면적 = 8,570 / 356 ≈ <b>24.1 m²</b> (Pmax₀=356 W/m² 기준).
+        추가 20% 마진 적용 시 → BOL 8.57kW. 패널 면적 = 8,570 / 349 ≈ <b>24.6 m²</b> (Pmax₀=349 W/m² 기준).
       </div>
     </div>
   </div>
@@ -807,8 +807,8 @@ footer{border-top:1px solid var(--border);padding-top:13px;margin-top:26px;displ
           <th style="padding:7px 10px;font-family:var(--mono);font-size:11px;text-align:left;color:var(--accent)">설명</th>
         </tr></thead>
         <tbody>
-          <tr><td style="padding:7px 10px;font-weight:700">Φ_start (5% 열화)</td><td style="padding:7px 10px;font-size:13px">측정 유효 시작점. Φ_start = Φ₀ × 10^(0.05/Cx). 이 이하에서는 열화량이 측정 불확도에 묻힐 수 있음. I-V 측정 정밀도 ±1% 가정 시 최소 열화 목표 5% 권장.</td></tr>
-          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">Φ_end (목표 열화)</td><td style="padding:7px 10px;font-size:13px">Φ_end = Φ₀ × 10^(D_target/Cx). AIAA 기준 D_target = 0.40. 가속기 최대 fluence(빔 전류 × 시간)가 Φ_end 이상인지 사전 확인 필수. 일반 저에너지 양성자 가속기: 최대 fluence ≈ 10¹³ p⁺/cm².</td></tr>
+          <tr><td style="padding:7px 10px;font-weight:700">Φ_start (5% 열화)</td><td style="padding:7px 10px;font-size:13px">측정 유효 시작점. Φ_start = Φ₀ × (10^(0.05/Cx) − 1). 이 이하에서는 열화량이 측정 불확도에 묻힐 수 있음. I-V 측정 정밀도 ±1% 가정 시 최소 열화 목표 5% 권장.</td></tr>
+          <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">Φ_end (목표 열화)</td><td style="padding:7px 10px;font-size:13px">Φ_end = Φ₀ × (10^(D_target/Cx) − 1). AIAA 기준 D_target = 0.40. 가속기 최대 fluence(빔 전류 × 시간)가 Φ_end 이상인지 사전 확인 필수. 일반 저에너지 양성자 가속기: 최대 fluence ≈ 10¹³ p⁺/cm².</td></tr>
           <tr><td style="padding:7px 10px;font-weight:700">레퍼런스 소재 비교</td><td style="padding:7px 10px;font-size:13px">GaAs·Si·Ge의 Anspaugh(1996) 참고값과 입력 소재를 동일 Φ_end에서 비교. 방사선 내성 상대 위치 파악에 활용. <b>주의: 레퍼런스값은 10MeV 양성자 기준 중간값으로, 에너지·온도·축적률(Flux Rate)에 따라 수십% 편차 발생.</b></td></tr>
           <tr style="background:var(--bg2)"><td style="padding:7px 10px;font-weight:700">시험 포인트 수</td><td style="padding:7px 10px;font-size:13px">AIAA 최소 5포인트(로그 등간격). Cx 불확도를 줄이려면 7–10포인트 권장. 각 포인트에서 Light I-V(AM0 조건) + Dark I-V + EQE 측정 세트를 구성하면 Cx와 더불어 J₀·n-factor 변화도 추출 가능.</td></tr>
         </tbody>
@@ -1402,15 +1402,18 @@ const MAT_DB = {
   ito_back:   {name:'ITO 후면전극',             Z:38, rho:7.14, Eg:'-',  cx:0.010,niel:1.50,phi0:1e11,role:'후면전극',   color:'#dbeafe',textC:'#1e3a8a',heal:false, conf:3},
 };
 
+// [FIX 2026-09 항목2] 세리아글라스 기본 두께: 0.5μm(비현실적) → 200μm(8mil, 표준 커버글라스 두께)
+// [FIX 2026-09 항목3] 후면전극(Mo) 기본 레이어 제거: Φ₀=1e15인 비활성층이 Cx_eff/Φ₀_eff
+//   가중평균을 과도하게 밀어올리던 문제의 원인 중 하나였다. 후면전극이 필요한 구조를
+//   평가할 때는 레이어 편집기의 "＋ 새 층 추가" 버튼으로 언제든 추가할 수 있다.
 let layers = [
-  {id:1, matKey:'ceria_glass', thick:0.5},
+  {id:1, matKey:'ceria_glass', thick:200},
   {id:2, matKey:'ito',         thick:0.15},
   {id:3, matKey:'perv_fama',   thick:0.5},
   {id:4, matKey:'niox',        thick:0.05},
   {id:5, matKey:'cigs',        thick:2.0},
-  {id:6, matKey:'mo',          thick:1.0},
 ];
-let nextId = 7;
+let nextId = 6;
 
 const ORBITS = {
   leo:     {name:'LEO 저경사 400km', fluxYr:1.0e9,  solar_mod:{min:1,max:0.8}, rad:{p:55,e:30,gcr:10,spe:5},  note:'지자기 차폐 최대. SAA 통과 시 순간 플럭스 급증.'},
@@ -1443,8 +1446,19 @@ function fmtSci(v,d=3){
   return (v/10**e).toFixed(2)+'×10'+String(e).split('').map(c=>sup[c]||c).join('');
 }
 
+// [FIX 2026-09 항목1 — 권장 방식] 커버유리(role:'커버유리')는 Cx_eff·Φ₀_eff 두께가중평균에서
+// 제외한다. 커버유리의 차폐 효과는 이미 cover 슬라이더(exp(-t/1.2) 감쇠)와 AIAA 탭의
+// getCoverAtten()(입자 비정 기반 감쇠)에서 별도로 반영되고 있어, 레이어 목록에도 넣고
+// 동시에 이 가중평균에도 포함시키면 동일한 물리적 실체가 두 경로에서 이중 반영된다.
+// 특히 커버유리의 Φ₀=1e15(사실상 무손상 가정)가 가중평균을 크게 밀어올려 흡수층
+// (페로브스카이트·CIGS)의 실제 열화 신호를 가리는 문제가 있었다. 이 함수는 이제
+// "광활성 스택(커버유리 제외)"의 유효 Cx·Φ₀만 반환한다.
+function getActiveLayers(){
+  return layers.filter(l => MAT_DB[l.matKey] && MAT_DB[l.matKey].role !== '커버유리');
+}
+
 function getCxEffAndPhi0(){
-  const activeLayers = layers.filter(l => MAT_DB[l.matKey]);
+  const activeLayers = getActiveLayers();
   const totalThick = Math.max(activeLayers.reduce((s,l) => s + Math.max(l.thick, 0.001), 0), 1);
   const cxEff = activeLayers.reduce((s,l) => {
     const m = MAT_DB[l.matKey];
@@ -1457,18 +1471,30 @@ function getCxEffAndPhi0(){
   return { cx: Math.max(0.005, cxEff), phi0: Math.pow(10, logPhi0Eff) };
 }
 
+// [FIX 2026-09 항목4] JPL Solar Cell Radiation Handbook(Tada, Carter, Anspaugh, Downing,
+// 3rd ed., 1982)의 Remaining Factor 원식은 로그 안에 "+1"이 있어 Φ→0일 때 R→1로 매끄럽게
+// 수렴한다(Tada와 Anspaugh는 같은 JPL 핸드북의 공동저자로, 별개 모델이 아니라 동일 계열이다).
+// 기존 구현은 이 항이 빠진 채 if(phi<=phi0) return 1.0으로 강제 클리핑해 Φ=Φ₀ 경계에서
+// 미분 불연속이 생겼다. 원 문헌의 식을 그대로 따르도록 수정한다.
 function pmaxDeg(phi, cx, phi0){
-  if(phi <= phi0) return 1.0;
-  return Math.max(0, 1 - cx * Math.log10(phi / phi0));
+  return Math.max(0, 1 - cx * Math.log10(1 + phi / phi0));
 }
 
+// [FIX 2026-09] getCxEffAndPhi0()가 이미 커버유리를 제외하므로 별도 계산이 더 이상
+// 필요 없다. AIAA 탭 등 기존 호출부와의 호환을 위해 별칭으로 유지한다.
 function getBareLayersParams(){
-  const bare = layers.filter(l => MAT_DB[l.matKey]?.role !== '커버유리');
-  if(bare.length === 0) return getCxEffAndPhi0();
-  const totalT = Math.max(bare.reduce((s,l) => s + Math.max(l.thick,0.001), 0), 1);
-  const cx = bare.reduce((s,l) => s + MAT_DB[l.matKey].cx * Math.max(l.thick,0.001), 0) / totalT;
-  const logPhi0 = bare.reduce((s,l) => s + Math.max(l.thick,0.001) * Math.log10(MAT_DB[l.matKey].phi0), 0) / totalT;
-  return { cx: Math.max(0.005, cx), phi0: Math.pow(10, logPhi0) };
+  return getCxEffAndPhi0();
+}
+
+// [FIX 2026-09] 자기회복 보정 계수는 "광활성 스택(커버유리 제외)" 중 페로브스카이트가
+// 차지하는 두께 비중이어야 한다. 커버유리를 포함한 전체 물리적 두께로 나누면, 커버유리
+// 기본 두께를 0.5μm→200μm로 현실화(항목2)한 뒤 fPerv가 사실상 0에 가까워져 자기회복
+// 보정 자체가 무의미해지는 부작용이 생긴다.
+function getPervFraction(){
+  const active = getActiveLayers();
+  const totalActive = Math.max(active.reduce((s,l) => s + Math.max(l.thick, 0.001), 0), 1e-6);
+  const pervThick = active.filter(l => MAT_DB[l.matKey].heal).reduce((s,l) => s + l.thick, 0);
+  return Math.min(0.7, pervThick / totalActive);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1493,7 +1519,7 @@ function update(){
   const cover  = parseFloat(document.getElementById('cover').value);
   const dur    = parseFloat(document.getElementById('dur').value);
   const heal   = parseFloat(document.getElementById('heal').value);
-  const pmax0  = parseFloat(document.getElementById('pmax0')?.value) || 356;
+  const pmax0  = parseFloat(document.getElementById('pmax0')?.value) || 349;
 
   document.getElementById('covV').textContent  = cover.toFixed(1)+' mm';
   document.getElementById('durV').textContent  = dur.toFixed(1)+' yr';
@@ -1506,9 +1532,7 @@ function update(){
   const totalFlux = fluxYr * dur;
 
   const {cx, phi0} = getCxEffAndPhi0();
-  const pervThick = layers.filter(l => MAT_DB[l.matKey]?.heal).reduce((s,l) => s + l.thick, 0);
-  const totalThick = Math.max(layers.reduce((s,l) => s + l.thick, 0), 1);
-  const fPerv = Math.min(0.7, pervThick / totalThick);
+  const fPerv = getPervFraction();
   const healCorr = heal * fPerv;
 
   const deg = pmaxDeg(totalFlux, cx, phi0);
@@ -1613,12 +1637,11 @@ function updateLayerParams(){
   const el_thick= document.getElementById('lp-thick');
   const el_pf   = document.getElementById('lp-pervfrac');
   if(!el_cx) return;
-  const pervThick = layers.filter(l => MAT_DB[l.matKey]?.heal).reduce((s,l) => s + l.thick, 0);
-  const totalThick = Math.max(layers.reduce((s,l) => s + l.thick, 0), 1);
+  const totalThick = Math.max(layers.reduce((s,l) => s + l.thick, 0), 1); // 커버유리 포함 전체 물리 두께
   el_cx.textContent   = cx.toFixed(5);
   el_phi0.textContent = fmtSci(phi0);
   el_thick.textContent= totalThick.toFixed(2);
-  el_pf.textContent   = ((pervThick/totalThick)*100).toFixed(1)+'%';
+  el_pf.textContent   = (getPervFraction()*100).toFixed(1)+'%';
 }
 
 function buildStackVis(totalFlux, phi0){
@@ -1771,15 +1794,13 @@ function drawEolCharts(){
   const cover  = parseFloat(document.getElementById('cover').value);
   const dur    = parseFloat(document.getElementById('dur').value);
   const heal   = parseFloat(document.getElementById('heal').value);
-  const pmax0  = parseFloat(document.getElementById('pmax0')?.value)||356;
+  const pmax0  = parseFloat(document.getElementById('pmax0')?.value)||349;
   const orb   = ORBITS[orbKey];
   const smod  = orb.solar_mod[solar];
   const atten = Math.exp(-cover/1.2);
   const fluxYr = orb.fluxYr * smod * atten;
   const {cx, phi0} = getCxEffAndPhi0();
-  const pervThick = layers.filter(l=>MAT_DB[l.matKey]?.heal).reduce((s,l)=>s+l.thick,0);
-  const totalThick = Math.max(layers.reduce((s,l)=>s+l.thick,0),1);
-  const fPerv = Math.min(0.7, pervThick/totalThick);
+  const fPerv = getPervFraction();
   const healCorr = heal * fPerv;
 
   const tbody = document.getElementById('eolTbody');
@@ -1924,8 +1945,9 @@ function runAiaaCalc(){
   const fluxMin = fluences[0];
   const atten   = getCoverAtten(particle, energyKey);
 
-  const bareP = getBareLayersParams();
-  const covP  = getCxEffAndPhi0();
+  // 커버유리는 Cx/Φ₀에 포함하지 않고 flux 감쇠(atten)로만 반영 → 두 조건 모두 동일 파라미터 사용
+  const bareP = getCxEffAndPhi0();
+  const covP  = bareP;
 
   document.getElementById('aiaa-bare-cx').textContent = bareP.cx.toFixed(4);
   document.getElementById('aiaa-cov-cx').textContent  = covP.cx.toFixed(4);
@@ -2043,8 +2065,8 @@ function calcTestPlan(){
   document.getElementById('tp-phi0-display').textContent = '= '+fmtSciTP(phi0);
 
   const aiaaMax   = particle==='electron' ? 1e16 : 1e13;
-  const phi_start = phi0 * Math.pow(10, 0.05/cx);
-  const phi_end   = phi0 * Math.pow(10, targetDeg/cx);
+  const phi_start = phi0 * (Math.pow(10, 0.05/cx) - 1);
+  const phi_end   = phi0 * (Math.pow(10, targetDeg/cx) - 1);
 
   const warnBlock = document.getElementById('tp-warn-block');
   const okBlock   = document.getElementById('tp-ok-block');
@@ -2059,7 +2081,7 @@ function calcTestPlan(){
   document.getElementById('tp-phi-start').textContent = fmtSciTP(phi_start);
   document.getElementById('tp-phi-end').textContent   = fmtSciTP(phi_end);
 
-  const phi_40pct = phi0 * Math.pow(10, 0.40/cx);
+  const phi_40pct = phi0 * (Math.pow(10, 0.40/cx) - 1);
   const aiaaPass  = phi_40pct <= aiaaMax;
   document.getElementById('tp-aiaa-pass').innerHTML = aiaaPass
     ? `<span style="color:var(--ok);font-weight:700">✓ 범위 내</span>`
@@ -2071,7 +2093,7 @@ function calcTestPlan(){
   tbody.innerHTML='';
   for(let i=0;i<nPoints;i++){
     const phi  = Math.pow(10, logStart+i*logStep);
-    const pmax = Math.max(0, 1-cx*Math.log10(phi/phi0))*100;
+    const pmax = Math.max(0, 1-cx*Math.log10(1+phi/phi0))*100;
     const deg  = 100-pmax;
     const isLast=(i===nPoints-1);
     const rowBg=isLast?'rgba(26,82,200,.06)':(i%2?'var(--bg2)':'');
@@ -2096,7 +2118,7 @@ function calcTestPlan(){
     {label:document.getElementById('tp-matname').value||'입력 소재', cx, phi0, color:'#b86e00'},
   ];
   compareEl.innerHTML = compareMats.map(m => {
-    const pmaxAtEnd = Math.max(0, 1-m.cx*Math.log10(Math.max(phi_end, m.phi0*1.001)/m.phi0))*100;
+    const pmaxAtEnd = Math.max(0, 1-m.cx*Math.log10(1+phi_end/m.phi0))*100;
     const barW=Math.max(0,Math.min(100,pmaxAtEnd));
     const barColor=pmaxAtEnd<60?'#dc2626':pmaxAtEnd<80?'#b86e00':m.color;
     return `<div style="margin-bottom:8px">
@@ -2167,17 +2189,16 @@ function exportXLSX() {
   const cover  = parseFloat(document.getElementById('cover')?.value || 0.5);
   const dur    = parseFloat(document.getElementById('dur')?.value   || 5);
   const heal   = parseFloat(document.getElementById('heal')?.value  || 0.3);
-  const pmax0  = parseFloat(document.getElementById('pmax0')?.value || 356);
-  const pce0   = parseFloat(document.getElementById('pce0')?.value  || 26.3);
+  const pmax0  = parseFloat(document.getElementById('pmax0')?.value || 349);
+  const pce0   = parseFloat(document.getElementById('pce0')?.value  || 25.5);
 
   const orb    = ORBITS[orbKey];
   const smod   = orb.solar_mod[solar];
   const atten  = Math.exp(-cover / 1.2);
   const fluxYr = orb.fluxYr * smod * atten;
   const {cx, phi0} = getCxEffAndPhi0();
-  const pervThick  = layers.filter(l => MAT_DB[l.matKey]?.heal).reduce((s,l) => s + l.thick, 0);
-  const totalThick = Math.max(layers.reduce((s,l) => s + l.thick, 0), 1);
-  const fPerv      = Math.min(0.7, pervThick / totalThick);
+  const totalThick = Math.max(layers.reduce((s,l) => s + l.thick, 0), 1); // 전체 물리 두께(레이어 표 비중용)
+  const fPerv      = getPervFraction();
   const healCorr   = heal * fPerv;
   const totalFlux  = fluxYr * dur;
   const deg        = pmaxDeg(totalFlux, cx, phi0);
@@ -2847,8 +2868,8 @@ function lsGetState() {
     cover:  parseFloat(document.getElementById('cover')?.value || 0.5),
     dur:    parseFloat(document.getElementById('dur')?.value   || 5),
     heal:   parseFloat(document.getElementById('heal')?.value  || 0.3),
-    pce0:   parseFloat(document.getElementById('pce0')?.value  || 26.3),
-    pmax0:  parseFloat(document.getElementById('pmax0')?.value || 356),
+    pce0:   parseFloat(document.getElementById('pce0')?.value  || 25.5),
+    pmax0:  parseFloat(document.getElementById('pmax0')?.value || 349),
     layers: typeof layers !== 'undefined' ? JSON.parse(JSON.stringify(layers)) : []
   };
 }
